@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Link, Switch } from "wouter";
 import { Router, Route, useParams } from "wouter";
 import LoginPage from '@/Login';
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { NavSidebar } from '@/NavSidebar';
 import SignupPage from './Signup';
-import LeaderboardPage from './Leaderboard';
+import ProfilePage from './Profile';
 import FriendsPage from './Friends';
 import { navigate } from 'wouter/use-browser-location';
 import GamesPage from './Games';
-import InboxPage from './Inbox';
 import PasswordPage from './Password';
+import { SidebarLayout } from './SidebarLayout';
+import GamelogPage from './Gamelog';
 
 
 const HomePage = () => {
@@ -57,29 +56,16 @@ function App() {
         <Route path="/" component={HomePage}></Route>
         <Route path="/home" component={HomePage}></Route>
         <Route path="/admin/:name" component={AdminPage} />
-        <Route path="/inbox" component={InboxPage}></Route>
+        <Route path="/gamelog" component={GamelogPage}></Route>
         <Route path="/login" component={LoginPage}></Route>
         <Route path="/signup" component={SignupPage}></Route>
         <Route path="/password" component={PasswordPage}></Route>
-        <Route path="/leaderboard/:name" component={LeaderboardPage}></Route>
+        <Route path="/profile/:name" component={ProfilePage}></Route>
         <Route path="/friends" component={FriendsPage}></Route>
         <Route path="/games" component={GamesPage}></Route>
       </Router>
 
     </Switch>
-  )
-}
-
-const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <SidebarProvider defaultOpen={false}>
-      <NavSidebar />
-      <main className='flex flex-col relative'>
-        <SidebarTrigger />
-        <div className='w-full'>{children}</div>
-
-      </main>
-    </SidebarProvider>
   )
 }
 

@@ -15,6 +15,16 @@ function Login({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (form.checkValidity()) {
+            navigate("/home");
+        }
+        else {
+            form.reportValidity();
+        }
+    }
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -25,7 +35,7 @@ function Login({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>

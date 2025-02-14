@@ -35,8 +35,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar"
-import { NavSidebar } from "./NavSidebar"
+import { SidebarLayout } from "./SidebarLayout"
 
 const data: Payment[] = [
     {
@@ -173,20 +172,7 @@ export const columns: ColumnDef<Payment>[] = [
     },
 ]
 
-const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
-    return (
-        <SidebarProvider>
-            <NavSidebar />
-            <main className='flex flex-col relative'>
-                <SidebarTrigger />
-                <div className='w-full'>{children}</div>
-
-            </main>
-        </SidebarProvider>
-    )
-}
-
-function Inbox() {
+function Gamelog() {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -345,14 +331,10 @@ function Inbox() {
     )
 }
 
-export default function InboxPage() {
+export default function GamelogPage() {
     return (
-        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-            <div className="w-full max-w-sm">
-                <SidebarLayout>
-                    <Inbox />
-                </SidebarLayout>
-            </div>
-        </div>
+        <SidebarLayout>
+            <Gamelog />
+        </SidebarLayout>
     )
 }

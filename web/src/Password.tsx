@@ -15,6 +15,16 @@ function Password({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (form.checkValidity()) {
+            navigate("/home");
+        }
+        else {
+            form.reportValidity();
+        }
+    }
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -25,7 +35,7 @@ function Password({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <div className="flex items-center">
@@ -37,7 +47,7 @@ function Password({
                                 </div>
                                 <Input id="password" type="password" required />
                             </div>
-                            <Button type="submit" className="w-full" onClick={() => navigate("/home")} disabled>
+                            <Button type="submit" className="w-full">
                                 Continue
                             </Button>
                             <Button variant="outline" className="w-full">

@@ -11,9 +11,9 @@ export function NavSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/inbox">
+                            <a href="/gamelog">
                                 <Inbox />
-                                <span>Inbox</span>
+                                <span>Gamelog</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

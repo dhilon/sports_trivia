@@ -1,7 +1,3 @@
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar"
-import { NavSidebar } from "./NavSidebar"
-
-
 "use client"
 
 import { TrendingUp } from "lucide-react"
@@ -22,6 +18,7 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { useParams } from "wouter"
+import { SidebarLayout } from "./SidebarLayout"
 const chartData = [
     { browser: "basketball", desktop: "#1", visitors: 187, fill: "var(--color-basketball)" },
     { browser: "hockey", desktop: "#2", visitors: 200, fill: "var(--color-hockey)" },
@@ -65,20 +62,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
-    return (
-        <SidebarProvider>
-            <NavSidebar />
-            <main className='flex flex-col relative'>
-                <SidebarTrigger />
-                <div className='w-full'>{children}</div>
-
-            </main>
-        </SidebarProvider>
-    )
-}
-
-function Leaderboard() {
+function Profile() {
     const params = useParams();
     return (
         <Card className="w-[550px] items-center space-x-4" >
@@ -147,14 +131,10 @@ function Leaderboard() {
 
 
 
-export default function LeaderboardPage() {
+export default function ProfilePage() {
     return (
-        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-            <div className="w-full max-w-sm">
-                <SidebarLayout>
-                    <Leaderboard />
-                </SidebarLayout>
-            </div>
-        </div>
+        <SidebarLayout>
+            <Profile />
+        </SidebarLayout>
     )
 }
