@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
 
-function Login({
+function Password({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -19,44 +19,30 @@ function Login({
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">Login</CardTitle>
+                    <CardTitle className="text-2xl">New Password</CardTitle>
                     <CardDescription>
-                        Enter your email below to login to your account
+                        Enter a new password below for your account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="m@example.com"
-                                    required
-                                />
-                            </div>
-                            <div className="grid gap-2">
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
-                                    <a className="ml-auto inline-block text-sm underline-offset-4 hover:underline" onClick={() => navigate("/password")}>
-                                        Forgot your password?
-                                    </a>
+                                </div>
+                                <Input id="password" type="password" required />
+                                <div className="flex items-center">
+                                    <Label htmlFor="password">Confirm Password</Label>
                                 </div>
                                 <Input id="password" type="password" required />
                             </div>
-                            <Button type="submit" className="w-full">
-                                Login
+                            <Button type="submit" className="w-full" onClick={() => navigate("/home")} disabled>
+                                Continue
                             </Button>
-                            <Button variant="outline" className="w-full" >
-                                Login with Google
+                            <Button variant="outline" className="w-full">
+                                Use Google
                             </Button>
-                        </div>
-                        <div className="mt-4 text-center text-sm">
-                            Don&apos;t have an account?{" "}
-                            <a className="underline underline-offset-4" onClick={() => navigate("/signup")}>
-                                Sign up
-                            </a>
                         </div>
                     </form>
                 </CardContent>
@@ -65,11 +51,11 @@ function Login({
     )
 }
 
-export default function LoginPage() {
+export default function PasswordPage() {
     return (
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
             <div className="w-full max-w-sm">
-                <Login />
+                <Password />
             </div>
         </div>
     )

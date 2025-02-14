@@ -1,5 +1,5 @@
-import { House, Inbox, KeyRound } from "lucide-react"
-import { Sidebar, SidebarHeader, SidebarContent, SidebarGroup, SidebarFooter, SidebarMenu, SidebarGroupContent, SidebarMenuButton, SidebarMenuItem, SidebarGroupLabel, SidebarTrigger } from "./components/ui/sidebar"
+import { House, Inbox, KeyRound, LogOut, UserRoundSearch } from "lucide-react"
+import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "./components/ui/sidebar"
 
 
 
@@ -19,6 +19,14 @@ export function NavSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
+                            <a href="/friends">
+                                <UserRoundSearch />
+                                <span>Friends</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
                             <a href="/">
                                 <House />
                                 <span>Home</span>
@@ -27,9 +35,17 @@ export function NavSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/login">
+                            <a href="/password">
                                 <KeyRound />
-                                <span>Login</span>
+                                <span>Change Login</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <a href="/login">
+                                <LogOut />
+                                <span>Log out</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

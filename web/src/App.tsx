@@ -3,68 +3,31 @@ import { Button } from "@/components/ui/button"
 
 import { Link, Switch } from "wouter";
 import { Router, Route, useParams } from "wouter";
-import { useRoute } from "wouter";
-import { useLocation } from "wouter";
 import LoginPage from '@/Login';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { NavSidebar } from '@/navSidebar';
+import { NavSidebar } from '@/NavSidebar';
+import SignupPage from './Signup';
+import LeaderboardPage from './Leaderboard';
+import FriendsPage from './Friends';
+import { navigate } from 'wouter/use-browser-location';
+import GamesPage from './Games';
+import InboxPage from './Inbox';
+import PasswordPage from './Password';
 
-
-const CurrentLocation = () => {
-  const [location, navigate] = useLocation();
-
-  return (
-    <div>
-      {`The current page is: ${location}`}
-      <a onClick={() => navigate("/home")}>Click to update</a>
-    </div>
-  );
-};
-
-const Users = () => {
-  // `match` is a boolean
-  const [match, params] = useRoute("/users/:name");
-
-  if (match) {
-    return <>Hello, {params.name}!</>;
-  } else {
-    return null;
-  }
-};
-
-const InboxPage = () => (
-  <>
-    <Link href="/users/2">Monkey</Link>
-
-    <Route path="/about">About Us</Route>
-
-    {/* 
-      Routes below are matched exclusively -
-      the first matched route gets rendered
-    */}
-    <Switch>
-
-      <Route path="/users/:name">
-        {(params) => <>Hello, {params.name}!</>}
-      </Route>
-
-      {/* Default route in a switch */}
-    </Switch>
-  </>
-);
 
 const HomePage = () => {
   const [count, setCount] = useState(0)
   return (
-    <AppLayout>
-      <div>
+    <SidebarLayout>
+      <div className="grid gap-2">
 
 
         <Link href="/users/1">Profile</Link>
 
         <Button className="" onClick={() => setCount((count) => count + 1)}>Count is {count}</Button>
+        <Button type="submit" onClick={() => navigate("/games")}>Play</Button>
       </div>
-    </AppLayout>
+    </SidebarLayout>
 
   )
 
@@ -96,13 +59,18 @@ function App() {
         <Route path="/admin/:name" component={AdminPage} />
         <Route path="/inbox" component={InboxPage}></Route>
         <Route path="/login" component={LoginPage}></Route>
+        <Route path="/signup" component={SignupPage}></Route>
+        <Route path="/password" component={PasswordPage}></Route>
+        <Route path="/leaderboard/:name" component={LeaderboardPage}></Route>
+        <Route path="/friends" component={FriendsPage}></Route>
+        <Route path="/games" component={GamesPage}></Route>
       </Router>
 
     </Switch>
   )
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
+const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider defaultOpen={false}>
       <NavSidebar />
@@ -114,8 +82,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   )
 }
-
-<Route path="/inbox" component={InboxPage}></Route>
 
 
 export default App
