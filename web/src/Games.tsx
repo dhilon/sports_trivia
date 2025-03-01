@@ -1,7 +1,5 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
-
 import {
     Card,
     CardContent,
@@ -11,38 +9,48 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { SidebarLayout } from "./SidebarLayout"
+import { Link } from "wouter"
+import tower from "tower.jpeg"
+import fire from "fire.jpeg"
+import around from "around.jpeg"
 
 function GameCard(
-    { name, image, description }: { name: string, image: string, description: string }
+    { name, image, description, url, analogy }: { name: string, image: string, description: string, url: string, analogy: string }
 ) {
 
     return (
-        <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70">
-            <CardHeader>
-                <CardTitle>{name}</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {image}
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    {description}
-                </div>
-            </CardFooter>
-        </Card>
+
+        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={url}>
+            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
+                <CardHeader>
+                    <CardTitle>{name}</CardTitle>
+                    <CardDescription>January - June 2024</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 text-sm">
+                    <div className="flex gap-2 font-medium leading-none">
+                        {analogy}
+                    </div>
+                    <div className="leading-none text-muted-foreground">
+                        {description}
+                    </div>
+                </CardFooter>
+            </Card>
+        </Link>
+
+
     )
 }
 
 function Games() {
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 ">
-            <GameCard name="Tower of Power" image="image" description="wow" />
-            <GameCard name="Rapid Fire" image="image" description="wow" />
-            <GameCard name="Around the Horn" image="image" description="wow" />
+            <GameCard name="Tower of Power" image={tower} description="wow" url="/pyramid" analogy="Funny analogy" />
+            <GameCard name="Rapid Fire" image={fire} description="wow" url="/rapid_fire" analogy="Funny analogy" />
+            <GameCard name="Around the Horn" image={around} description="wow" url="/back_and_forth" analogy="Funny analogy" />
+
         </div>
 
     )
@@ -50,7 +58,7 @@ function Games() {
 
 
 
-export default function GamesPage() {
+export default function GamesPage() { //images generated using Gemini
     return (
         <SidebarLayout>
             <Games />

@@ -12,18 +12,16 @@ import GamesPage from './Games';
 import PasswordPage from './Password';
 import { SidebarLayout } from './SidebarLayout';
 import GamelogPage from './Gamelog';
+import PyramidPage from './Pyramid';
+import BackandForth from './BackandForth';
+import RapidFire from './RapidFire';
+import ResultsPage from './Results';
 
 
 const HomePage = () => {
-  const [count, setCount] = useState(0)
   return (
     <SidebarLayout>
       <div className="grid gap-2">
-
-
-        <Link href="/users/1">Profile</Link>
-
-        <Button className="" onClick={() => setCount((count) => count + 1)}>Count is {count}</Button>
         <Button type="submit" onClick={() => navigate("/games")}>Play</Button>
       </div>
     </SidebarLayout>
@@ -63,6 +61,10 @@ function App() {
         <Route path="/profile/:name" component={ProfilePage}></Route>
         <Route path="/friends" component={FriendsPage}></Route>
         <Route path="/games" component={GamesPage}></Route>
+        <Route path="/pyramid" component={PyramidPage}></Route>
+        <Route path="/back_and_forth" component={BackandForth}></Route>
+        <Route path="/rapid_fire" component={RapidFire}></Route>
+        <Route path="/results" component={ResultsPage}></Route>
       </Router>
 
     </Switch>

@@ -81,7 +81,7 @@ function Friends() {
                                 layout="vertical"
                                 fill="var(--color-desktop)"
                                 radius={4}
-                                onClick={() => navigate("/profile/" + chartData[0].name)} //only goes to first name in list
+                                onClick={(e) => navigate("/profile/" + e.payload.name)} //only goes to first name in list
                             >
                                 <LabelList
                                     dataKey="name"

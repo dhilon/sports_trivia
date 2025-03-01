@@ -40,31 +40,31 @@ import { SidebarLayout } from "./SidebarLayout"
 const data: Payment[] = [
     {
         id: "m5gr84i9",
-        amount: 316,
+        date: 316,
         status: "win",
         email: "ken99@yahoo.com",
     },
     {
         id: "3u1reuv4",
-        amount: 242,
+        date: 242,
         status: "win",
         email: "Abe45@gmail.com",
     },
     {
         id: "derv1ws0",
-        amount: 1739563200011,
+        date: 1739563200011,
         status: "loss",
         email: "Monserrat44@gmail.com",
     },
     {
         id: "5kma53ae",
-        amount: 874,
+        date: 874,
         status: "loss",
         email: "Silas22@gmail.com",
     },
     {
         id: "bhqecj4p",
-        amount: 721,
+        date: 721,
         status: "win",
         email: "carmella@hotmail.com",
     },
@@ -72,7 +72,7 @@ const data: Payment[] = [
 
 export type Payment = {
     id: string
-    amount: number
+    date: number
     status: "win" | "loss"
     email: string
 }
@@ -123,7 +123,7 @@ export const columns: ColumnDef<Payment>[] = [
         cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
     },
     {
-        accessorKey: "amount",
+        accessorKey: "date",
         header: ({ column }) => {
             return (
                 <Button
@@ -136,9 +136,9 @@ export const columns: ColumnDef<Payment>[] = [
             )
         },
         cell: ({ row }) => {
-            const amount = new Date(parseFloat(row.getValue("amount"))).toLocaleDateString();
+            const date = new Date(parseFloat(row.getValue("date"))).toLocaleDateString();
 
-            return <div className="text-right font-medium">{amount}</div>
+            return <div className="text-right font-medium">{date}</div>
         },
     },
     {
