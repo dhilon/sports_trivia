@@ -14,7 +14,7 @@ function BackandForth() {
             <div className="grid grid-cols">
                 <h1 className="justify-center items-center flex">
                     Dhilon
-                    <HeartPulseIcon />
+                    <HeartPulseIcon className="text-red-500" />
                 </h1>
                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
                     <MyClock></MyClock>

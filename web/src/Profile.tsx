@@ -65,67 +65,70 @@ const chartConfig = {
 function Profile() {
     const params = useParams();
     return (
-        <Card className="w-[550px] items-center space-x-4" >
-            <CardHeader>
-                <CardTitle>{params.name}'s Profile</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <BarChart accessibilityLayer data={chartData} margin={{
-                        top: 20,
-                    }}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="browser"
-                            tickLine={false}
-                            tickMargin={10}
-                            axisLine={false}
-                            tickFormatter={(value) =>
-                                chartConfig[value as keyof typeof chartConfig]?.label
-                            }
-                        />
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Bar
-                            dataKey="visitors"
-                            strokeWidth={2}
-                            radius={8}
-                            activeIndex={2}
-                            activeBar={({ ...props }) => {
-                                return (
-                                    <Rectangle
-                                        {...props}
-                                        fillOpacity={0.8}
-                                        stroke={props.payload.fill}
-                                        strokeDasharray={4}
-                                        strokeDashoffset={4}
-                                    />
-                                )
-                            }}
-                        >
-                            <LabelList
-                                dataKey="desktop"
-                                position="top"
-                                offset={12}
-                                className="fill-foreground"
-                                fontSize={12}
+        <div className="flex items-center justify-center">
+            <Card className="w-[550px] items-center space-x-4" >
+                <CardHeader>
+                    <CardTitle>{params.name}'s Profile</CardTitle>
+                    <CardDescription>January - June 2024</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig}>
+                        <BarChart accessibilityLayer data={chartData} margin={{
+                            top: 20,
+                        }}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="browser"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) =>
+                                    chartConfig[value as keyof typeof chartConfig]?.label
+                                }
                             />
-                        </Bar>
-                    </BarChart>
-                </ChartContainer>
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
-                </div>
-            </CardFooter>
-        </Card>
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                            />
+                            <Bar
+                                dataKey="visitors"
+                                strokeWidth={2}
+                                radius={8}
+                                activeIndex={2}
+                                activeBar={({ ...props }) => {
+                                    return (
+                                        <Rectangle
+                                            {...props}
+                                            fillOpacity={0.8}
+                                            stroke={props.payload.fill}
+                                            strokeDasharray={4}
+                                            strokeDashoffset={4}
+                                        />
+                                    )
+                                }}
+                            >
+                                <LabelList
+                                    dataKey="desktop"
+                                    position="top"
+                                    offset={12}
+                                    className="fill-foreground"
+                                    fontSize={12}
+                                />
+                            </Bar>
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 text-sm">
+                    <div className="flex gap-2 font-medium leading-none">
+                        Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+                    </div>
+                    <div className="leading-none text-muted-foreground">
+                        Showing total visitors for the last 6 months
+                    </div>
+                </CardFooter>
+            </Card>
+        </div>
+
     )
 }
 

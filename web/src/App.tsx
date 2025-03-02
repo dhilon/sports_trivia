@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 
-import { Link, Switch } from "wouter";
+import { Switch } from "wouter";
 import { Router, Route, useParams } from "wouter";
 import LoginPage from '@/Login';
 import SignupPage from './Signup';
