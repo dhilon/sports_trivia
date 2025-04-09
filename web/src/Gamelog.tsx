@@ -36,37 +36,38 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { SidebarLayout } from "./SidebarLayout"
+import { navigate } from "wouter/use-browser-location"
 
 const data: Payment[] = [
     {
         id: "m5gr84i9",
         date: 316,
         status: "win",
-        email: "ken99@yahoo.com",
+        gameType: "Around the Horn",
     },
     {
         id: "3u1reuv4",
         date: 242,
         status: "win",
-        email: "Abe45@gmail.com",
+        gameType: "Around the Horn",
     },
     {
         id: "derv1ws0",
         date: 1739563200011,
         status: "loss",
-        email: "Monserrat44@gmail.com",
+        gameType: "Around the Horn",
     },
     {
         id: "5kma53ae",
         date: 874,
         status: "loss",
-        email: "Silas22@gmail.com",
+        gameType: "Around the Horn",
     },
     {
         id: "bhqecj4p",
         date: 721,
         status: "win",
-        email: "carmella@hotmail.com",
+        gameType: "Around the Horn",
     },
 ]
 
@@ -74,29 +75,12 @@ export type Payment = {
     id: string
     date: number
     status: "win" | "loss"
-    email: string
+    gameType: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
     {
         id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
         enableSorting: false,
         enableHiding: false,
     },
@@ -108,19 +92,19 @@ export const columns: ColumnDef<Payment>[] = [
         ),
     },
     {
-        accessorKey: "email",
+        accessorKey: "gameType",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Email
+                    Game Type
                     <ArrowUpDown />
                 </Button>
             )
         },
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        cell: ({ row }) => <div>{row.getValue("gameType")}</div>,
     },
     {
         accessorKey: "date",
@@ -146,6 +130,7 @@ export const columns: ColumnDef<Payment>[] = [
         enableHiding: false,
         cell: ({ row }) => {
             const payment = row.original
+            const gameType = row.id
 
             return (
                 <DropdownMenu>
@@ -158,7 +143,7 @@ export const columns: ColumnDef<Payment>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id)}
+                            onClick={() => navigate(gameType)}
                         >
                             Review Game
                         </DropdownMenuItem>
@@ -203,14 +188,6 @@ function Gamelog() {
     return (
         <div className="w-full">
             <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
@@ -288,45 +265,7 @@ function Gamelog() {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Next
-                    </Button>
-                </div>
 
-            </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Input
-                    placeholder="Send us feedback..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
-                <Button variant="outline" size="icon">
-                    <SendHorizonal />
-                </Button>
-
-            </div>
         </div>
     )
 }

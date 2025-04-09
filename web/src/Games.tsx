@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { SidebarLayout } from "./SidebarLayout"
-import { Link } from "wouter"
+import { Link, useParams } from "wouter"
 import tower from "tower.jpeg"
 import fire from "fire.jpeg"
 import around from "around.jpeg"
@@ -17,10 +17,11 @@ import around from "around.jpeg"
 function GameCard(
     { name, image, description, url, analogy }: { name: string, image: string, description: string, url: string, analogy: string }
 ) {
+    const params = useParams();
 
     return (
 
-        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={url}>
+        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={url + "/" + params.sport}>
             <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
                 <CardHeader>
                     <CardTitle>{name}</CardTitle>

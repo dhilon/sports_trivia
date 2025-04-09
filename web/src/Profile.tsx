@@ -20,12 +20,12 @@ import {
 import { useParams } from "wouter"
 import { SidebarLayout } from "./SidebarLayout"
 const chartData = [
-    { browser: "basketball", desktop: "#1", visitors: 187, fill: "var(--color-basketball)" },
-    { browser: "hockey", desktop: "#2", visitors: 200, fill: "var(--color-hockey)" },
-    { browser: "baseball", desktop: "#131", visitors: 275, fill: "var(--color-baseball)" },
-    { browser: "tennis", desktop: "#34", visitors: 173, fill: "var(--color-tennis)" },
-    { browser: "football", desktop: "#26", visitors: 90, fill: "var(--color-football)" },
-    { browser: "soccer", desktop: "#26", visitors: 90, fill: "var(--color-soccer)" },
+    { browser: "basketball", desktop: "#1", points: 1870, fill: "var(--color-basketball)" },
+    { browser: "hockey", desktop: "#2", points: 2000, fill: "var(--color-hockey)" },
+    { browser: "baseball", desktop: "#131", points: 2750, fill: "var(--color-baseball)" },
+    { browser: "tennis", desktop: "#34", points: 1730, fill: "var(--color-tennis)" },
+    { browser: "football", desktop: "#26", points: 900, fill: "var(--color-football)" },
+    { browser: "soccer", desktop: "#26", points: 100, fill: "var(--color-soccer)" },
 ]
 
 const chartConfig = {
@@ -33,19 +33,19 @@ const chartConfig = {
         label: "Desktop",
         color: "hsl(var(--chart-1))",
     },
-    visitors: {
-        label: "Visitors",
+    points: {
+        label: "Points",
     },
     basketball: {
-        label: "Basketba",
+        label: "Basketball",
         color: "hsl(var(--chart-1))",
     },
     hockey: {
-        label: "hockey",
+        label: "Hockey",
         color: "hsl(var(--chart-2))",
     },
     baseball: {
-        label: "baseball",
+        label: "Baseball",
         color: "hsl(var(--chart-3))",
     },
     tennis: {
@@ -91,7 +91,7 @@ function Profile() {
                                 content={<ChartTooltipContent hideLabel />}
                             />
                             <Bar
-                                dataKey="visitors"
+                                dataKey="points"
                                 strokeWidth={2}
                                 radius={8}
                                 activeIndex={2}
@@ -123,7 +123,7 @@ function Profile() {
                         Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
                     </div>
                     <div className="leading-none text-muted-foreground">
-                        Showing total visitors for the last 6 months
+                        Showing total points for the last 6 months
                     </div>
                 </CardFooter>
             </Card>
