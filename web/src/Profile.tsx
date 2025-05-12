@@ -1,5 +1,6 @@
 "use client"
 
+import useSWR from 'swr'
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis, LabelList } from "recharts"
 
@@ -17,8 +18,10 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { useParams } from "wouter"
+import { Redirect, useParams } from "wouter"
 import { SidebarLayout } from "./SidebarLayout"
+
+
 const chartData = [
     { browser: "basketball", desktop: "#1", points: 1870, fill: "var(--color-basketball)" },
     { browser: "hockey", desktop: "#2", points: 2000, fill: "var(--color-hockey)" },
@@ -64,12 +67,17 @@ const chartConfig = {
 
 function Profile() {
     const params = useParams();
+    const { data, error, isLoading } = useSWR(`/profile/` + params.name)
+
+    if (error) return <Redirect to="/" />;
+    if (isLoading) return <div>loading...</div>
+
     return (
         <div className="flex items-center justify-center">
             <Card className="w-[550px] items-center space-x-4" >
                 <CardHeader>
-                    <CardTitle>{params.name}'s Profile</CardTitle>
-                    <CardDescription>January - June 2024</CardDescription>
+                    <CardTitle>{data.username}'s Profile</CardTitle>
+                    <CardDescription>Created at {data.created_at}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={chartConfig}>

@@ -20,6 +20,7 @@
     "@tailwindcss/postcss": "^4.0.3",
     "@tailwindcss/vite": "^4.0.3",
     "@tanstack/react-table": "^8.21.2",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.474.0",
@@ -27,6 +28,7 @@
     "react-clock": "^5.1.0",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.1",
+    "swr": "^2.3.3",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "wouter": "^3.5.1"

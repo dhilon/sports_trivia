@@ -13,20 +13,17 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, SendHorizonal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import {
     Table,
     TableBody,
@@ -37,48 +34,18 @@ import {
 } from "@/components/ui/table"
 import { SidebarLayout } from "./SidebarLayout"
 import { navigate } from "wouter/use-browser-location"
+import { Redirect } from "wouter"
+import useSWR from "swr"
+import { Game } from "./types"
 
-const data: Payment[] = [
-    {
-        id: "m5gr84i9",
-        date: 316,
-        status: "win",
-        gameType: "Around the Horn",
-    },
-    {
-        id: "3u1reuv4",
-        date: 242,
-        status: "win",
-        gameType: "Around the Horn",
-    },
-    {
-        id: "derv1ws0",
-        date: 1739563200011,
-        status: "loss",
-        gameType: "Around the Horn",
-    },
-    {
-        id: "5kma53ae",
-        date: 874,
-        status: "loss",
-        gameType: "Around the Horn",
-    },
-    {
-        id: "bhqecj4p",
-        date: 721,
-        status: "win",
-        gameType: "Around the Horn",
-    },
-]
 
-export type Payment = {
-    id: string
-    date: number
-    status: "win" | "loss"
-    gameType: string
-}
 
-export const columns: ColumnDef<Payment>[] = [
+
+
+
+
+
+const columns: ColumnDef<Game, any>[] = [
     {
         id: "select",
         enableSorting: false,
@@ -92,7 +59,7 @@ export const columns: ColumnDef<Payment>[] = [
         ),
     },
     {
-        accessorKey: "gameType",
+        accessorKey: "type",
         header: ({ column }) => {
             return (
                 <Button
@@ -104,7 +71,22 @@ export const columns: ColumnDef<Payment>[] = [
                 </Button>
             )
         },
-        cell: ({ row }) => <div>{row.getValue("gameType")}</div>,
+        cell: ({ row }) => <div>{row.getValue("type")}</div>,
+    },
+    {
+        accessorKey: "sport",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Sport
+                    <ArrowUpDown />
+                </Button>
+            )
+        },
+        cell: ({ row }) => <div className="capitalize">{row.getValue("sport")}</div>,
     },
     {
         accessorKey: "date",
@@ -129,8 +111,11 @@ export const columns: ColumnDef<Payment>[] = [
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original
-            const gameType = row.id
+            const gameType = row.getValue("type");
+            const sgameType = typeof gameType === 'string' ? gameType.replace(/\s+/g, '_') : '';
+            const lgameType = typeof sgameType === 'string' ? sgameType.toLowerCase() : '';
+            const sport = row.getValue("sport");
+            const gameId = (row.original as Game).gameId;
 
             return (
                 <DropdownMenu>
@@ -143,7 +128,7 @@ export const columns: ColumnDef<Payment>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigate(gameType)}
+                            onClick={() => navigate("/games/" + sport + "/" + lgameType + "/" + gameId)}
                         >
                             Review Game
                         </DropdownMenuItem>
@@ -158,6 +143,9 @@ export const columns: ColumnDef<Payment>[] = [
 ]
 
 function Gamelog() {
+
+    const { data: games = [], error, isLoading } = useSWR<Game[]>("/games");
+
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -166,8 +154,12 @@ function Gamelog() {
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
+
+
+
+
     const table = useReactTable({
-        data,
+        data: games,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -185,36 +177,11 @@ function Gamelog() {
         },
     })
 
+    if (error) return <Redirect to="/" />;
+    if (isLoading) return <div>loading...</div>
+
     return (
         <div className="w-full">
-            <div className="flex items-center py-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>

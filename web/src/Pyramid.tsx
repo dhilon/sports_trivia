@@ -1,109 +1,103 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { SidebarLayout } from "./SidebarLayout"
+import { Input } from "@/components/ui/input"
+import { HomeIcon, SendHorizonalIcon } from "lucide-react"
+import { Button } from "./components/ui/button"
+import { Redirect, useParams } from "wouter"
+import useSWR from "swr"
+import { Game, Question } from "./types"
+import MyClock from "./Clock"
 
-type Level = {
-    level: number,
-    question: string,
-    timeTaken: number
-}
-type PyramidLevelProps = { level: Level }
 
-const PyramidLevel = ({ level }: PyramidLevelProps) => {
-    const width = 60 / level.level + 25; //percent based rows
-    const [isGreen, setIsGreen] = useState(false);
 
-    const handleClick = () => {
-        setIsGreen(!isGreen); // Toggle the state between true and false
-    };
+
+type PyramidLevelProps = { question: Question, isGreen: boolean }
+
+const PyramidLevel = ({ question, isGreen }: PyramidLevelProps) => {
+    const width = 60 / (question?.level ?? 0 + 1) + 25; //percent based rows
+
     return (
-        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${width}%` }} onClick={handleClick}>
+        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${width}%` }}>
             <div className="flex-initial ml-2 basis-1/5">
-                Level {level.level}
+                Level {question?.level ?? 0}
             </div>
             <div className="flex-auto flex items-center justify-center basis-3/5">
-                {level.question}
-            </div>
-            <div className="flex-initial flex items-end mr-2 justify-end basis-1/5">
-                {level.timeTaken} secs.
+                {question.text}
             </div>
         </div>
     )
 }
 
-
-
-const data: Level[] = [
-    {
-        level: 1,
-        timeTaken: 316,
-        question: "What's up?",
-    },
-    {
-        level: 2,
-        timeTaken: 242,
-        question: "What's up?",
-    },
-    {
-        level: 3,
-        timeTaken: 173,
-        question: "What's up?",
-    },
-    {
-        level: 4,
-        timeTaken: 874,
-        question: "What's up?",
-    },
-    {
-        level: 5,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 6,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 7,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 8,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 9,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 10,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-    {
-        level: 11,
-        timeTaken: 721,
-        question: "What's up?",
-    },
-].reverse()
-
 function Pyramid() {
+
+
+    const params = useParams();
+    const { data: game, error, isLoading } = useSWR<Game>(`/games/${params.id}`)
+
+    const [inputValue, setInputValue] = useState('');
+    const [count, setCount] = useState(0);
+    const [highlightedLevelId, setHighlightedLevelId] = useState(0);
+    const [fail, setFail] = useState('');
+    const [sendDisabled, setSendDisabled] = useState(false);
+
+    const handleClockClick = () => {
+
+    };
+
+    const handleLevelClick = () => {
+        console.log(inputValue)
+        console.log(highlightedLevelId)
+        if (inputValue === game?.questions[count - 1].answer) {
+            setHighlightedLevelId(count - 1);
+            setInputValue('');
+            setCount(count - 1);
+        }
+        else {
+            setFail("You failed the pyramid")
+            setSendDisabled(true)
+        }
+    };
+
+    useEffect(() => {
+        setCount(game?.questions.length ?? 0)
+        setHighlightedLevelId(game?.questions.length ?? 0)
+    }, [game])
+
+    if (error) return <Redirect to="/" />;
+    if (isLoading) return <div>loading...</div>
+
+    const gameWithLevels = {
+        ...game,
+        questions: game?.questions?.map((question, index) => ({
+            ...question,
+            // highest level = length, then down to 1
+            level: (game.questions.length ?? 0) - index
+        })) ?? []
+    }
+
 
     return (
         <div>
             <div className="flex items-center justify-center text-2xl">Tower of Power</div>
             <div className="flex flex-col items-center ">
-                {data.map((level) => (<PyramidLevel level={level}></PyramidLevel>))}
+                {gameWithLevels?.questions.map((question, index) => (<PyramidLevel key={index}
+                    question={question}
+                    isGreen={question.level <= (game?.questions.length ?? 0) - highlightedLevelId}
+                ></PyramidLevel>))}
             </div>
 
             <div className="flex items-center space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
-                    ... level(s) completed.
+                    {(game?.questions.length ?? 0) - highlightedLevelId} level(s) completed.
+                </div>
+                <div className="flex items-center justify-center flex-3">
+                    <Input placeholder="Enter Answer:" className="w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                    <Button className="shadow-lg bg-green-600 cursor-pointer ml-3 h-6 transition-all hover:bg-green-200 active:scale-95 rounded-lg" onClick={() => handleLevelClick()} disabled={sendDisabled}>
+                        <SendHorizonalIcon></SendHorizonalIcon>
+                    </Button>
+
                 </div>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
                     50 points gained
@@ -114,6 +108,22 @@ function Pyramid() {
                 </div>
 
             </div>
+            <div>
+                <div className="flex flex-col items-center justify-center mx-auto space-y-2">
+                    {fail}
+                    <Button disabled={!sendDisabled}>
+                        <HomeIcon
+
+                        />
+                    </Button>
+                </div>
+
+                <div className="items-end flex justify-center w-fit ml-auto mr-10">
+                    <MyClock onClick={handleClockClick}></MyClock>
+                </div>
+            </div>
+
+
 
 
         </div>

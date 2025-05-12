@@ -14,6 +14,7 @@ import tower from "tower.jpeg"
 import fire from "fire.jpeg"
 import around from "around.jpeg"
 
+
 function GameCard(
     { name, image, description, url, analogy }: { name: string, image: string, description: string, url: string, analogy: string }
 ) {
@@ -21,7 +22,7 @@ function GameCard(
 
     return (
 
-        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={url + "/" + params.sport}>
+        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={"/games/" + params.sport + url + "1"}>
             <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
                 <CardHeader>
                     <CardTitle>{name}</CardTitle>
@@ -48,9 +49,9 @@ function GameCard(
 function Games() {
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 ">
-            <GameCard name="Tower of Power" image={tower} description="wow" url="/pyramid" analogy="Funny analogy" />
-            <GameCard name="Rapid Fire" image={fire} description="wow" url="/rapid_fire" analogy="Funny analogy" />
-            <GameCard name="Around the Horn" image={around} description="wow" url="/back_and_forth" analogy="Funny analogy" />
+            <GameCard name="Tower of Power" image={tower} description="wow" url="/pyramid/" analogy="Funny analogy" />
+            <GameCard name="Rapid Fire" image={fire} description="wow" url="/rapid_fire/" analogy="Funny analogy" />
+            <GameCard name="Around the Horn" image={around} description="wow" url="/around_the_horn/" analogy="Funny analogy" />
 
         </div>
 
