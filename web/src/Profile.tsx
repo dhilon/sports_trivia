@@ -23,17 +23,17 @@ import { SidebarLayout } from "./SidebarLayout"
 
 
 const chartData = [
-    { browser: "basketball", desktop: "#1", points: 1870, fill: "var(--color-basketball)" },
-    { browser: "hockey", desktop: "#2", points: 2000, fill: "var(--color-hockey)" },
-    { browser: "baseball", desktop: "#131", points: 2750, fill: "var(--color-baseball)" },
-    { browser: "tennis", desktop: "#34", points: 1730, fill: "var(--color-tennis)" },
-    { browser: "football", desktop: "#26", points: 900, fill: "var(--color-football)" },
-    { browser: "soccer", desktop: "#26", points: 100, fill: "var(--color-soccer)" },
+    { browser: "basketball", ranking: "#1", points: 0, fill: "var(--color-basketball)" }, //need to still fix ranking but points is good
+    { browser: "hockey", ranking: "#2", points: 0, fill: "var(--color-hockey)" },
+    { browser: "baseball", ranking: "#131", points: 0, fill: "var(--color-baseball)" },
+    { browser: "tennis", ranking: "#34", points: 0, fill: "var(--color-tennis)" },
+    { browser: "football", ranking: "#26", points: 0, fill: "var(--color-football)" },
+    { browser: "soccer", ranking: "#26", points: 0, fill: "var(--color-soccer)" },
 ]
 
 const chartConfig = {
-    desktop: {
-        label: "Desktop",
+    ranking: {
+        label: "Ranking",
         color: "hsl(var(--chart-1))",
     },
     points: {
@@ -71,6 +71,13 @@ function Profile() {
 
     if (error) return <Redirect to="/" />;
     if (isLoading) return <div>loading...</div>
+
+    chartData[0].points = data.scores.basketball
+    chartData[1].points = data.scores.hockey
+    chartData[2].points = data.scores.baseball
+    chartData[3].points = data.scores.tennis
+    chartData[4].points = data.scores.football
+    chartData[5].points = data.scores.soccer
 
     return (
         <div className="flex items-center justify-center">
@@ -116,7 +123,7 @@ function Profile() {
                                 }}
                             >
                                 <LabelList
-                                    dataKey="desktop"
+                                    dataKey="ranking"
                                     position="top"
                                     offset={12}
                                     className="fill-foreground"

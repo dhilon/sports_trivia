@@ -39,108 +39,107 @@ import useSWR from "swr"
 import { Game } from "./types"
 
 
-
-
-
-
-
-
-const columns: ColumnDef<Game, any>[] = [
-    {
-        id: "select",
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("status")}</div>
-        ),
-    },
-    {
-        accessorKey: "type",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Game Type
-                    <ArrowUpDown />
-                </Button>
-            )
+export function getColumns(
+    onViewOpponents: (game: Game) => void
+): ColumnDef<Game, any>[] {
+    return [
+        {
+            id: "select",
+            enableSorting: false,
+            enableHiding: false,
         },
-        cell: ({ row }) => <div>{row.getValue("type")}</div>,
-    },
-    {
-        accessorKey: "sport",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Sport
-                    <ArrowUpDown />
-                </Button>
-            )
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <div className="capitalize">{row.getValue("status")}</div>
+            ),
         },
-        cell: ({ row }) => <div className="capitalize">{row.getValue("sport")}</div>,
-    },
-    {
-        accessorKey: "date",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    <div className="text-right">Date</div>
-                    <ArrowUpDown />
-                </Button>
-            )
+        {
+            accessorKey: "type",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Game Type
+                        <ArrowUpDown />
+                    </Button>
+                )
+            },
+            cell: ({ row }) => <div>{row.getValue("type")}</div>,
         },
-        cell: ({ row }) => {
-            const date = new Date(parseFloat(row.getValue("date"))).toLocaleDateString();
+        {
+            accessorKey: "sport",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Sport
+                        <ArrowUpDown />
+                    </Button>
+                )
+            },
+            cell: ({ row }) => <div className="capitalize">{row.getValue("sport")}</div>,
+        },
+        {
+            accessorKey: "date",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        <div className="text-right">Date</div>
+                        <ArrowUpDown />
+                    </Button>
+                )
+            },
+            cell: ({ row }) => {
+                const date = new Date(parseFloat(row.getValue("date"))).toLocaleDateString();
 
-            return <div className="text-right font-medium">{date}</div>
+                return <div className="text-right font-medium">{date}</div>
+            },
         },
-    },
-    {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-            const gameType = row.getValue("type");
-            const sgameType = typeof gameType === 'string' ? gameType.replace(/\s+/g, '_') : '';
-            const lgameType = typeof sgameType === 'string' ? sgameType.toLowerCase() : '';
-            const sport = row.getValue("sport");
-            const gameId = (row.original as Game).gameId;
+        {
+            id: "actions",
+            enableHiding: false,
+            cell: ({ row }) => {
+                const game = row.original
+                const gameType = row.getValue("type");
+                const sgameType = typeof gameType === 'string' ? gameType.replace(/\s+/g, '_') : '';
+                const lgameType = typeof sgameType === 'string' ? sgameType.toLowerCase() : '';
+                const sport = row.getValue("sport");
+                const gameId = (row.original as Game).gameId;
 
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigate("/games/" + sport + "/" + lgameType + "/" + gameId)}
-                        >
-                            Review Game
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View opponents</DropdownMenuItem>
-                        <DropdownMenuItem>Stuff</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                                onClick={() => navigate("/games/" + sport + "/" + lgameType + "/" + gameId)}
+                            >
+                                Review Game
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
+                            <DropdownMenuItem>Practice</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            },
         },
-    },
-]
+    ]
+}
 
 function Gamelog() {
 
@@ -153,8 +152,15 @@ function Gamelog() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [modalGame, setModalGame] = React.useState<Game | null>(null);
 
+    const handleOpps = (game: Game) => {
+        // game contains all row data
+        setModalGame(game);
+        // do anything: navigate, open a modal, etc.
+    };
 
+    const columns = getColumns((game) => handleOpps(game));
 
 
 
@@ -181,59 +187,89 @@ function Gamelog() {
     if (isLoading) return <div>loading...</div>
 
     return (
-        <div className="w-full">
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
+        <div>
+            <div className="w-full">
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => {
+                                        return (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                            </TableHead>
+                                        )
+                                    })}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && "selected"}
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        No results.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
 
+
+
+            {modalGame && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg">
+                        <h2 className="text-xl font-bold">
+                            Opponents for Game #{modalGame.gameId}
+                        </h2>
+                        <ul className="mt-4 list-disc list-inside">
+                            {modalGame.players.map((o) => {
+
+                                return (
+                                    <li key={o}>
+                                        {o}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        <button
+                            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded"
+                            onClick={() => setModalGame(null)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
+
     )
 }
 

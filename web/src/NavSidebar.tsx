@@ -3,7 +3,7 @@ import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, Sid
 
 
 
-export function NavSidebar() {
+export function NavSidebar() { //need to change redirects to fetch currUser
     return (
         <Sidebar>
             <SidebarHeader>Hello <SidebarTrigger /></SidebarHeader>
@@ -19,7 +19,7 @@ export function NavSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/profile/Bob">
+                            <a href="/profile/dhilon">
                                 <CircleUserRound />
                                 <span>Profile</span>
                             </a>
@@ -35,7 +35,7 @@ export function NavSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/friends">
+                            <a href="/friends/dhilon">
                                 <UserRoundSearch />
                                 <span>Friends</span>
                             </a>

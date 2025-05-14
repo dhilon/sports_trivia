@@ -5,11 +5,25 @@ import { useState } from "react";
 import { Redirect, useParams } from "wouter";
 import useSWR from "swr";
 
+export function PlayerStars({ players }: { players: string[] }) {
+    return (
+        <div className="flex space-x-4 justify-center items-center">
+            {players.map((player) => (
+                <h1 key={player} className="flex items-center space-x-2">
+                    <span>{player}</span>
+                    <StarIcon className="text-black fill-amber-400" />
+                </h1>
+            ))}
+        </div>
+
+    )
+}
+
 function RapidFire() {
     const [isTextVisible, setIsTextVisible] = useState(false);
 
     const params = useParams();
-    const { data, error, isLoading } = useSWR(`/games/` + params.id)
+    const { data: game, error, isLoading } = useSWR(`/games/` + params.id)
 
     if (error) return <Redirect to="/" />;
     if (isLoading) return <div>loading...</div>
@@ -17,6 +31,10 @@ function RapidFire() {
     const handleClick = () => {
         setIsTextVisible(!isTextVisible);
     };
+
+    const handleExpire = () => {
+
+    }
 
     return (
         <div className="w-full">
@@ -28,12 +46,11 @@ function RapidFire() {
             </div>
             <div className="grid grid-cols">
                 <h1 className="justify-center items-center flex">
-                    Dhilon
-                    <br />
-                    <StarIcon className="text-black fill-amber-400" />
+                    <PlayerStars players={game.players} />
+
                 </h1>
                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
-                    <MyClock onClick={handleClick}></MyClock>
+                    <MyClock onClick={handleClick} isR={false} reset={false} onExpire={handleExpire} ref={null}></MyClock>
                 </div>
             </div>
 

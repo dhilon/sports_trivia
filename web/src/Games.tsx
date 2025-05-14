@@ -22,7 +22,7 @@ function GameCard(
 
     return (
 
-        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={"/games/" + params.sport + url + "1"}>
+        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={"/games/" + params.sport + url + "2"}>
             <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
                 <CardHeader>
                     <CardTitle>{name}</CardTitle>
@@ -46,7 +46,7 @@ function GameCard(
     )
 }
 
-function Games() {
+function Games() { //rapid fire and around the horn need to generate new games, will do later
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 ">
             <GameCard name="Tower of Power" image={tower} description="wow" url="/pyramid/" analogy="Funny analogy" />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { SidebarLayout } from "./SidebarLayout"
 import { Input } from "@/components/ui/input"
 import { HomeIcon, SendHorizonalIcon } from "lucide-react"
@@ -8,7 +8,7 @@ import { Button } from "./components/ui/button"
 import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
 import { Game, Question } from "./types"
-import MyClock from "./Clock"
+import MyClock, { ClockHandle } from "./Clock"
 
 
 
@@ -34,22 +34,34 @@ function Pyramid() {
 
 
     const params = useParams();
-    const { data: game, error, isLoading } = useSWR<Game>(`/games/${params.id}`)
+    const { data: game, error, isLoading } = useSWR<Game>(`/games/${params.id}`) //still need to sort by sport
 
     const [inputValue, setInputValue] = useState('');
     const [count, setCount] = useState(0);
     const [highlightedLevelId, setHighlightedLevelId] = useState(0);
     const [fail, setFail] = useState('');
     const [sendDisabled, setSendDisabled] = useState(false);
+    const clockRef = useRef<ClockHandle>(null);
+
+
+
+    function capitalizeFirstLetter(string: string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    const handleExpire = () => {
+        setSendDisabled(true)
+        setFail("You ran out of time")
+    }
 
     const handleClockClick = () => {
-
+        clockRef.current?.click();
     };
 
     const handleLevelClick = () => {
-        console.log(inputValue)
-        console.log(highlightedLevelId)
-        if (inputValue === game?.questions[count - 1].answer) {
+        handleClockClick()
+        clockRef.current?.toggle();
+        if (capitalizeFirstLetter(inputValue) === game?.questions[count - 1].answer) {
             setHighlightedLevelId(count - 1);
             setInputValue('');
             setCount(count - 1);
@@ -57,6 +69,7 @@ function Pyramid() {
         else {
             setFail("You failed the pyramid")
             setSendDisabled(true)
+            clockRef.current?.toggle();
         }
     };
 
@@ -65,8 +78,10 @@ function Pyramid() {
         setHighlightedLevelId(game?.questions.length ?? 0)
     }, [game])
 
-    if (error) return <Redirect to="/" />;
+    if (error) return <Redirect to="/" />; //idk why this has to be down here but there's an error otherwise
     if (isLoading) return <div>loading...</div>
+
+
 
     const gameWithLevels = {
         ...game,
@@ -100,26 +115,31 @@ function Pyramid() {
 
                 </div>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    50 points gained
+                    {60 * ((game?.questions.length ?? 0) - highlightedLevelId)} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
-                    700 points wagered
+                    {50 * (game?.questions.length ?? 0)} points wagered
                 </div>
 
             </div>
             <div>
                 <div className="flex flex-col items-center justify-center mx-auto space-y-2">
                     {fail}
-                    <Button disabled={!sendDisabled}>
-                        <HomeIcon
-
-                        />
-                    </Button>
+                    <a
+                        href={!sendDisabled ? undefined : "/"}
+                        style={{
+                            pointerEvents: !sendDisabled ? 'none' : 'auto',
+                            color: !sendDisabled ? 'gray' : 'blue',
+                        }}
+                        aria-disabled={!sendDisabled}
+                    >
+                        <HomeIcon />
+                    </a>
                 </div>
 
                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
-                    <MyClock onClick={handleClockClick}></MyClock>
+                    <MyClock onClick={handleClockClick} isR={true} reset={true} onExpire={handleExpire} ref={clockRef}></MyClock>
                 </div>
             </div>
 
@@ -130,7 +150,7 @@ function Pyramid() {
     )
 }
 
-export default function PyramidPage() {
+export default function PyramidPage() { //need to make it so you can't stop the timer by clicking on the clock
     return (
         <SidebarLayout>
             <Pyramid />
