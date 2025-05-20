@@ -1,12 +1,12 @@
 import { ClassDictionary } from "clsx"
 
 export type Game = {
-    gameId: string
+    id: string
     status: "win" | "loss" | "in progress"
     type: "around_the_horn" | "pyramid" | "rapid_fire"
     sport: "basketball" | "hockey" | "soccer" | "football" | "baseball" | "tennis"
-    date: number
-    players: Array<string>
+    date: Date
+    players: Array<User>
     questions: Array<Question>
     time: number
 
@@ -21,6 +21,7 @@ export type Question = {
 }
 
 export type User = {
+    id: number,
     created_at: Date,
     username: string,
     password: string,

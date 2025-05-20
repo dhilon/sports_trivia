@@ -67,7 +67,7 @@ const chartConfig = {
 
 function Profile() {
     const params = useParams();
-    const { data, error, isLoading } = useSWR(`/profile/` + params.name)
+    const { data, error, isLoading } = useSWR(`/users/` + params.name)
 
     if (error) return <Redirect to="/" />;
     if (isLoading) return <div>loading...</div>

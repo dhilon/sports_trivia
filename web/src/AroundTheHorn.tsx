@@ -4,14 +4,15 @@ import { HeartPulseIcon } from "lucide-react";
 import { useState } from "react";
 import useSWR from "swr";
 import { Redirect, useParams } from "wouter";
+import { User } from "./types";
 
 
-export function PlayerHearts({ players }: { players: string[] }) {
+export function PlayerHearts({ players }: { players: User[] }) {
     return (
         <div className="flex space-x-4 justify-center items-center">
             {players.map((player) => (
-                <h1 key={player} className="flex items-center space-x-2">
-                    <span>{player}</span>
+                <h1 key={player.username} className="flex items-center space-x-2">
+                    <span>{player.username}</span>
                     <HeartPulseIcon className="text-red-500" />
                 </h1>
             ))}

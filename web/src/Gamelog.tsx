@@ -34,9 +34,9 @@ import {
 } from "@/components/ui/table"
 import { SidebarLayout } from "./SidebarLayout"
 import { navigate } from "wouter/use-browser-location"
-import { Redirect } from "wouter"
+import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
-import { Game } from "./types"
+import { Game, User } from "./types"
 
 
 export function getColumns(
@@ -99,9 +99,8 @@ export function getColumns(
                 )
             },
             cell: ({ row }) => {
-                const date = new Date(parseFloat(row.getValue("date"))).toLocaleDateString();
 
-                return <div className="text-right font-medium">{date}</div>
+                return <div className="text-right font-medium">{row.getValue("date")}</div>
             },
         },
         {
@@ -113,7 +112,7 @@ export function getColumns(
                 const sgameType = typeof gameType === 'string' ? gameType.replace(/\s+/g, '_') : '';
                 const lgameType = typeof sgameType === 'string' ? sgameType.toLowerCase() : '';
                 const sport = row.getValue("sport");
-                const gameId = (row.original as Game).gameId;
+                const gameId = (row.original as Game).id;
 
                 return (
                     <DropdownMenu>
@@ -143,7 +142,9 @@ export function getColumns(
 
 function Gamelog() {
 
-    const { data: games = [], error, isLoading } = useSWR<Game[]>("/games");
+    const params = useParams();
+
+    const { data: games = [], error, isLoading } = useSWR<Game[]>("/users/" + params.name + "/games");
 
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -247,14 +248,14 @@ function Gamelog() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg">
                         <h2 className="text-xl font-bold">
-                            Opponents for Game #{modalGame.gameId}
+                            Opponents for Game #{modalGame.id}
                         </h2>
                         <ul className="mt-4 list-disc list-inside">
                             {modalGame.players.map((o) => {
 
                                 return (
-                                    <li key={o}>
-                                        {o}
+                                    <li key={o.username}>
+                                        {o.username}
                                     </li>
                                 );
                             })}

@@ -24,7 +24,7 @@ function Login({
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const { data: user, error, isLoading } = useSWR<User>(
-        uName ? `/profile/${uName}` : null,
+        uName ? `/users/${uName}` : null,
     );
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

@@ -4,13 +4,14 @@ import { StarIcon } from "lucide-react";
 import { useState } from "react";
 import { Redirect, useParams } from "wouter";
 import useSWR from "swr";
+import { User } from "./types";
 
-export function PlayerStars({ players }: { players: string[] }) {
+export function PlayerStars({ players }: { players: User[] }) {
     return (
         <div className="flex space-x-4 justify-center items-center">
             {players.map((player) => (
-                <h1 key={player} className="flex items-center space-x-2">
-                    <span>{player}</span>
+                <h1 key={player.username} className="flex items-center space-x-2">
+                    <span>{player.username}</span>
                     <StarIcon className="text-black fill-amber-400" />
                 </h1>
             ))}

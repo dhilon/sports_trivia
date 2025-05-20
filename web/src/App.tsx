@@ -38,7 +38,7 @@ function App() {
         <Router base="/">
           <Route path="/" component={HomePage}></Route>
           <Route path="/home" component={HomePage}></Route>
-          <Route path="/gamelog" component={GamelogPage}></Route>
+          <Route path="/gamelog/:name" component={GamelogPage}></Route>
           <Route path="/login" component={LoginPage}></Route>
           <Route path="/signup" component={SignupPage}></Route>
           <Route path="/password" component={PasswordPage}></Route>

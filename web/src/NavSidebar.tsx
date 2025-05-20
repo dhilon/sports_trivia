@@ -27,7 +27,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/gamelog">
+                            <a href="/gamelog/dhilon">
                                 <Inbox />
                                 <span>Gamelog</span>
                             </a>

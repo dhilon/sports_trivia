@@ -26,7 +26,7 @@ function Signup({
     const [check, setCheck] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const { data: user, error, isLoading } = useSWR<User>(
-        uName ? `/profile/${uName}` : null,
+        uName ? `/users/${uName}` : null,
     );
 
 

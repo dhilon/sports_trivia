@@ -42,20 +42,20 @@ const chartConfig = {
 function Friends() {
 
 
-
-    const [uName, setUName] = useState('');
-    const [sum, setSum] = useState(0);
     const [inputValue, setInputValue] = useState('');
 
     const params = useParams();
-    const { data: user, error, isLoading } = useSWR(`/profile/` + params.name)
+    const { data: user, error, isLoading } = useSWR(`/users/` + params.name)
 
     if (error) return <Redirect to="/" />;
     if (isLoading) return <div>loading...</div>
 
-
     for (let i = 0; i < user.friends.length; i++) {
-        chartData[i] = { name: user.friends[i], points: 186 }; //need to find a way to loop through data fetch to get summed score
+        let sum = 0;
+        for (let c = 0; c < 6; c++) {
+            sum += Object.values(user.friends[i].scores)[c] as number;
+        }
+        chartData[i] = { name: user.friends[i].username, points: sum }
     }
 
 
@@ -66,12 +66,12 @@ function Friends() {
     }
 
     return (
-        <div className="ml-auto mr-auto lg:w-120 lg:h-120">
+        <div className="ml-auto mr-auto lg:w-180 lg:h-150">
             <div>
                 <Card >
                     <CardHeader>
                         <CardTitle>Friends</CardTitle>
-                        <CardDescription>January - June 2024</CardDescription>
+                        <CardDescription>Not in any particular order</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={chartConfig}>
@@ -80,7 +80,7 @@ function Friends() {
                                 data={chartData}
                                 layout="vertical"
                                 margin={{
-                                    right: 16,
+                                    right: 100,
                                 }}
                             >
                                 <CartesianGrid horizontal={false} />
@@ -128,7 +128,7 @@ function Friends() {
                             Trending up by 5.2% this name <TrendingUp className="h-4 w-4" />
                         </div>
                         <div className="leading-none text-muted-foreground">
-                            Showing total visitors for the last 6 names
+                            Showing total scores for all users
                         </div>
                     </CardFooter>
                 </Card>

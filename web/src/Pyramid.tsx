@@ -12,10 +12,7 @@ import MyClock, { ClockHandle } from "./Clock"
 
 
 
-
-type PyramidLevelProps = { question: Question, isGreen: boolean }
-
-const PyramidLevel = ({ question, isGreen }: PyramidLevelProps) => {
+const PyramidLevel = ({ question, isGreen }: { question: Question, isGreen: boolean }) => {
     const width = 60 / (question?.level ?? 0 + 1) + 25; //percent based rows
 
     return (
