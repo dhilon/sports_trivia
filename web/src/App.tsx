@@ -18,6 +18,7 @@ import AroundTheHorn from "./AroundTheHorn";
 function App() {
 
   const fetcher = async (url: string) => {
+    axios.defaults.withCredentials = true;
     const instance = axios.create({
       baseURL: 'http://localhost:5000/',
       timeout: 1000,
@@ -29,7 +30,7 @@ function App() {
   return (
     <SWRConfig
       value={{
-        refreshInterval: 3000,
+        refreshInterval: 0,
         fetcher
       }}
     >

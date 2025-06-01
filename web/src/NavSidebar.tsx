@@ -1,12 +1,47 @@
 import { CircleUserRound, House, Inbox, KeyRound, LogOut, UserRoundSearch } from "lucide-react"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "./components/ui/sidebar"
-
+import { useState } from "react";
+import axios from "axios";
+import { navigate } from "wouter/use-browser-location";
+import { currUser } from "./CurrUser";
 
 
 export function NavSidebar() { //need to change redirects to fetch currUser
+
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [errMsg, setErrMsg] = useState("");
+
+    const { user, isLoading, isError, errorMessage, refresh } = currUser();
+
+    if (isLoading) {
+        return <p>Loading user…</p>;
+    }
+    if (isError) {
+        return <p style={{ color: "red" }}>Error: {errorMessage}</p>;
+    }
+
+    async function handleLogout() {
+        setErrMsg("");
+        setIsLoggingOut(true);
+
+        try {
+            await axios.get("http://localhost:5000/logout/", {
+                withCredentials: true,
+            });
+            // Successfully logged out on the server; redirect to /login
+            navigate("/login");
+        } catch (error: any) {
+            console.error("Logout error:", error);
+            setErrMsg("Failed to log out. Please try again.");
+            setIsLoggingOut(false);
+        }
+    }
+
+
+
     return (
         <Sidebar>
-            <SidebarHeader>Hello <SidebarTrigger /></SidebarHeader>
+            <SidebarHeader>Hello {user?.username}<SidebarTrigger /></SidebarHeader>
             <SidebarContent className='min-w-52 bg-amber-200'>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -51,13 +86,14 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                            <a href="/login">
+                        <SidebarMenuButton asChild onClick={handleLogout} disabled={isLoggingOut}>
+                            <div>
                                 <LogOut />
-                                <span>Log out</span>
-                            </a>
+                                <span>{isLoggingOut ? "Logging out…" : "Log Out"}</span>
+                            </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    {errMsg && <p className="text-red-500 mt-2 ml-2">{errMsg}</p>}
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter />

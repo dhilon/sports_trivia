@@ -33,7 +33,7 @@ function JoinCard() {
         inputValue ? `/games/${inputValue}` : null,
     );
 
-    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleClick = (e: React.FormEvent) => {
         e.preventDefault(); //prevent immediate link href
 
         if (error) {
@@ -62,9 +62,9 @@ function JoinCard() {
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 font-medium leading-none">
                     <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
-                    <Link className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" onClick={handleClick} href={"/games/" + game?.sport + "/" + game?.type + "/" + inputValue}>
+                    <button className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" onClick={(e) => (handleClick(e))}>
                         <SendHorizonalIcon></SendHorizonalIcon>
-                    </Link>
+                    </button>
 
                 </div>
             </CardFooter>
@@ -83,7 +83,7 @@ function HomeCard(
             <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
                 <CardHeader>
                     <CardTitle>{sport}</CardTitle>
-                    <CardDescription>January - June 2024</CardDescription>
+                    <CardDescription>A sport</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
@@ -108,7 +108,7 @@ function Home() {
             <HomeCard image={football} description="Are the Lions ever winning the Super Bowl?" sport="Football" />
             <HomeCard image={baseball} description="Is hitting a baseball really the hardest thing to do in pro sports?" sport="Baseball" />
             <HomeCard image={hockey} description="Can you skate?" sport="Hockey" />
-            <HomeCard image={tennis} description="Is Sinner just a druggie?" sport="Tennis" />
+            <HomeCard image={tennis} description="Will the Big Three ever be topped?" sport="Tennis" />
             <JoinCard />
 
         </div>

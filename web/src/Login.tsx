@@ -10,10 +10,32 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
-import useSWR from "swr"
-import { Redirect } from "wouter"
-import { useState } from "react"
-import { User } from "./types"
+import { useRef, useState } from "react"
+import axios from "axios";
+import useSWRMutation from "swr/mutation";
+
+type LoginUserPayload = { uName: string; pwd: string };
+type LoginUserResponse = { id: number; username: string };
+
+function useLoginUser() {
+    return useSWRMutation<
+        LoginUserResponse,
+        Error,
+        "/login",
+        LoginUserPayload
+    >(
+        "/login",
+        async (_url, { arg: { uName, pwd } }) => {
+            const res = await axios.post<LoginUserResponse>(
+                "http://localhost:5000/login/",
+                { username: uName, password: pwd },
+                { withCredentials: true }
+            );
+            return res.data;
+        }
+    );
+}
+
 
 function Login({
     className,
@@ -23,36 +45,50 @@ function Login({
     const [uName, setUName] = useState('');
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
-    const { data: user, error, isLoading } = useSWR<User>(
-        uName ? `/users/${uName}` : null,
-    );
+    const [isLoading, setIsLoading] = useState(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        if (error) {
-            setErrMsg("No user with that username found")
-            return <Redirect to="/login" />
-        }
-        if (isLoading) return <div>loading...</div>
+    const { trigger: loginUser, isMutating } = useLoginUser();
 
 
-        const form = event.currentTarget;
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setErrMsg("");
+        setIsLoading(true);
 
-        if (form.checkValidity()) {
-
-            if (user?.password === pwd) {
-                navigate("/home");
-            }
-            else {
-                setErrMsg("Incorrect password")
-            }
-        }
-
-        else {
+        // 1) Client-side validation
+        const form = formRef.current;
+        if (form && !form.checkValidity()) {
             form.reportValidity();
+            setIsLoading(false);
+            return;
         }
+
+        // 2) Send credentials to Flask
+        try {
+            await loginUser({ uName, pwd });
+            navigate("/home");
+            setUName("");
+            setPwd("");
+            setErrMsg("")
+        } catch (error: any) {
+            // 4) On 4xx/5xx, display message
+            const serverMsg = error.response?.data?.error;
+            setErrMsg(
+                serverMsg === "no such user"
+                    ? "No user with that username found"
+                    : serverMsg === "incorrect password"
+                        ? "Incorrect password"
+                        : "Login failed"
+            );
+        } finally {
+            setIsLoading(false);
+        }
+
+
+
     }
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -82,8 +118,8 @@ function Login({
                                 </div>
                                 <Input id="password" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} required />
                             </div>
-                            <Button type="submit" className="w-full">
-                                Login
+                            <Button disabled={isLoading} type="submit" className="w-full" >
+                                {isLoading || isMutating ? "Processing…" : "Log In"}
                             </Button>
                             <Button variant="outline" className="w-full" >
                                 Login with Google

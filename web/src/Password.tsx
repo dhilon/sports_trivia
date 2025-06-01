@@ -12,6 +12,34 @@ import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
 import { useState } from "react"
 
+
+import axios from 'axios'
+import useSWRMutation from 'swr/mutation'
+import { currUser } from "./CurrUser"
+
+
+type CreateUserPayload = { uName: string; pwd: string }
+type CreateUserResponse = { id: number; username: string }
+
+/** 2) Mutation hook using axios */
+function useCreateUser() {
+    return useSWRMutation<
+        CreateUserResponse,     // return type from the mutation
+        Error,                  // error type
+        '/users',               // key type
+        CreateUserPayload       // your arg type
+    >(
+        '/users',
+        async (url, { arg: { uName, pwd } }) => {
+            const res = await axios.put<CreateUserResponse>('http://localhost:5000/users/' + uName, {
+                username: uName,
+                password: pwd,
+            })
+            return res.data
+        }
+    )
+}
+
 function Password({
     className,
     ...props
@@ -21,8 +49,19 @@ function Password({
     const [check, setCheck] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
+    const { user, isLoading, isError, errorMessage, refresh } = currUser();
+    if (isLoading) {
+        return <p>Loading user…</p>;
+    }
+    if (isError) {
+        return <p style={{ color: "red" }}>Error: {errorMessage}</p>;
+    }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+
+    const { trigger: createUser, isMutating, error: uError } = useCreateUser()
+
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const form = event.currentTarget;
         if (form.checkValidity()) {
@@ -30,6 +69,20 @@ function Password({
                 setErrMsg("Make sure you correctly confirm your password")
             }
             else {
+                try {
+                    if (!user) {
+                        return <p>You are not logged in.</p>;
+                    }
+                    else {
+                        await createUser({ uName: user?.username, pwd })
+                        // revalidate the list after create
+                        setCheck('')
+                        setPwd('')
+                    }
+
+                } catch (uError) {
+                    console.error(uError)
+                }
                 navigate("/home");
             }
         }
@@ -59,8 +112,8 @@ function Password({
                                 </div>
                                 <Input id="password" type="password" value={check} onChange={(e) => setCheck(e.target.value)} required />
                             </div>
-                            <Button type="submit" className="w-full">
-                                Continue
+                            <Button type="submit" className="w-full" disabled={isMutating}>
+                                {isMutating ? 'Changing' : 'Continue'}
                             </Button>
                             <Button variant="outline" className="w-full">
                                 Use Google
