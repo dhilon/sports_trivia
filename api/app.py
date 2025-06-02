@@ -7,7 +7,7 @@ from models import db, User, Question, Game, Score, Friends
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash
 from peewee import IntegrityError
-from datetime import datetime
+from datetime import datetime, timedelta
 
 users = [
     {
@@ -365,7 +365,7 @@ questions = [
   },
   {
     "id": 29,
-    "text": "Who is the only player to record at least 10 steals and 10 blocks in the same NBA game?",
+    "text": "Who is the only player to record at least 19 combined steals + blocks in an NBA game?",
     "answer": "Hakeem Olajuwon",
     "sport": "basketball"
   },
@@ -1209,14 +1209,17 @@ CORS(
     resources={r"/*": {"origins": "http://localhost:5174"}}
 )
 app.config.update(
-    SESSION_COOKIE_SAMESITE="None",  # allow cross-site
-    SESSION_COOKIE_SECURE=False      # must be False on localhost (no HTTPS)
+    SECRET_KEY="a-very-secret-string",
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",  # Change from "None" for localhost
+    SESSION_COOKIE_SECURE=False,    # Keep False for localhost
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=24)  # Optional
 )
 #app.response_class = JSONResponse
 app.config["SECRET_KEY"] = "a-very-secret-string"
-login_manager = LoginManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 login_manager.login_view = "login"
-login_manager.session_protection = "strong"
 
 if __name__ == '__main__': 
     app.run(debug=True, use_reloader=False, port=5000)
@@ -1238,20 +1241,17 @@ def on_unauthorized():
   
 @login_manager.user_loader
 def load_user(user_id: str):
-    app.logger.debug("user_loader: looking up user_id = %r", user_id)
     try:
         user_obj = User.get_or_none(User.id == int(user_id))
-        app.logger.debug("user_loader: found user = %r", user_obj)
         return user_obj
     except Exception as e:
         app.logger.error("user_loader exception: %s", e)
         return None
 
+
 @app.route('/me/', methods=["GET"])
 def who_am_i():
-    if current_user.is_authenticated:
-        return {"id": current_user.id, "username": current_user.username}, 200
-    return {"error": "not authenticated"}
+    return {"id": current_user.id, "username": current_user.username}, 200
 
 
 @app.route('/users/', methods=['POST', 'GET'])
@@ -1377,7 +1377,6 @@ def user_detail(name):
         return get_user(name)
     
     
-@login_manager.user_loader
 def get_user(name=None):
     user=User.get(username=name)
     if user:
@@ -1447,6 +1446,7 @@ def login():
         return {'error': 'incorrect password'}, 401
 
     login_user(user)
+    session['me'] = 'me'
     return {'id': user.id, 'username': user.username}, 200
 
 @app.route('/logout/', methods=['GET']) #logout

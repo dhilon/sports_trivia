@@ -9,19 +9,20 @@ import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
 import { Game, Question } from "./types"
 import MyClock, { ClockHandle } from "./Clock"
+import answersMatch from "./strCmp"
 
 
 
 const PyramidLevel = ({ question, isGreen }: { question: Question, isGreen: boolean }) => {
-    const width = 60 / (question?.level ?? 0 + 1) + 25; //percent based rows
+    const width = 60 / (question?.level ?? 0 + 1) + 33; //percent based rows
 
     return (
-        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${width}%` }}>
+        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-red-400'}`} style={{ width: `${width}%` }}>
             <div className="flex-initial ml-2 basis-1/5">
                 Level {question?.level ?? 0}
             </div>
-            <div className="flex-auto flex items-center justify-center basis-3/5">
-                {question.text}
+            <div className="flex-auto flex items-center justify-center basis-3/5 text-xs">
+                <b>{question.text}</b>
             </div>
         </div>
     )
@@ -58,7 +59,7 @@ function Pyramid() {
     const handleLevelClick = () => {
         handleClockClick()
         clockRef.current?.toggle();
-        if (capitalizeFirstLetter(inputValue) === game?.questions[count - 1].answer) {
+        if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[count - 1].answer)) {
             setHighlightedLevelId(count - 1);
             setInputValue('');
             setCount(count - 1);

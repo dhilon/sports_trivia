@@ -51,9 +51,13 @@ export function getColumns(
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("status")}</div>
-            ),
+            cell: ({ row }) => {
+                // force‐cast to string
+                const str = row.getValue("status") as string;
+                // replace all underscores with spaces
+                const spaced = str.replace(/_/g, " ");
+                return <div className="capitalize">{spaced}</div>;
+            },
         },
         {
             accessorKey: "type",
@@ -68,7 +72,13 @@ export function getColumns(
                     </Button>
                 )
             },
-            cell: ({ row }) => <div>{row.getValue("type")}</div>,
+            cell: ({ row }) => {
+                // force‐cast to string
+                const str = row.getValue("type") as string;
+                // replace all underscores with spaces
+                const spaced = str.replace(/_/g, " ");
+                return <div className="capitalize">{spaced}</div>;
+            },
         },
         {
             accessorKey: "sport",
