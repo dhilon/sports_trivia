@@ -66,7 +66,7 @@ function Login({
 
         // 2) Send credentials to Flask
         try {
-            await loginUser({ uName, pwd });
+            const ret = await loginUser({ uName, pwd });
             navigate("/home");
             setUName("");
             setPwd("");

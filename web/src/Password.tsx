@@ -30,7 +30,7 @@ function useCreateUser() {
         CreateUserPayload       // your arg type
     >(
         '/users',
-        async (url, { arg: { uName, pwd } }) => {
+        async (_url, { arg: { uName, pwd } }) => {
             const res = await axios.put<CreateUserResponse>('http://localhost:5000/users/' + uName, {
                 username: uName,
                 password: pwd,
@@ -49,7 +49,7 @@ function Password({
     const [check, setCheck] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
-    const { user, isLoading, isError, errorMessage, refresh } = currUser();
+    const { user, isLoading, isError, errorMessage } = currUser();
     if (isLoading) {
         return <p>Loading user…</p>;
     }
