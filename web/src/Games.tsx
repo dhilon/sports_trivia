@@ -18,6 +18,7 @@ import { useState } from "react"
 import axios from "axios";
 import useSWRMutation from "swr/mutation";
 import { navigate } from "wouter/use-browser-location"
+import { currUser } from "./components/CurrUser"
 
 type CreateGamePayload = { type: string; sport: string };
 type CreateGameResponse = { id: number };
@@ -49,22 +50,22 @@ function GameCard(
 ) {
     const params = useParams();
     const { sport } = useParams<Params>();
-    const [isLoading, setIsLoading] = useState(false);
     const { trigger: createGame, isMutating } = useCreateGame();
+    const { user, isLoading, isError, errorMessage } = currUser();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setIsLoading(true);
 
         // 2) Send credentials to Flask
         try {
+            if (!user?.username) {
+                throw new Error("Must be logged in to create game");
+            }
             const id = (await createGame({ type: name, sport })).id;
             navigate("/games/" + params.sport + url + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message
             const serverMsg = error.response?.data?.error;
-        } finally {
-            setIsLoading(false);
         }
 
 

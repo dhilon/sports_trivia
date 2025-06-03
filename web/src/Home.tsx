@@ -20,29 +20,55 @@ import tennis from "tennis.jpeg"
 import { Input } from "./components/ui/input"
 import { SendHorizonalIcon } from "lucide-react"
 import together from "together.jpeg"
-import useSWR from "swr"
-import { Game } from "./types"
 import { useState } from "react"
 import { navigate } from "wouter/use-browser-location"
+import { currUser } from "./components/CurrUser"
+import axios from "axios"
+import useSWRMutation from "swr/mutation"
+
+type CreateGamePayload = { id: number };
+type CreateGameResponse = { id: number, sport: string, type: string };
+
+function useCreateGame() {
+    return useSWRMutation<
+        CreateGameResponse,
+        Error,
+        "/games",
+        CreateGamePayload
+    >(
+        "/games",
+        async (_url, { arg: { id } }) => {
+            const res = await axios.post<CreateGameResponse>(
+                `http://localhost:5000/games/${id}`,
+                { id: id },
+                { withCredentials: true }
+            );
+            return res.data;
+        }
+    );
+}
 
 function JoinCard() {
 
     const [inputValue, setInputValue] = useState('');
     const [errMsg, setErrMsg] = useState('');
-    const { data: game, error, isLoading } = useSWR<Game>(
-        inputValue ? `/games/${inputValue}` : null,
-    );
 
-    const handleClick = (e: React.FormEvent) => {
+    const { user, isLoading, isError, errorMessage } = currUser();
+    const { trigger: createGame, isMutating } = useCreateGame();
+
+    const handleClick = async (e: React.FormEvent) => {
         e.preventDefault(); //prevent immediate link href
 
-        if (error) {
-            setErrMsg("No Game with that ID Found")
-            return <Redirect to="/" />
+        try {
+            if (!user?.username) {
+                throw new Error("Must be logged in to create game");
+            }
+            const { id, type, sport } = await createGame({ id: parseInt(inputValue) });
+            navigate("/games/" + sport + "/" + type + "/" + id);
+        } catch (error: any) {
+            // 4) On 4xx/5xx, display message
+            setErrMsg(error.message)
         }
-        if (isLoading) return <div>loading...</div>
-
-        navigate("/games/" + game?.sport + "/" + game?.type + "/" + inputValue); //could probably just remove the Link but idk
 
     };
 

@@ -3,7 +3,7 @@ import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, Sid
 import { useState } from "react";
 import axios from "axios";
 import { navigate } from "wouter/use-browser-location";
-import { currUser } from "./CurrUser";
+import { currUser } from "./components/CurrUser";
 
 
 export function NavSidebar() { //need to change redirects to fetch currUser
@@ -11,7 +11,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [errMsg, setErrMsg] = useState("");
 
-    const { user, isLoading, isError, errorMessage, refresh } = currUser();
+    const { user, isLoading, isError, errorMessage } = currUser();
 
     if (isLoading) {
         return <p>Loading user…</p>;
@@ -41,7 +41,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
 
     return (
         <Sidebar>
-            <SidebarHeader>Hello {user?.username}<SidebarTrigger /></SidebarHeader>
+            <SidebarHeader>Hello, {user?.username}<SidebarTrigger /></SidebarHeader>
             <SidebarContent className='min-w-52 bg-amber-200'>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -54,7 +54,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/profile/dhilon">
+                            <a href={`/profile/${user?.username}`}>
                                 <CircleUserRound />
                                 <span>Profile</span>
                             </a>
@@ -62,7 +62,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/gamelog/dhilon">
+                            <a href={`/gamelog/${user?.username}`}>
                                 <Inbox />
                                 <span>Gamelog</span>
                             </a>
@@ -70,7 +70,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <a href="/friends/dhilon">
+                            <a href={`/friends/${user?.username}`}>
                                 <UserRoundSearch />
                                 <span>Friends</span>
                             </a>

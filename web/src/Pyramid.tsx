@@ -8,8 +8,8 @@ import { Button } from "./components/ui/button"
 import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
 import { Game, Question } from "./types"
-import MyClock, { ClockHandle } from "./Clock"
-import answersMatch from "./strCmp"
+import MyClock, { ClockHandle } from "./components/Clock"
+import answersMatch from "./components/strCmp"
 
 
 

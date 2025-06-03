@@ -15,7 +15,7 @@ import { useState } from "react"
 
 import axios from 'axios'
 import useSWRMutation from 'swr/mutation'
-import { currUser } from "./CurrUser"
+import { currUser } from "./components/CurrUser"
 
 
 type CreateUserPayload = { uName: string; pwd: string }
@@ -31,7 +31,7 @@ function useCreateUser() {
     >(
         '/users',
         async (_url, { arg: { uName, pwd } }) => {
-            const res = await axios.put<CreateUserResponse>('http://localhost:5000/users/' + uName, {
+            const res = await axios.post<CreateUserResponse>('http://localhost:5000/users/' + uName + "/", {
                 username: uName,
                 password: pwd,
             })
@@ -50,16 +50,7 @@ function Password({
     const [errMsg, setErrMsg] = useState('');
 
     const { user, isLoading, isError, errorMessage } = currUser();
-    if (isLoading) {
-        return <p>Loading user…</p>;
-    }
-    if (isError) {
-        return <p style={{ color: "red" }}>Error: {errorMessage}</p>;
-    }
-
-
-    const { trigger: createUser, isMutating, error: uError } = useCreateUser()
-
+    const { trigger: createUser, isMutating } = useCreateUser();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -68,28 +59,34 @@ function Password({
             if (pwd !== check) {
                 setErrMsg("Make sure you correctly confirm your password")
             }
+            else if (!user) {
+                setErrMsg("You are not logged in.");
+            }
             else {
                 try {
-                    if (!user) {
-                        return <p>You are not logged in.</p>;
-                    }
-                    else {
-                        await createUser({ uName: user?.username, pwd })
-                        // revalidate the list after create
-                        setCheck('')
-                        setPwd('')
-                    }
-
-                } catch (uError) {
-                    console.error(uError)
+                    await createUser({ uName: user.username, pwd })
+                    setCheck('')
+                    setPwd('')
+                    navigate("/home");
+                } catch (error) {
+                    console.error(error)
+                    setErrMsg("Failed to update password");
                 }
-                navigate("/home");
             }
         }
         else {
             form.reportValidity();
         }
     }
+
+    if (isLoading) {
+        return <p>Loading user…</p>;
+    }
+
+    if (isError) {
+        return <p style={{ color: "red" }}>Error: {errorMessage}</p>;
+    }
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>

@@ -1,5 +1,5 @@
 import table from "table.jpg"
-import MyClock from "./Clock";
+import MyClock from "./components/Clock";
 import { StarIcon } from "lucide-react";
 import { useState } from "react";
 import { Redirect, useParams } from "wouter";

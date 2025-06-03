@@ -12,11 +12,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { navigate } from "wouter/use-browser-location";
 import { useRef, useState } from "react";
-import useSWR from "swr";
 import axios from "axios";
 import useSWRMutation from "swr/mutation";
 
-import { User } from "./types";
+type LoginUserPayload = { uName: string; pwd: string };
+type LoginUserResponse = { id: number; username: string };
+
+function useLoginUser() {
+    return useSWRMutation<
+        LoginUserResponse,
+        Error,
+        "/login",
+        LoginUserPayload
+    >(
+        "/login",
+        async (_url, { arg: { uName, pwd } }) => {
+            const res = await axios.post<LoginUserResponse>(
+                "http://localhost:5000/login/",
+                { username: uName, password: pwd },
+                { withCredentials: true }
+            );
+            return res.data;
+        }
+    );
+}
 
 type CreateUserPayload = { uName: string; pwd: string };
 type CreateUserResponse = { id: number; username: string };
@@ -49,16 +68,11 @@ function Signup() {
     const [check, setCheck] = useState("");
     const [errMsg, setErrMsg] = useState("");
 
-    // only fetch when we set this
-    const [submittedName, setSubmittedName] = useState<string | null>(null);
 
-    const { data: user, error, isValidating: isLoading, mutate } = useSWR<User>(
-        submittedName ? `/users/${submittedName}` : null,
-        // uses your global fetcher from App.tsx
-        { revalidateOnFocus: false, revalidateOnReconnect: false }
-    );
 
     const { trigger: createUser, isMutating } = useCreateUser();
+
+    const { trigger: loginUser, isM } = useLoginUser();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -77,21 +91,16 @@ function Signup() {
             return;
         }
 
-        // 3) trigger the GET /users/<uName> once
-        setSubmittedName(uName);
-        // wait for SWR to fetch
-        const existing = await mutate();
-
-        if (existing) {
-            setErrMsg("User with that username already exists");
-            return;
-        }
-
         // 4) create the new user
         try {
             await createUser({ uName, pwd });
         } catch (e: any) {
-            setErrMsg(e.message || "Signup failed");
+            const serverMsg = e.response?.data?.error;
+            setErrMsg(
+                serverMsg === "username already exists"
+                    ? "Username already exists"
+                    : "Signup failed"
+            );
             return;
         }
 
@@ -100,6 +109,7 @@ function Signup() {
         setPwd("");
         setCheck("");
         setErrMsg("");
+        const ret = await loginUser({ uName, pwd });
         navigate("/home");
     }
 
@@ -156,9 +166,9 @@ function Signup() {
                             <Button
                                 type="submit"
                                 className="w-full"
-                                disabled={isLoading || isMutating}
+                                disabled={isMutating || isM}
                             >
-                                {isLoading || isMutating ? "Processing…" : "Sign Up"}
+                                {isMutating || isM ? "Processing…" : "Sign Up"}
                             </Button>
 
                             {/* Optional OAuth */}
