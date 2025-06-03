@@ -23,6 +23,7 @@ import { useState } from "react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { currUser } from "./components/CurrUser"
+import useCreateUser from "./components/CreateUser"
 const chartData = [
     { name: "bob", points: 186 },
 ]
@@ -42,10 +43,13 @@ function Friends() {
 
 
     const [inputValue, setInputValue] = useState('');
+    const [errMsg, setErrMsg] = useState('');
     const { user, isLoading, isError, errorMessage } = currUser();
 
+    const { trigger: createUser, isMutating, error } = useCreateUser();
+
     if (isError) return <div>Error: {errorMessage}</div>;
-    if (isLoading) return <div>loading...</div>
+    if (isLoading || isMutating) return <div>loading...</div>
 
     for (let i = 0; i < (user?.friends?.length || 0); i++) {
         let sum = 0;
@@ -60,8 +64,26 @@ function Friends() {
 
 
 
-    const handleClick = () => {
-
+    const handleClick = async () => {
+        try {
+            const response = await createUser({
+                uName: user?.username || "",
+                pwd: "",
+                scores: user?.scores || {},
+                friends: [inputValue]
+            });
+            setErrMsg("Friend added");
+        } catch (error: any) {
+            if (error?.response?.status === 400) {
+                setErrMsg("Friend already added");
+            }
+            else if (error?.response?.status === 404) {
+                setErrMsg("Friend not found");
+            }
+            else {
+                setErrMsg("Failed to add friend");
+            }
+        }
     }
 
     return (
@@ -145,6 +167,11 @@ function Friends() {
                 >
                     <PlusCircleIcon />
                 </Button>
+            </div>
+            <div className="flex flex-col items-center justify-center mx-auto space-y-2">
+                <div className={`${errMsg === "Friend added" ? 'text-green-500' : 'text-red-500'}`}>
+                    {errMsg}
+                </div>
             </div>
 
         </div>

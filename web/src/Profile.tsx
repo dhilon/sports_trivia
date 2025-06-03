@@ -18,7 +18,8 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { SidebarLayout } from "./SidebarLayout"
-import { currUser } from './components/CurrUser'
+import { useParams } from "wouter"
+import useSWR from "swr"
 
 
 const chartData = [
@@ -65,12 +66,13 @@ const chartConfig = {
 } satisfies ChartConfig
 
 function Profile() {
-    const { user: data, isLoading, isError, errorMessage } = currUser();
+    const { name } = useParams();
 
-    if (isError) return <div>Error: {errorMessage}</div>;
-    if (isLoading) return <div>loading...</div>
+    const { data, isLoading, error } = useSWR(`/users/${name}`);
 
     if (!data) return null;
+    if (error) return <div>Error: {error.message}</div>;
+    if (isLoading) return <div>loading...</div>
 
     chartData[0].points = data.scores.basketball ?? 0
     chartData[1].points = data.scores.hockey ?? 0

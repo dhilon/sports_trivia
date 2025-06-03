@@ -43,6 +43,8 @@ function Pyramid() {
     const [sendDisabled, setSendDisabled] = useState(false);
     const clockRef = useRef<ClockHandle>(null);
 
+    const [shouldUpdateScore, setShouldUpdateScore] = useState(false);
+
     const { user, isLoading: isLoadingUser, isError, errorMessage } = currUser();
 
     const { trigger: createUser, isMutating } = useCreateUser();
@@ -53,47 +55,84 @@ function Pyramid() {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    const handleExpire = () => {
-        if (user && game?.sport) {
+    // Keep the initial setup effect
+    useEffect(() => {
+        setCount(game?.questions.length ?? 0);
+        setHighlightedLevelId(game?.questions.length ?? 0);
+    }, [game]);
+
+    // Score handling effect - only for wrong answers
+    useEffect(() => {
+        if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId))// - (50 * (game?.questions.length ?? 0))
-                createUser({ uName: user.username, pwd: "", scores: user.scores, friends: user.friends })
+                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId)); //posting twice for some reason
+                createUser({
+                    uName: user.username,
+                    pwd: "",
+                    scores: user.scores,
+                    friends: []
+                });
+                setShouldUpdateScore(false);
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         }
-        setSendDisabled(true)
-        setFail("You ran out of time")
-    }
+    }, [shouldUpdateScore, user, game?.sport, highlightedLevelId, createUser]);
 
-    const handleClockClick = () => {
-        clockRef.current?.click();
+    const handleExpire = () => { //just resets and keeps going
+        setSendDisabled(true);
+        setFail("You ran out of time");
+        setShouldUpdateScore(true);
+        // Just stop the clock without toggling
+
+        if (user && game?.sport) {
+            try {
+                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId));
+                createUser({
+                    uName: user.username,
+                    pwd: "",
+                    scores: user.scores,
+                    friends: []
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
     };
 
-    const handleLevelClick = () => {
-        handleClockClick()
-        clockRef.current?.toggle();
-        if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[count - 1].answer)) {
-            setHighlightedLevelId(count - 1);
-            setInputValue('');
-            setCount(count - 1);
-        }
-        else {
-            setFail("You failed the pyramid")
-            setSendDisabled(true)
+    const handleClockClick = () => {
+        if (!sendDisabled) {  // Only allow clicking if not disabled
             clockRef.current?.toggle();
         }
     };
 
-    useEffect(() => {
-        setCount(game?.questions.length ?? 0)
-        setHighlightedLevelId(game?.questions.length ?? 0)
-    }, [game])
 
-    if (error || isError) return <div>Error: {errorMessage}</div>; //idk why this has to be down here but there's an error otherwise
+    const handleLevelClick = () => {
+        if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[count - 1].answer)) {
+            setHighlightedLevelId(count - 1);
+            setInputValue('');
+            setCount(count - 1);
+            // For correct answers, reset and start the clock
+            clockRef.current?.reset();
+        }
+        else {
+            setFail("You failed the pyramid");
+            setSendDisabled(true);
+            // For wrong answers, just stop the clock without resetting
+            clockRef.current?.toggle();
+            // Set the flag to update score
+            setShouldUpdateScore(true);
+        }
+    };
+
+    if (error || isError) return <div>Error: {errorMessage}</div>
     if (isLoading || isLoadingUser || isMutating) return <div>loading...</div>
 
-
+    //the clock doesn't stop when the user gets a question wrong or the clock expires
+    //the clock doesn't stop when the user gets a question wrong or the clock expires
+    //the clock doesn't stop when the user gets a question wrong or the clock expires
+    //the clock doesn't stop when the user gets a question wrong or the clock expires
+    //the clock doesn't stop when the user gets a question wrong or the clock expires
 
     const gameWithLevels = {
         ...game,
@@ -151,7 +190,13 @@ function Pyramid() {
                 </div>
 
                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
-                    <MyClock onClick={handleClockClick} isR={true} reset={true} onExpire={handleExpire} ref={clockRef}></MyClock>
+                    <MyClock
+                        onClick={handleClockClick}
+                        isR={true}
+                        reset={false}
+                        onExpire={handleExpire}
+                        ref={clockRef}
+                    ></MyClock>
                 </div>
             </div>
 

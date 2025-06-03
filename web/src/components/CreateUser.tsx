@@ -1,8 +1,7 @@
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
-import { User } from "./CurrUser";
 
-type CreateUserPayload = { uName: string; pwd: string; scores: { [key: string]: number }; friends: User[] }
+type CreateUserPayload = { uName: string; pwd: string; scores: { [key: string]: number }; friends: string[] }
 type CreateUserResponse = { id: number; username: string }
 
 /** 2) Mutation hook using axios */

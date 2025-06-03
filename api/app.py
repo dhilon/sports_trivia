@@ -102,11 +102,10 @@ def all_games():
             return {'error': 'type and sport are required'}, 400
 
         try:
-            game = Game.create(type=type, sport=sport, date=datetime.now(), time=0, status="in_progress") #should add currUser to list of players when that's sorted too
+            game = Game.create(type=type, sport=sport, date=datetime.now(), time=0, status="in_progress")
             sport_questions = [x for x in Question.select().where(Question.sport==sport)]
             rqs = random.sample(sport_questions, random.randint(8, 12)) #default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
-            question_objs = [Question.get(id=qid['id']) for qid in rqs]
-            game.questions = [q for q in question_objs]
+            game.questions = [q for q in rqs]
             game.players.add([current_user])
         except Exception as e:
             return {'error': str(e)}, 400
@@ -175,15 +174,28 @@ def user_detail(name):
         user.password = data['password']
         user.save()
     if 'friends' in data:
-        for friend_id in data['friends']:
-            friend = User.get_or_none(User.id == friend_id)
+        for fname in data['friends']:
+            friend = User.get_or_none(User.username == fname)
             if friend:
-                Friends.create(user=user, friend=friend)
+                existing_friendship = Friends.get_or_none(
+                    (Friends.user == user) & (Friends.friend == friend)
+                )
+                if not existing_friendship:
+                    Friends.create(user=user, friend=friend)
+                    return {'message': 'friend added'}, 200
+                else:
+                    return {'error': 'Friend already added'}, 400
+            else:
+              return {'error': 'Friend not found'}, 404
     if 'scores' in data:
-        Score.delete().where(Score.userId == user).execute()
+        sports_list = list(data['scores'].keys())
+        Score.delete().where(
+            (Score.userId == user) & 
+            (Score.sport.in_(sports_list))
+        ).execute()
         for entry in data['scores']:
-            sport = entry.get('sport')
-            score = entry.get('score')
+            sport = entry
+            score = data['scores'][sport]
             if sport is not None and score is not None:
                 Score.create(
                     userId=user,

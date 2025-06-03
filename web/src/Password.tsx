@@ -38,7 +38,7 @@ function Password({
             }
             else {
                 try {
-                    await createUser({ uName: user.username, pwd, scores: user.scores, friends: [] })
+                    await createUser({ uName: user.username, pwd, scores: {}, friends: [] })
                     setCheck('')
                     setPwd('')
                     navigate("/home");

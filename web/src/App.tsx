@@ -43,7 +43,7 @@ function App() {
           <Route path="/login" component={LoginPage}></Route>
           <Route path="/signup" component={SignupPage}></Route>
           <Route path="/password" component={PasswordPage}></Route>
-          <Route path="/profile/" component={ProfilePage}></Route>
+          <Route path="/profile/:name" component={ProfilePage}></Route>
           <Route path="/friends/" component={FriendsPage}></Route>
           <Route path="/games/:sport" component={GamesPage}></Route>
           <Route path="/games/:sport/pyramid/:id" component={PyramidPage}></Route>
