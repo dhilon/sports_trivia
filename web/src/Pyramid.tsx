@@ -5,11 +5,13 @@ import { SidebarLayout } from "./SidebarLayout"
 import { Input } from "@/components/ui/input"
 import { HomeIcon, SendHorizonalIcon } from "lucide-react"
 import { Button } from "./components/ui/button"
-import { Redirect, useParams } from "wouter"
+import { useParams } from "wouter"
 import useSWR from "swr"
 import { Game, Question } from "./types"
 import MyClock, { ClockHandle } from "./components/Clock"
 import answersMatch from "./components/strCmp"
+import { currUser } from "./components/CurrUser"
+import useCreateUser from "./components/CreateUser"
 
 
 
@@ -41,6 +43,10 @@ function Pyramid() {
     const [sendDisabled, setSendDisabled] = useState(false);
     const clockRef = useRef<ClockHandle>(null);
 
+    const { user, isLoading: isLoadingUser, isError, errorMessage } = currUser();
+
+    const { trigger: createUser, isMutating } = useCreateUser();
+
 
 
     function capitalizeFirstLetter(string: string) {
@@ -48,6 +54,14 @@ function Pyramid() {
     }
 
     const handleExpire = () => {
+        if (user && game?.sport) {
+            try {
+                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId))// - (50 * (game?.questions.length ?? 0))
+                createUser({ uName: user.username, pwd: "", scores: user.scores, friends: user.friends })
+            } catch (error) {
+                console.error(error)
+            }
+        }
         setSendDisabled(true)
         setFail("You ran out of time")
     }
@@ -76,8 +90,8 @@ function Pyramid() {
         setHighlightedLevelId(game?.questions.length ?? 0)
     }, [game])
 
-    if (error) return <Redirect to="/" />; //idk why this has to be down here but there's an error otherwise
-    if (isLoading) return <div>loading...</div>
+    if (error || isError) return <div>Error: {errorMessage}</div>; //idk why this has to be down here but there's an error otherwise
+    if (isLoading || isLoadingUser || isMutating) return <div>loading...</div>
 
 
 

@@ -36,7 +36,7 @@ import { SidebarLayout } from "./SidebarLayout"
 import { navigate } from "wouter/use-browser-location"
 import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
-import { Game, User } from "./types"
+import { Game } from "./types"
 
 
 export function getColumns(

@@ -63,7 +63,7 @@ def load_user(user_id: str):
 
 @app.route('/me/', methods=["GET"])
 def who_am_i():
-    return {"id": current_user.id, "username": current_user.username}, 200
+    return get_user(current_user.username), 200
 
 
 @app.route('/users/', methods=['POST', 'GET'])
@@ -88,6 +88,7 @@ def all_users():
         return {'id': user.id, 'username': user.username}, 201
 
 
+
 @app.route('/games/', methods=['POST', 'GET'])
 def all_games():
     if request.method == 'GET':
@@ -102,7 +103,7 @@ def all_games():
 
         try:
             game = Game.create(type=type, sport=sport, date=datetime.now(), time=0, status="in_progress") #should add currUser to list of players when that's sorted too
-            sport_questions = [x for x in questions if x['sport']==sport]
+            sport_questions = [x for x in Question.select().where(Question.sport==sport)]
             rqs = random.sample(sport_questions, random.randint(8, 12)) #default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
             question_objs = [Question.get(id=qid['id']) for qid in rqs]
             game.questions = [q for q in question_objs]
@@ -170,7 +171,7 @@ def user_detail(name):
     data = request.get_json() or {}
 
     # 4) Mutate the instance
-    if 'password' in data:
+    if 'password' in data and data['password'] != '':
         user.password = data['password']
         user.save()
     if 'friends' in data:

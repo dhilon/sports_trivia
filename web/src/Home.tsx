@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { SidebarLayout } from "./SidebarLayout"
-import { Link, Redirect } from "wouter"
+import { Link } from "wouter"
 
 import basketball from "basketball.jpeg"
 import soccer from "soccer.jpeg"
@@ -59,15 +59,17 @@ function JoinCard() {
     const handleClick = async (e: React.FormEvent) => {
         e.preventDefault(); //prevent immediate link href
 
+        if (isLoading || isMutating) return <div>Loading...</div>;
+
         try {
-            if (!user?.username) {
+            if (!user?.username || isError) {
                 throw new Error("Must be logged in to create game");
             }
             const { id, type, sport } = await createGame({ id: parseInt(inputValue) });
             navigate("/games/" + sport + "/" + type + "/" + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message
-            setErrMsg(error.message)
+            setErrMsg(error.message + " " + error.response.data.error + errorMessage)
         }
 
     };

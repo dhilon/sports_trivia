@@ -4,6 +4,9 @@ import useSWR from "swr";
 export interface User {
     id: number;
     username: string;
+    scores: { [key: string]: number };
+    friends: User[];
+    created_at: string;
 }
 
 export function currUser() {

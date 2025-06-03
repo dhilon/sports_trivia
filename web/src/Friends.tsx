@@ -19,11 +19,10 @@ import {
 } from "@/components/ui/chart"
 import { navigate } from "wouter/use-browser-location"
 import { SidebarLayout } from "./SidebarLayout"
-import { Redirect, useParams } from "wouter"
-import useSWR from "swr"
 import { useState } from "react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
+import { currUser } from "./components/CurrUser"
 const chartData = [
     { name: "bob", points: 186 },
 ]
@@ -43,21 +42,21 @@ function Friends() {
 
 
     const [inputValue, setInputValue] = useState('');
+    const { user, isLoading, isError, errorMessage } = currUser();
 
-    const params = useParams();
-    const { data: user, error, isLoading } = useSWR(`/users/` + params.name)
-
-    if (error) return <Redirect to="/" />;
+    if (isError) return <div>Error: {errorMessage}</div>;
     if (isLoading) return <div>loading...</div>
 
-    for (let i = 0; i < user.friends.length; i++) {
+    for (let i = 0; i < (user?.friends?.length || 0); i++) {
         let sum = 0;
         for (let c = 0; c < 6; c++) {
-            sum += Object.values(user.friends[i].scores)[c] as number;
+            const scores = user?.friends[i]?.scores;
+            if (!scores) continue;
+            const scoreValues = Object.values(scores);
+            sum += scoreValues[c] || 0;
         }
-        chartData[i] = { name: user.friends[i].username, points: sum }
+        chartData[i] = { name: user?.friends[i]?.username || "", points: sum }
     }
-
 
 
 

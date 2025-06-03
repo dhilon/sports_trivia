@@ -11,34 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
 import { useState } from "react"
-
-
-import axios from 'axios'
-import useSWRMutation from 'swr/mutation'
 import { currUser } from "./components/CurrUser"
-
-
-type CreateUserPayload = { uName: string; pwd: string }
-type CreateUserResponse = { id: number; username: string }
-
-/** 2) Mutation hook using axios */
-function useCreateUser() {
-    return useSWRMutation<
-        CreateUserResponse,     // return type from the mutation
-        Error,                  // error type
-        '/users',               // key type
-        CreateUserPayload       // your arg type
-    >(
-        '/users',
-        async (_url, { arg: { uName, pwd } }) => {
-            const res = await axios.post<CreateUserResponse>('http://localhost:5000/users/' + uName + "/", {
-                username: uName,
-                password: pwd,
-            })
-            return res.data
-        }
-    )
-}
+import useCreateUser from "./components/CreateUser"
 
 function Password({
     className,
@@ -64,7 +38,7 @@ function Password({
             }
             else {
                 try {
-                    await createUser({ uName: user.username, pwd })
+                    await createUser({ uName: user.username, pwd, scores: user.scores, friends: [] })
                     setCheck('')
                     setPwd('')
                     navigate("/home");

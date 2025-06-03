@@ -12,52 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { navigate } from "wouter/use-browser-location";
 import { useRef, useState } from "react";
-import axios from "axios";
-import useSWRMutation from "swr/mutation";
+import useCreateUser from "./components/CreateUser";
+import useLoginUser from "./components/LoginUser";
 
-type LoginUserPayload = { uName: string; pwd: string };
-type LoginUserResponse = { id: number; username: string };
-
-function useLoginUser() {
-    return useSWRMutation<
-        LoginUserResponse,
-        Error,
-        "/login",
-        LoginUserPayload
-    >(
-        "/login",
-        async (_url, { arg: { uName, pwd } }) => {
-            const res = await axios.post<LoginUserResponse>(
-                "http://localhost:5000/login/",
-                { username: uName, password: pwd },
-                { withCredentials: true }
-            );
-            return res.data;
-        }
-    );
-}
-
-type CreateUserPayload = { uName: string; pwd: string };
-type CreateUserResponse = { id: number; username: string };
-
-/** Mutation hook for POST /users */
-function useCreateUser() {
-    return useSWRMutation<
-        CreateUserResponse,
-        Error,
-        "/users",
-        CreateUserPayload
-    >(
-        "/users",
-        async (_url, { arg: { uName, pwd } }) => { //have to pass in default first _url argument
-            const res = await axios.post<CreateUserResponse>(
-                "http://localhost:5000/users/",
-                { username: uName, password: pwd }
-            );
-            return res.data;
-        }
-    );
-}
 
 function Signup() {
     const formRef = useRef<HTMLFormElement>(null);
@@ -72,7 +29,7 @@ function Signup() {
 
     const { trigger: createUser, isMutating } = useCreateUser();
 
-    const { trigger: loginUser, isM } = useLoginUser();
+    const { trigger: loginUser, isMutating: isMutatingLogin } = useLoginUser();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -93,7 +50,7 @@ function Signup() {
 
         // 4) create the new user
         try {
-            await createUser({ uName, pwd });
+            await createUser({ uName: uName, pwd, scores: { basketball: 100, soccer: 100, baseball: 100, football: 100, hockey: 100 }, friends: [] })
         } catch (e: any) {
             const serverMsg = e.response?.data?.error;
             setErrMsg(
@@ -166,9 +123,9 @@ function Signup() {
                             <Button
                                 type="submit"
                                 className="w-full"
-                                disabled={isMutating || isM}
+                                disabled={isMutating || isMutatingLogin}
                             >
-                                {isMutating || isM ? "Processing…" : "Sign Up"}
+                                {isMutating || isMutatingLogin ? "Processing…" : "Sign Up"}
                             </Button>
 
                             {/* Optional OAuth */}

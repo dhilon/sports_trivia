@@ -1,6 +1,5 @@
 "use client"
 
-import useSWR from 'swr'
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis, LabelList } from "recharts"
 
@@ -18,8 +17,8 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Redirect, useParams } from "wouter"
 import { SidebarLayout } from "./SidebarLayout"
+import { currUser } from './components/CurrUser'
 
 
 const chartData = [
@@ -66,18 +65,19 @@ const chartConfig = {
 } satisfies ChartConfig
 
 function Profile() {
-    const params = useParams();
-    const { data, error, isLoading } = useSWR(`/users/` + params.name)
+    const { user: data, isLoading, isError, errorMessage } = currUser();
 
-    if (error) return <Redirect to="/" />;
+    if (isError) return <div>Error: {errorMessage}</div>;
     if (isLoading) return <div>loading...</div>
 
-    chartData[0].points = data.scores.basketball
-    chartData[1].points = data.scores.hockey
-    chartData[2].points = data.scores.baseball
-    chartData[3].points = data.scores.tennis
-    chartData[4].points = data.scores.football
-    chartData[5].points = data.scores.soccer
+    if (!data) return null;
+
+    chartData[0].points = data.scores.basketball ?? 0
+    chartData[1].points = data.scores.hockey ?? 0
+    chartData[2].points = data.scores.baseball ?? 0
+    chartData[3].points = data.scores.tennis ?? 0
+    chartData[4].points = data.scores.football ?? 0
+    chartData[5].points = data.scores.soccer ?? 0
 
     return (
         <div className="flex items-center justify-center">
