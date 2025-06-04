@@ -27,7 +27,7 @@ class BaseModel(Model):
 class User(BaseModel, UserMixin):
     id = IdentityField(primary_key=True)
     username = CharField()
-    password_hash = CharField()
+    password_hash = CharField(default=" ")
     created_at = DateTimeField(default = datetime.now())
     
     @property
@@ -58,6 +58,7 @@ class Question(BaseModel):
     text = CharField()
     answer = CharField()
     sport = CharField()
+    difficulty = IntegerField(default=50)  # Default to middle difficulty
 
 
 class Game(BaseModel):

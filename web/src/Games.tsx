@@ -13,8 +13,6 @@ import { useParams } from "wouter"
 import tower from "tower.jpeg"
 import fire from "fire.jpeg"
 import around from "around.jpeg"
-
-import { useState } from "react"
 import axios from "axios";
 import useSWRMutation from "swr/mutation";
 import { navigate } from "wouter/use-browser-location"
@@ -65,12 +63,15 @@ function GameCard(
             navigate("/games/" + params.sport + url + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message
-            const serverMsg = error.response?.data?.error;
+            console.log(error.response?.data?.error);
         }
 
 
 
     }
+
+    if (isLoading || isMutating) return <div>Loading...</div>;
+    if (isError) return <div>Error: {errorMessage}</div>;
 
     return (
 

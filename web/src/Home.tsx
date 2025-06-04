@@ -23,30 +23,9 @@ import together from "together.jpeg"
 import { useState } from "react"
 import { navigate } from "wouter/use-browser-location"
 import { currUser } from "./components/CurrUser"
-import axios from "axios"
-import useSWRMutation from "swr/mutation"
+import useCreateGame from "./components/CreateGame"
 
-type CreateGamePayload = { id: number };
-type CreateGameResponse = { id: number, sport: string, type: string };
 
-function useCreateGame() {
-    return useSWRMutation<
-        CreateGameResponse,
-        Error,
-        "/games",
-        CreateGamePayload
-    >(
-        "/games",
-        async (_url, { arg: { id } }) => {
-            const res = await axios.post<CreateGameResponse>(
-                `http://localhost:5000/games/${id}`,
-                { id: id },
-                { withCredentials: true }
-            );
-            return res.data;
-        }
-    );
-}
 
 function JoinCard() {
 
@@ -63,9 +42,9 @@ function JoinCard() {
 
         try {
             if (!user?.username || isError) {
-                throw new Error("Must be logged in to create game");
+                throw new Error("Must be logged in to join game");
             }
-            const { id, type, sport } = await createGame({ id: parseInt(inputValue) });
+            const { id, type, sport } = await createGame({ id: parseInt(inputValue), status: "in_progress" });
             navigate("/games/" + sport + "/" + type + "/" + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message

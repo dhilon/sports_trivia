@@ -43,7 +43,7 @@ function Login({
 
         // 2) Send credentials to Flask
         try {
-            const ret = await loginUser({ uName, pwd });
+            await loginUser({ uName, pwd });
             navigate("/home");
             setUName("");
             setPwd("");

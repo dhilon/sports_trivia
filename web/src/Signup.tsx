@@ -66,7 +66,7 @@ function Signup() {
         setPwd("");
         setCheck("");
         setErrMsg("");
-        const ret = await loginUser({ uName, pwd });
+        await loginUser({ uName, pwd });
         navigate("/home");
     }
 

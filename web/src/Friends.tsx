@@ -48,7 +48,7 @@ function Friends() {
 
     const { trigger: createUser, isMutating, error } = useCreateUser();
 
-    if (isError) return <div>Error: {errorMessage}</div>;
+    if (isError || error) return <div>Error: {errorMessage}</div>;
     if (isLoading || isMutating) return <div>loading...</div>
 
     for (let i = 0; i < (user?.friends?.length || 0); i++) {
@@ -66,7 +66,7 @@ function Friends() {
 
     const handleClick = async () => {
         try {
-            const response = await createUser({
+            await createUser({
                 uName: user?.username || "",
                 pwd: "",
                 scores: user?.scores || {},

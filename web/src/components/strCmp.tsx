@@ -56,7 +56,7 @@ export function levenshteinDistance(a: string, b: string) {
     if (n === 0) return m;
     if (m === 0) return n;
 
-    // use a (m+1)‐length array for the “previous” row
+    // use a (m+1)‐length array for the "previous" row
     let prevRow = new Array(m + 1);
     for (let j = 0; j <= m; j++) {
         prevRow[j] = j;
@@ -91,13 +91,19 @@ export function similarityRatio(a: string, b: string) {
 }
 
 
-// 4) Answer‐matching function (returns true if “close enough”)
+// 4) Answer‐matching function (returns true if "close enough")
 const THRESHOLD = 0.75;  // tweak as needed
 
 export default function answersMatch(userAnswer: string, correctAnswer: string | undefined) {
-    // use normalizeWithNumbers if you want “sixteen”→“16” handling
-    if (!correctAnswer) correctAnswer = ""
-    const u = normalizeWithNumbers(userAnswer);
-    const c = normalizeWithNumbers(correctAnswer);
+    if (!correctAnswer) correctAnswer = "";
+
+    // Remove content in parentheses from both strings
+    const cleanUserAnswer = userAnswer.replace(/\s*\([^)]*\)/g, '').trim();
+    const cleanCorrectAnswer = correctAnswer.replace(/\s*\([^)]*\)/g, '').trim();
+
+    // Normalize both strings
+    const u = normalizeWithNumbers(cleanUserAnswer);
+    const c = normalizeWithNumbers(cleanCorrectAnswer);
+
     return similarityRatio(u, c) >= THRESHOLD;
 }

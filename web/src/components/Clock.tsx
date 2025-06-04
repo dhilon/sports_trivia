@@ -10,6 +10,7 @@ export type ClockHandle = {
     click: () => void;    // expose the native click if you like
     reset: () => void;    // or custom methods
     toggle: () => void;
+    getTime: () => number;
 };
 
 export interface MyClockProps {
@@ -45,6 +46,7 @@ const MyClock = forwardRef<ClockHandle, MyClockProps>(
             click: () => buttonRef.current?.click(),
             reset: () => setTime(10),
             toggle: () => setRun((r) => !r),
+            getTime: () => time,
         }));
 
         const handleClick = () => {

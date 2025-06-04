@@ -12,6 +12,7 @@ import MyClock, { ClockHandle } from "./components/Clock"
 import answersMatch from "./components/strCmp"
 import { currUser } from "./components/CurrUser"
 import useCreateUser from "./components/CreateUser"
+import useCreateGame from "./components/CreateGame"
 
 
 
@@ -49,10 +50,16 @@ function Pyramid() {
 
     const { trigger: createUser, isMutating } = useCreateUser();
 
+    const { trigger: updateGame, isMutating: isMutatingGame } = useCreateGame();
+
 
 
     function capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function updateGameStatus(status: string) {
+        updateGame({ id: parseInt(game?.id ?? '0'), status: status, time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0) });
     }
 
     // Keep the initial setup effect
@@ -72,6 +79,7 @@ function Pyramid() {
                     scores: user.scores,
                     friends: []
                 });
+                updateGameStatus("finished");
                 setShouldUpdateScore(false);
             } catch (error) {
                 console.error(error);
@@ -94,6 +102,7 @@ function Pyramid() {
                     scores: user.scores,
                     friends: []
                 });
+                updateGameStatus("finished");
             } catch (error) {
                 console.error(error);
             }
@@ -126,7 +135,7 @@ function Pyramid() {
     };
 
     if (error || isError) return <div>Error: {errorMessage}</div>
-    if (isLoading || isLoadingUser || isMutating) return <div>loading...</div>
+    if (isLoading || isLoadingUser || isMutating || isMutatingGame) return <div>loading...</div>
 
     //the clock doesn't stop when the user gets a question wrong or the clock expires
     //the clock doesn't stop when the user gets a question wrong or the clock expires

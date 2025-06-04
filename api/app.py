@@ -6,6 +6,7 @@ from models import db, User, Question, Game, Score, Friends
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from init import init_db
+from peewee import IntegrityError
 
 
     
@@ -96,13 +97,13 @@ def all_games():
     else:
         payload = request.get_json() or {}
         # required fields
-        type = payload.get('type').replace(" ", "_").lower()
+        game_type = payload.get('type').replace(" ", "_").lower()
         sport = payload.get('sport')
-        if not type or not sport:
+        if not game_type or not sport:
             return {'error': 'type and sport are required'}, 400
 
         try:
-            game = Game.create(type=type, sport=sport, date=datetime.now(), time=0, status="in_progress")
+            game = Game.create(type=game_type, sport=sport, date=datetime.now(), time=0, status="in_progress")
             sport_questions = [x for x in Question.select().where(Question.sport==sport)]
             rqs = random.sample(sport_questions, random.randint(8, 12)) #default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
             game.questions = [q for q in rqs]
@@ -130,8 +131,18 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
         if request.method == 'GET':
             return gameInfo
         else:
+            payload = request.get_json() or {}
+            status = payload.get('status')
+            time = payload.get('time')
+            if time:
+                game.time = time
+                game.save()
+            if status == "finished" or status == "in_progress":
+                game.status = status
+                game.save()
+                return {'message': 'status updated'}, 200
             try:
-              game.players.add([current_user])
+                game.players.add([current_user])
             except Exception as e:
                 return {'error': "player already in game"}, 400
             
@@ -248,13 +259,14 @@ def get_user_games(name=None):
 
 @app.route('/questions/<int:questionId>')
 def get_question(questionId):
-    question=Question.get(id=questionId)
+    question = Question.get(id=questionId)
     if question:
         return {
             "id": question.id,
             "text": question.text,
             "answer": question.answer,
-            "sport": question.sport
+            "sport": question.sport,
+            "difficulty": question.difficulty
         }
     else:
         return abort(404, description="Question " + questionId + " not found")
@@ -315,6 +327,6 @@ def list_questions():
     if db.is_closed():
         db.connect()
     q = Question.select()
-    items = list(map(lambda q: f"{q.id}: {q.text}", q))
+    items = list(map(lambda q: f"{q.id}: {q.text} (Difficulty: {q.difficulty})", q))
     text = '\n'.join(items)
     return text, 200, {"Content-Type": "text/plain"}
