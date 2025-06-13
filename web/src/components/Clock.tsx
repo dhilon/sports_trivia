@@ -30,7 +30,7 @@ const MyClock = forwardRef<ClockHandle, MyClockProps>(
             if (!isRunning || time <= 0) return;
             const id = setInterval(() => setTime((t) => t - 1), 1000);
             return () => clearInterval(id);
-        }, [isRunning, time]);
+        }, [time]);
 
         useEffect(() => {
             if (time === 0) {

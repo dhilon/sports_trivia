@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
 import { useState } from "react"
 import { currUser } from "./components/CurrUser"
-import useCreateUser from "./components/CreateUser"
+import useEditUser from "./components/EditUser"
 
 function Password({
     className,
@@ -24,7 +24,7 @@ function Password({
     const [errMsg, setErrMsg] = useState('');
 
     const { user, isLoading, isError, errorMessage } = currUser();
-    const { trigger: createUser, isMutating } = useCreateUser();
+    const { trigger: createUser, isMutating } = useEditUser();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();

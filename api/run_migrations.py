@@ -1,14 +1,13 @@
-from playhouse.migrate import PostgresqlMigrator, migrate
-from models import db
-from peewee import CharField, IntegerField  # Or whatever field you’re adding
+from models import db, User, Question, Game, Score, Friends
+from peewee import *
 
-# Initialize migrator
-migrator = PostgresqlMigrator(db)
+# Drop all tables if they exist
+db.drop_tables([User, Question, Game, Score, Friends], safe=True, cascade=True)
 
-# Example Migration: Add an 'email' column to the 'user' table //need to be able to reset database and initialize database
-with db.atomic():
-    migrate(
-        #migrator.add_column('question', 'difficulty', IntegerField(null=True)),
-    )
+# Drop and recreate sequences
+
+# Create all tables
+db.create_tables([User, Question, Game, Score, Friends], safe=True)
+
 
 print("Migration applied successfully!")

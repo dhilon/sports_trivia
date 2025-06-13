@@ -23,7 +23,7 @@ import { useState } from "react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { currUser } from "./components/CurrUser"
-import useCreateUser from "./components/CreateUser"
+import useEditUser from "./components/EditUser"
 const chartData = [
     { name: "bob", points: 186 },
 ]
@@ -46,7 +46,7 @@ function Friends() {
     const [errMsg, setErrMsg] = useState('');
     const { user, isLoading, isError, errorMessage } = currUser();
 
-    const { trigger: createUser, isMutating, error } = useCreateUser();
+    const { trigger: createUser, isMutating, error } = useEditUser();
 
     if (isError || error) return <div>Error: {errorMessage}</div>;
     if (isLoading || isMutating) return <div>loading...</div>

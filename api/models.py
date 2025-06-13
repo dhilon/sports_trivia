@@ -25,7 +25,7 @@ class BaseModel(Model):
 
     
 class User(BaseModel, UserMixin):
-    id = IdentityField(primary_key=True)
+    id = AutoField(primary_key=True)
     username = CharField()
     password_hash = CharField(default=" ")
     created_at = DateTimeField(default = datetime.now())
@@ -48,13 +48,13 @@ class Friends(BaseModel):
     friend = ForeignKeyField(User, backref='friend_of')
     
 class Score(BaseModel):
-    id = IdentityField()
+    id = AutoField(primary_key=True)
     userId = ForeignKeyField(User, backref='scores')
     sport = CharField() # Switch this to a Enum with a type
     score = IntegerField()
 
 class Question(BaseModel):
-    id = IdentityField(primary_key=True)
+    id = AutoField(primary_key=True)
     text = CharField()
     answer = CharField()
     sport = CharField()
@@ -62,7 +62,7 @@ class Question(BaseModel):
 
 
 class Game(BaseModel):
-    id = IdentityField(primary_key=True)
+    id = AutoField(primary_key=True)
     status = CharField()
     type = CharField()
     sport = CharField()

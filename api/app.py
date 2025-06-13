@@ -2,7 +2,7 @@ import random
 from flask import Flask, request, Response, abort, jsonify, session
 import datetime
 from flask_cors import CORS
-from models import db, User, Question, Game, Score, Friends
+from models import db, User, Question, Game, Score, Friends, default_scores
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from init import init_db
@@ -19,7 +19,7 @@ init_db()
 CORS(
     app,
     supports_credentials=True,
-    resources={r"/*": {"origins": "http://localhost:5174"}}
+    resources={r"/*": {"origins": "http://localhost:5173"}}
 )
 app.config.update(
     SECRET_KEY="a-very-secret-string",
@@ -38,7 +38,12 @@ if __name__ == '__main__':
     app.run(debug=True, use_reloader=False, port=5000)
     
     
+#helper functions
+def recent_user():
+    return User.select().order_by(User.id.desc()).limit(1).get()
 
+def recent_game():
+    return Game.select().order_by(Game.id.desc()).limit(1).get()
 
 @app.errorhandler(404)
 def not_found(error):
@@ -62,6 +67,7 @@ def load_user(user_id: str):
         return None
 
 
+
 @app.route('/me/', methods=["GET"])
 def who_am_i():
     return get_user(current_user.username), 200
@@ -82,7 +88,10 @@ def all_users():
         try:
             if (User.get_or_none(username=username)):
                 return {'error': 'username already exists'}, 400
-            user = User.create(username=username, password=password, created_at=datetime.now())
+            user = User.create(username=username, password=password, created_at=datetime.now(), id=recent_user().id + 1)
+            scores = default_scores()
+            for sport in scores:
+                Score.create(userId=user, sport=sport, score=scores[sport])
         except Exception as e:
             return {'error': str(e)}, 400
 
@@ -103,7 +112,7 @@ def all_games():
             return {'error': 'type and sport are required'}, 400
 
         try:
-            game = Game.create(type=game_type, sport=sport, date=datetime.now(), time=0, status="in_progress")
+            game = Game.create(type=game_type, sport=sport, date=datetime.now(), time=0, status="in_progress", id=recent_game().id + 1)
             sport_questions = [x for x in Question.select().where(Question.sport==sport)]
             rqs = random.sample(sport_questions, random.randint(8, 12)) #default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
             game.questions = [q for q in rqs]

@@ -50,7 +50,7 @@ function Signup() {
 
         // 4) create the new user
         try {
-            await createUser({ uName: uName, pwd, scores: { basketball: 100, soccer: 100, baseball: 100, football: 100, hockey: 100 }, friends: [] })
+            await createUser({ uName: uName, pwd })
         } catch (e: any) {
             const serverMsg = e.response?.data?.error;
             setErrMsg(

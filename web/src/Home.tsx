@@ -44,7 +44,7 @@ function JoinCard() {
             if (!user?.username || isError) {
                 throw new Error("Must be logged in to join game");
             }
-            const { id, type, sport } = await createGame({ id: parseInt(inputValue), status: "in_progress" });
+            const { id, type, sport } = await createGame({ id: parseInt(inputValue), status: "in_progress", time: 0 });
             navigate("/games/" + sport + "/" + type + "/" + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message

@@ -11,8 +11,8 @@ import { Game, Question } from "./types"
 import MyClock, { ClockHandle } from "./components/Clock"
 import answersMatch from "./components/strCmp"
 import { currUser } from "./components/CurrUser"
-import useCreateUser from "./components/CreateUser"
 import useCreateGame from "./components/CreateGame"
+import useEditUser from "./components/EditUser"
 
 
 
@@ -48,7 +48,7 @@ function Pyramid() {
 
     const { user, isLoading: isLoadingUser, isError, errorMessage } = currUser();
 
-    const { trigger: createUser, isMutating } = useCreateUser();
+    const { trigger: createUser, isMutating } = useEditUser();
 
     const { trigger: updateGame, isMutating: isMutatingGame } = useCreateGame();
 
@@ -201,7 +201,7 @@ function Pyramid() {
                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
                     <MyClock
                         onClick={handleClockClick}
-                        isR={true}
+                        isR={!sendDisabled}
                         reset={false}
                         onExpire={handleExpire}
                         ref={clockRef}

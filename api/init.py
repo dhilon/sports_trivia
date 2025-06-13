@@ -1263,7 +1263,6 @@ def init_db():
     if db.is_closed():
         db.connect()
     # create tables
-    #db.drop_tables([GameQuestions, GamePlayers, Score, Game, Question, Friends, User], safe=True, cascade=True)
     db.create_tables([User, Question, Game, Friends, Score, GamePlayers, GameQuestions], safe=True)
 
 
@@ -1273,14 +1272,16 @@ def init_db():
                 id=count['id'],
                 username=count['username'],
                 defaults={
-                    'password': count['password'],
                     'created_at': count['created_at']
                 }
             )
+            if created:
+                usr.password = count['password']  # This will trigger the password setter to hash it
+                usr.save()
+            
             friend_objects = [User.get_or_none(username=f) for f in count['friends']]
             for friend in filter(None, friend_objects):  # Skip None if user doesn't exist
                 Friends.get_or_create(user=usr, friend=friend)
-                
                 Friends.get_or_create(user=friend, friend=usr)
         
         except IntegrityError:
