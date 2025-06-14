@@ -48,7 +48,7 @@ function JoinCard() {
             navigate("/games/" + sport + "/" + type + "/" + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message
-            setErrMsg(error.message + " " + error.response.data.error + errorMessage)
+            setErrMsg(error.response.data.error + errorMessage)
         }
 
     };

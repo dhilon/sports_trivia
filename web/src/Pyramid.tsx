@@ -137,14 +137,9 @@ function Pyramid() {
     if (error || isError) return <div>Error: {errorMessage}</div>
     if (isLoading || isLoadingUser || isMutating || isMutatingGame) return <div>loading...</div>
 
-    //the clock doesn't stop when the user gets a question wrong or the clock expires
-    //the clock doesn't stop when the user gets a question wrong or the clock expires
-    //the clock doesn't stop when the user gets a question wrong or the clock expires
-    //the clock doesn't stop when the user gets a question wrong or the clock expires
-    //the clock doesn't stop when the user gets a question wrong or the clock expires
 
     const gameWithLevels = {
-        ...game,
+        ...game?.questions.sort((a, b) => b.difficulty - a.difficulty), //sort questions by difficulty in frontend
         questions: game?.questions?.map((question, index) => ({
             ...question,
             // highest level = length, then down to 1

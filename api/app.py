@@ -115,7 +115,7 @@ def all_games():
             game = Game.create(type=game_type, sport=sport, date=datetime.now(), time=0, status="in_progress", id=recent_game().id + 1)
             sport_questions = [x for x in Question.select().where(Question.sport==sport)]
             rqs = random.sample(sport_questions, random.randint(8, 12)) #default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
-            game.questions = [q for q in rqs]
+            game.questions.add(rqs) #mixes question difficulty here
             game.players.add([current_user])
         except Exception as e:
             return {'error': str(e)}, 400
@@ -125,7 +125,7 @@ def all_games():
 @app.route('/games/<int:id>', methods=['POST', 'GET'])
 def get_game(id): #implement a post method here for JoinCard in Home Screen for when other users join the game, returning the same information as GET
     
-    game=Game.get(id=id)
+    game=Game.get_or_none(id=id)
     if game:
         gameInfo = {
             "id": game.id,
@@ -143,6 +143,8 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
             payload = request.get_json() or {}
             status = payload.get('status')
             time = payload.get('time')
+            if game.type == "tower_of_power":
+                return {'error': "Tower of Power is a one player game"}, 429
             if time:
                 game.time = time
                 game.save()
@@ -153,9 +155,8 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
             try:
                 game.players.add([current_user])
             except Exception as e:
-                return {'error': "player already in game"}, 400
+                return {'error': "You are already in this game"}, 400
             
-            gameInfo["players"] =  [get_user(x.username) for x in game.players]
             return {
                 "id": game.id,
                 "type": game.type,
@@ -163,7 +164,7 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
             }
           
     else:
-        return abort(404, description="Game " + id + " not found")
+        return {'error': "Game " + str(id) + " not found"}, 404
     
     
       

@@ -14,6 +14,7 @@ export type Game = {
 }
 
 export type Question = {
+    difficulty: number
     id: number,
     text: string,
     answer: string,
