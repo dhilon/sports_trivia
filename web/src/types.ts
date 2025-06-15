@@ -3,7 +3,7 @@ import { ClassDictionary } from "clsx"
 export type Game = {
     id: string
     status: "win" | "loss" | "in progress" | "finished"
-    type: "around_the_horn" | "pyramid" | "rapid_fire"
+    type: "around_the_horn" | "tower_of_power" | "rapid_fire"
     sport: "basketball" | "hockey" | "soccer" | "football" | "baseball" | "tennis"
     date: Date
     players: Array<User>

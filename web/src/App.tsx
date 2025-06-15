@@ -51,7 +51,7 @@ function App() {
           <Route path="/profile/:name" component={ProfilePage}></Route>
           <Route path="/friends/" component={FriendsPage}></Route>
           <Route path="/games/:sport" component={GamesPage}></Route>
-          <Route path="/games/:sport/pyramid/:id" component={PyramidPage}></Route>
+          <Route path="/games/:sport/tower_of_power/:id" component={PyramidPage}></Route>
           <Route path="/games/:sport/around_the_horn/:id" component={AroundTheHorn}></Route>
           <Route path="/games/:sport/rapid_fire/:id" component={RapidFire}></Route>
           <Route path="/games/:sport/:type/:id/results" component={ResultsPage}></Route>

@@ -99,7 +99,7 @@ function GameCard(
 function Games() { //rapid fire and around the horn need to generate new games, will do later
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 ">
-            <GameCard name="Tower of Power" image={tower} description="Can you take on every single level of this timed pyramid and not lose all your points?" url="/pyramid/" analogy="It's like scaling Mount Fuji" />
+            <GameCard name="Tower of Power" image={tower} description="Can you take on every single level of this timed pyramid and not lose all your points?" url="/tower_of_power/" analogy="It's like scaling Mount Fuji" />
             <GameCard name="Rapid Fire" image={fire} description="Which one of your friends can answer correctly first?" url="/rapid_fire/" analogy="Just don't be last" />
             <GameCard name="Around the Horn" image={around} description="Answer your question whenever you can, but don't be the one to flame out. Circles are endless" url="/around_the_horn/" analogy="Duck duck and you're the goose" />
 
