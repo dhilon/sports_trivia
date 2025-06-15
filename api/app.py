@@ -72,6 +72,37 @@ def load_user(user_id: str):
 def who_am_i():
     return get_user(current_user.username), 200
 
+@app.route('/rankings/', methods=['GET'])
+def get_user_rankings():
+    if not current_user.is_authenticated:
+        return {'error': 'Not authenticated'}, 401
+
+    rankings = {}
+    sports = ["basketball", "soccer", "baseball", "football", "tennis", "hockey"]
+    
+    for sport in sports:
+        # Get all scores for this sport, ordered by score descending
+        scores = (Score
+                 .select(Score, User)
+                 .join(User)
+                 .where(Score.sport == sport)
+                 .order_by(Score.score.desc()))
+        
+        # Convert to list to find index
+        scores_list = list(scores)
+        
+        # Find user's score and position
+        user_score = next((score for score in scores_list if score.userId == current_user), None)
+        if user_score:
+            position = scores_list.index(user_score) + 1  # 1-based ranking
+            total_players = len(scores_list)
+            rankings[sport] = {
+                "position": position,
+                "total_players": total_players,
+                "score": user_score.score
+            }
+    
+    return rankings
 
 @app.route('/users/', methods=['POST', 'GET'])
 def all_users():
@@ -143,10 +174,10 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
             payload = request.get_json() or {}
             status = payload.get('status')
             time = payload.get('time')
-            if game.type == "tower_of_power":
+            if game.type == "tower_of_power" and not time:
                 return {'error': "Tower of Power is a one player game"}, 429
             if time:
-                game.time = time
+                game.time = (datetime.now() - game.date).total_seconds()
                 game.save()
             if status == "finished" or status == "in_progress":
                 game.status = status
@@ -340,3 +371,4 @@ def list_questions():
     items = list(map(lambda q: f"{q.id}: {q.text} (Difficulty: {q.difficulty})", q))
     text = '\n'.join(items)
     return text, 200, {"Content-Type": "text/plain"}
+

@@ -69,10 +69,11 @@ function Profile() {
     const { name } = useParams();
 
     const { data, isLoading, error } = useSWR(`/users/${name}`);
+    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings`);
 
     if (!data) return null;
-    if (error) return <div>Error: {error.message}</div>;
-    if (isLoading) return <div>loading...</div>
+    if (error || rankingsError) return <div>Error: {error?.message || rankingsError?.message}</div>;
+    if (isLoading || rankingsLoading) return <div>loading...</div>
 
     chartData[0].points = data.scores.basketball ?? 0
     chartData[1].points = data.scores.hockey ?? 0
@@ -80,6 +81,13 @@ function Profile() {
     chartData[3].points = data.scores.tennis ?? 0
     chartData[4].points = data.scores.football ?? 0
     chartData[5].points = data.scores.soccer ?? 0
+
+    chartData[0].ranking = '#' + (rankings.basketball.position ?? 0)
+    chartData[1].ranking = '#' + (rankings.hockey.position ?? 0)
+    chartData[2].ranking = '#' + (rankings.baseball.position ?? 0)
+    chartData[3].ranking = '#' + (rankings.tennis.position ?? 0)
+    chartData[4].ranking = '#' + (rankings.football.position ?? 0)
+    chartData[5].ranking = '#' + (rankings.soccer.position ?? 0)
 
     return (
         <div className="flex items-center justify-center">

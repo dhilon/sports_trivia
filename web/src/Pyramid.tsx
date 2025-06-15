@@ -66,6 +66,7 @@ function Pyramid() {
     useEffect(() => {
         setCount(game?.questions.length ?? 0);
         setHighlightedLevelId(game?.questions.length ?? 0);
+        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
     }, [game]);
 
     // Score handling effect - only for wrong answers
@@ -85,6 +86,9 @@ function Pyramid() {
                 console.error(error);
             }
         }
+
+        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
+
     }, [shouldUpdateScore, user, game?.sport, highlightedLevelId, createUser]);
 
     const handleExpire = () => { //just resets and keeps going
@@ -107,6 +111,8 @@ function Pyramid() {
                 console.error(error);
             }
         }
+
+        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
     };
 
     const handleClockClick = () => {
@@ -139,7 +145,7 @@ function Pyramid() {
 
 
     const gameWithLevels = {
-        ...game?.questions.sort((a, b) => b.difficulty - a.difficulty), //sort questions by difficulty in frontend
+        ...game, //sort questions by difficulty in frontend
         questions: game?.questions?.map((question, index) => ({
             ...question,
             // highest level = length, then down to 1
@@ -180,7 +186,7 @@ function Pyramid() {
             </div>
             <div>
                 <div className="flex flex-col items-center justify-center mx-auto space-y-2">
-                    {fail}
+                    <div className="text-red-500">{fail}</div>
                     <a
                         href={!sendDisabled ? undefined : "/"}
                         style={{
