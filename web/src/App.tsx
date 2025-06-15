@@ -34,7 +34,6 @@ function App() {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         fetcher
-        // add for no reload restart:
         // provider: () => new Map(),
         // dedupingInterval: 2000,
         // keepPreviousData: true

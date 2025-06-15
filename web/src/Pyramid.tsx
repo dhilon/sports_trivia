@@ -66,6 +66,10 @@ function Pyramid() {
     useEffect(() => {
         setCount(game?.questions.length ?? 0);
         setHighlightedLevelId(game?.questions.length ?? 0);
+        if (game?.status === "finished") {
+            setSendDisabled(true);
+            setFail("Pyramid already finished");
+        }
         game?.questions.sort((a, b) => b.difficulty - a.difficulty);
     }, [game]);
 
@@ -96,29 +100,9 @@ function Pyramid() {
         setFail("You ran out of time");
         setShouldUpdateScore(true);
         // Just stop the clock without toggling
-
-        if (user && game?.sport) {
-            try {
-                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId));
-                createUser({
-                    uName: user.username,
-                    pwd: "",
-                    scores: user.scores,
-                    friends: []
-                });
-                updateGameStatus("finished");
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
     };
 
     const handleClockClick = () => {
-        if (!sendDisabled) {  // Only allow clicking if not disabled
-            clockRef.current?.toggle();
-        }
     };
 
 
@@ -133,7 +117,6 @@ function Pyramid() {
         else {
             setFail("You failed the pyramid");
             setSendDisabled(true);
-            // For wrong answers, just stop the clock without resetting
             clockRef.current?.toggle();
             // Set the flag to update score
             setShouldUpdateScore(true);
@@ -168,13 +151,15 @@ function Pyramid() {
                 <div className="flex-1 text-sm text-muted-foreground">
                     {(game?.questions.length ?? 0) - highlightedLevelId} level(s) completed.
                 </div>
-                <div className="flex items-center justify-center flex-3">
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleLevelClick();
+                }} className="flex items-center justify-center flex-3">
                     <Input placeholder="Enter Answer:" className="w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-                    <Button className="shadow-lg bg-green-600 cursor-pointer ml-3 h-6 transition-all hover:bg-green-200 active:scale-95 rounded-lg" onClick={() => handleLevelClick()} disabled={sendDisabled}>
+                    <Button type="submit" className="shadow-lg bg-green-600 cursor-pointer ml-3 h-6 transition-all hover:bg-green-200 active:scale-95 rounded-lg" disabled={sendDisabled}>
                         <SendHorizonalIcon></SendHorizonalIcon>
                     </Button>
-
-                </div>
+                </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
                     {60 * ((game?.questions.length ?? 0) - highlightedLevelId)} points gained
                 </div>

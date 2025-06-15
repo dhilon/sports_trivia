@@ -2,6 +2,7 @@
 
 import { PlusCircleIcon, TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
+import { mutate } from "swr"
 
 import {
     Card,
@@ -25,7 +26,7 @@ import { Input } from "./components/ui/input"
 import { currUser } from "./components/CurrUser"
 import useEditUser from "./components/EditUser"
 const chartData = [
-    { name: "bob", points: 186 },
+    {},
 ]
 
 const chartConfig = {
@@ -73,6 +74,9 @@ function Friends() {
                 friends: [inputValue]
             });
             setErrMsg("Friend added");
+            setInputValue(''); // Clear input after successful add
+            // Revalidate user data with the correct URL
+            mutate("http://localhost:5000/me/");
         } catch (error: any) {
             if (error?.response?.status === 400) {
                 setErrMsg("Friend already added");
@@ -155,18 +159,23 @@ function Friends() {
                 </Card>
             </div>
             <div className="mt-5 flex items-center justify-center space-x-3">
-                <Input
-                    placeholder="Add Friend:"
-                    className="w-100"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                />
-                <Button
-                    className="shadow-lg bg-green-600 cursor-pointer transition-all hover:bg-green-200 active:scale-95 w-10 h-10 rounded-full grid place-items-center"
-                    onClick={() => handleClick()}
-                >
-                    <PlusCircleIcon />
-                </Button>
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleClick();
+                }} className="flex items-center space-x-3">
+                    <Input
+                        placeholder="Add Friend:"
+                        className="w-100"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        className="shadow-lg bg-green-600 cursor-pointer transition-all hover:bg-green-200 active:scale-95 w-10 h-10 rounded-full grid place-items-center"
+                    >
+                        <PlusCircleIcon />
+                    </Button>
+                </form>
             </div>
             <div className="flex flex-col items-center justify-center mx-auto space-y-2">
                 <div className={`${errMsg === "Friend added" ? 'text-green-500' : 'text-red-500'}`}>
