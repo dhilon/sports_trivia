@@ -20,11 +20,11 @@ const PyramidLevel = ({ question, isGreen }: { question: Question, isGreen: bool
     const width = 60 / (question?.level ?? 0 + 1) + 33; //percent based rows
 
     return (
-        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-red-400'}`} style={{ width: `${width}%` }}>
-            <div className="flex-initial ml-2 basis-1/5">
+        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-cyan-200'}`} style={{ width: `${width}%` }}>
+            <div className="flex-initial ml-2 basis-1/5 text-purple-400 font-bold">
                 Level {question?.level ?? 0}
             </div>
-            <div className="flex-auto flex items-center justify-center basis-3/5 text-xs">
+            <div className="flex-auto flex items-center justify-center basis-3/5 text-xs text-purple-400">
                 <b>{question.text}</b>
             </div>
         </div>
@@ -97,7 +97,9 @@ function Pyramid() {
 
     const handleExpire = () => { //just resets and keeps going
         setSendDisabled(true);
-        setFail("You ran out of time");
+        if (fail != "Pyramid already finished") {
+            setFail("You ran out of time");
+        }
         setShouldUpdateScore(true);
         // Just stop the clock without toggling
     };
@@ -139,8 +141,8 @@ function Pyramid() {
 
     return (
         <div>
-            <div className="flex items-center justify-center text-2xl">Tower of Power</div>
-            <div className="flex flex-col items-center ">
+            <div className="flex items-center justify-center text-2xl text-blue-500">Tower of Power</div>
+            <div className="flex flex-col items-center mt-5">
                 {gameWithLevels?.questions.map((question, index) => (<PyramidLevel key={index}
                     question={question}
                     isGreen={question.level <= (game?.questions.length ?? 0) - highlightedLevelId}
@@ -148,7 +150,7 @@ function Pyramid() {
             </div>
 
             <div className="flex items-center space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
+                <div className="flex-1 text-sm ml-10 text-pink-700">
                     {(game?.questions.length ?? 0) - highlightedLevelId} level(s) completed.
                 </div>
                 <form onSubmit={(e) => {
@@ -169,9 +171,10 @@ function Pyramid() {
                 </div>
 
             </div>
-            <div>
-                <div className="flex flex-col items-center justify-center mx-auto space-y-2">
-                    <div className="text-red-500">{fail}</div>
+
+
+            <div className="flex items-start justify-between px-10 mt-2">
+                <div className="flex items-start">
                     <a
                         href={!sendDisabled ? undefined : "/"}
                         style={{
@@ -183,8 +186,10 @@ function Pyramid() {
                         <HomeIcon />
                     </a>
                 </div>
-
-                <div className="items-end flex justify-center w-fit ml-auto mr-10">
+                <div className="flex items-start text-red-500">
+                    {fail}
+                </div>
+                <div className="flex items-start">
                     <MyClock
                         onClick={handleClockClick}
                         isR={!sendDisabled}
@@ -194,8 +199,6 @@ function Pyramid() {
                     ></MyClock>
                 </div>
             </div>
-
-
 
 
         </div>

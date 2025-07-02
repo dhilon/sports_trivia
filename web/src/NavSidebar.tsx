@@ -42,7 +42,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
     return (
         <Sidebar>
             <SidebarHeader>Hello, {user?.username}<SidebarTrigger /></SidebarHeader>
-            <SidebarContent className='min-w-52 bg-amber-200'>
+            <SidebarContent className='min-w-52 bg-amber-200 text-purple-500'>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>

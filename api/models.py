@@ -61,7 +61,7 @@ class Question(BaseModel):
     difficulty = IntegerField(default=50)  # Default to middle difficulty
 
 
-class Game(BaseModel):
+class Game(BaseModel): #TODO: add a num questions answered field (dict by user)and maybe more advanced stats like accuracy for multiplayer
     id = AutoField(primary_key=True)
     status = CharField()
     type = CharField()

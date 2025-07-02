@@ -75,7 +75,7 @@ function Profile() {
     if (error || rankingsError) return <div>Error: {error?.message || rankingsError?.message}</div>;
     if (isLoading || rankingsLoading) return <div>loading...</div>
 
-    chartData[0].points = data.scores.basketball ?? 0
+    chartData[0].points = data.scores.basketball ?? 0 //get onclick to view overall leaderboards for each sport
     chartData[1].points = data.scores.hockey ?? 0
     chartData[2].points = data.scores.baseball ?? 0
     chartData[3].points = data.scores.tennis ?? 0
@@ -91,7 +91,7 @@ function Profile() {
 
     return (
         <div className="flex items-center justify-center">
-            <Card className="w-[550px] items-center space-x-4" >
+            <Card className="w-full max-w-[1000px] h-full max-h-[1000px] items-center space-x-4" >
                 <CardHeader>
                     <CardTitle>{data.username}'s Profile</CardTitle>
                     <CardDescription>Created at {data.created_at}</CardDescription>

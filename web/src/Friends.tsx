@@ -91,7 +91,7 @@ function Friends() {
     }
 
     return (
-        <div className="ml-auto mr-auto lg:w-180 lg:h-150">
+        <div className="ml-auto mr-auto max-w-[900px] max-h-[900px]">
             <div>
                 <Card >
                     <CardHeader>

@@ -9,7 +9,6 @@ import {
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
@@ -56,7 +55,7 @@ export function getColumns(
                 const str = row.getValue("status") as string;
                 // replace all underscores with spaces
                 const spaced = str.replace(/_/g, " ");
-                return <div className="capitalize">{spaced}</div>;
+                return <div className="capitalize ">{spaced}</div>;
             },
         },
         {
@@ -77,7 +76,7 @@ export function getColumns(
                 const str = row.getValue("type") as string;
                 // replace all underscores with spaces
                 const spaced = str.replace(/_/g, " ");
-                return <div className="capitalize">{spaced}</div>;
+                return <div className="capitalize flex items-center justify-center">{spaced}</div>;
             },
         },
         {
@@ -110,7 +109,7 @@ export function getColumns(
             },
             cell: ({ row }) => {
 
-                return <div className="text-right font-medium">{row.getValue("date")}</div>
+                return <div className="text-right flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#ffffff73] text-[#101418] text-sm font-medium leading-normal w-full">{row.getValue("date")}</div>
             },
         },
         {
@@ -142,6 +141,7 @@ export function getColumns(
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
                             <DropdownMenuItem>Practice</DropdownMenuItem>
+                            <DropdownMenuLabel className="italic font-light text-green-400">{game.time} seconds</DropdownMenuLabel>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -181,7 +181,6 @@ function Gamelog() {
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
@@ -198,11 +197,11 @@ function Gamelog() {
     if (isLoading) return <div>loading...</div>
 
     return (
-        <div>
-            <div className="w-full">
-                <div className="rounded-md border">
+        <div className="flex justify-center">
+            <div className="w-full max-w-[1300px] rounded-lg">
+                <div className="border-2 border-gray-200 overflow-y-auto" style={{ maxHeight: '90vh' }}>
                     <Table>
-                        <TableHeader>
+                        <TableHeader className="sticky top-0 bg-gray-300 z-1">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => {

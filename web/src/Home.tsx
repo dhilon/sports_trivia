@@ -58,7 +58,7 @@ function JoinCard() {
 
     return (
 
-        <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
+        <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75" >
             <CardHeader>
                 <CardTitle>Join Game</CardTitle>
                 <CardDescription className="text-red-600">{errMsg}</CardDescription>
@@ -68,11 +68,12 @@ function JoinCard() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 font-medium leading-none">
-                    <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
-                    <button className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" onClick={(e) => (handleClick(e))}>
-                        <SendHorizonalIcon></SendHorizonalIcon>
-                    </button>
-
+                    <form onSubmit={handleClick} className="flex gap-2">
+                        <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
+                        <button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg">
+                            <SendHorizonalIcon></SendHorizonalIcon>
+                        </button>
+                    </form>
                 </div>
             </CardFooter>
         </Card>
@@ -87,7 +88,7 @@ function HomeCard(
 
     return (
         <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={"/games/" + sport.toLowerCase()}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
+            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75" >
                 <CardHeader>
                     <CardTitle>{sport}</CardTitle>
                     <CardDescription>A sport</CardDescription>
@@ -109,7 +110,7 @@ function HomeCard(
 
 function Home() {
     return (
-        <div className="flex flex-wrap justify-center gap-10 ">
+        <div className="flex flex-wrap justify-center gap-10 mt-10">
             <HomeCard image={basketball} description="Is Michael Jordan the GOAT?" sport="Basketball" />
             <HomeCard image={soccer} description="Is it actually futból?" sport="Soccer" />
             <HomeCard image={football} description="Are the Lions ever winning the Super Bowl?" sport="Football" />

@@ -99,7 +99,7 @@ function Password({
 
 export default function PasswordPage() {
     return (
-        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+        <div className="flex min-h-svh w-full items-center justify-center dark gradient-background p-6 md:p-10">
             <div className="w-full max-w-sm">
                 <Password />
             </div>
