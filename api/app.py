@@ -197,9 +197,30 @@ def get_game(id): #implement a post method here for JoinCard in Home Screen for 
     else:
         return {'error': "Game " + str(id) + " not found"}, 404
     
-    
-      
-      
+
+def get_leaderboard_for_sport(sport):
+    scores = Score.select().where(Score.sport == sport).order_by(Score.score.desc())
+    return {x.userId.username: x.score for x in scores}
+
+
+@app.route('/leaderboard/', methods=['GET'])
+def get_leaderboard():
+    basketball_leaderboard = get_leaderboard_for_sport("basketball")
+    soccer_leaderboard = get_leaderboard_for_sport("soccer")
+    football_leaderboard = get_leaderboard_for_sport("football")
+    baseball_leaderboard = get_leaderboard_for_sport("baseball")
+    hockey_leaderboard = get_leaderboard_for_sport("hockey")
+    tennis_leaderboard = get_leaderboard_for_sport("tennis")
+    #total_leaderboard = get_leaderboard_for_sport("total")
+    return {
+        "basketball": basketball_leaderboard,
+        "soccer": soccer_leaderboard,
+        "football": football_leaderboard,
+        "baseball": baseball_leaderboard,
+        "hockey": hockey_leaderboard,
+        "tennis": tennis_leaderboard,
+        #"total": total_leaderboard
+    }, 200
       
 
 @app.route('/users/<name>/', methods=['GET', 'POST', 'OPTIONS'])
@@ -234,6 +255,7 @@ def user_detail(name):
                 )
                 if not existing_friendship:
                     Friends.create(user=user, friend=friend)
+                    Friends.create(user=friend, friend=user)
                     return {'message': 'friend added'}, 200
                 else:
                     return {'error': 'Friend already added'}, 400

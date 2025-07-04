@@ -1,4 +1,4 @@
-import { CircleUserRound, House, Inbox, KeyRound, LogOut, UserRoundSearch } from "lucide-react"
+import { CircleUserRound, House, Inbox, KeyRound, LogOut, Trophy, UserRoundSearch } from "lucide-react"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "./components/ui/sidebar"
 import { useState } from "react";
 import axios from "axios";
@@ -37,8 +37,6 @@ export function NavSidebar() { //need to change redirects to fetch currUser
         }
     }
 
-
-
     return (
         <Sidebar>
             <SidebarHeader>Hello, {user?.username}<SidebarTrigger /></SidebarHeader>
@@ -73,6 +71,14 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                             <a href={`/friends/`}>
                                 <UserRoundSearch />
                                 <span>Friends</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <a href={`/leaderboard/`}>
+                                <Trophy />
+                                <span>Leaderboard</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

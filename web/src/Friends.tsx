@@ -63,7 +63,11 @@ function Friends() {
         chartData[i] = { name: user?.friends[i]?.username || "", points: sum }
     }
 
-
+    chartData.sort((a, b) => {
+        const pointsA = (a as { points: number }).points || 0;
+        const pointsB = (b as { points: number }).points || 0;
+        return pointsB - pointsA;
+    });
 
     const handleClick = async () => {
         try {
@@ -91,14 +95,14 @@ function Friends() {
     }
 
     return (
-        <div className="ml-auto mr-auto max-w-[900px] max-h-[900px]">
-            <div>
-                <Card >
-                    <CardHeader>
-                        <CardTitle>Friends</CardTitle>
-                        <CardDescription>Not in any particular order</CardDescription>
+        <div className="flex flex-col h-full max-w-[900px] mx-auto">
+            <div className="flex-1 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+                <Card className="h-full">
+                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-10">
+                        <CardTitle className="text-purple-500">Friends</CardTitle>
+                        <CardDescription>Sorted by points</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="overflow-y-auto items-center justify-center mt-5">
                         <ChartContainer config={chartConfig}>
                             <BarChart
                                 accessibilityLayer
@@ -182,9 +186,7 @@ function Friends() {
                     {errMsg}
                 </div>
             </div>
-
         </div>
-
     )
 }
 

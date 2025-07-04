@@ -14,6 +14,7 @@ import HomePage from './Home';
 import { SWRConfig } from "swr";
 import axios from 'axios';
 import AroundTheHorn from "./AroundTheHorn";
+import LeaderboardPage from "./Leaderboard";
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/home" component={HomePage}></Route>
           <Route path="/gamelog/:name" component={GamelogPage}></Route>
           <Route path="/login" component={LoginPage}></Route>
+          <Route path="/leaderboard" component={LeaderboardPage}></Route>
           <Route path="/signup" component={SignupPage}></Route>
           <Route path="/password" component={PasswordPage}></Route>
           <Route path="/profile/:name" component={ProfilePage}></Route>

@@ -99,8 +99,9 @@ function Pyramid() {
         setSendDisabled(true);
         if (fail != "Pyramid already finished") {
             setFail("You ran out of time");
+            setShouldUpdateScore(true);
         }
-        setShouldUpdateScore(true);
+
         // Just stop the clock without toggling
     };
 

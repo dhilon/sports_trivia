@@ -14,7 +14,7 @@ import { useRef, useState } from "react"
 import useLoginUser from "./components/LoginUser"
 
 
-function Login({
+function Login({ //need to add a login check for if the user is already logged in, and if so, redirect to the home page
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
