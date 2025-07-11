@@ -26,11 +26,16 @@ const MyClock = forwardRef<ClockHandle, MyClockProps>(
         const [time, setTime] = useState(10);
         const [isRunning, setRun] = useState(isR);
 
+        // Add this useEffect to sync isRunning with the isR prop
+        useEffect(() => {
+            setRun(isR);
+        }, [isR]);
+
         useEffect(() => {
             if (!isRunning || time <= 0) return;
             const id = setInterval(() => setTime((t) => t - 1), 1000);
             return () => clearInterval(id);
-        }, [time]);
+        }, [isRunning, time]); // Also add isRunning to dependencies
 
         useEffect(() => {
             if (time === 0) {

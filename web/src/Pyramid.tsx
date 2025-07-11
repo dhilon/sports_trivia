@@ -59,7 +59,12 @@ function Pyramid() {
     }
 
     function updateGameStatus(status: string) {
-        updateGame({ id: parseInt(game?.id ?? '0'), status: status, time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0) });
+        updateGame({
+            id: parseInt(game?.id ?? '0'),
+            status: status,
+            time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
+            score: (60 * ((game?.questions.length ?? 0) - highlightedLevelId))
+        });
     }
 
     // Keep the initial setup effect
@@ -109,7 +114,8 @@ function Pyramid() {
     };
 
 
-    const handleLevelClick = () => {
+    const handleLevelClick = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[count - 1].answer)) {
             setHighlightedLevelId(count - 1);
             setInputValue('');
@@ -154,10 +160,7 @@ function Pyramid() {
                 <div className="flex-1 text-sm ml-10 text-pink-700">
                     {(game?.questions.length ?? 0) - highlightedLevelId} level(s) completed.
                 </div>
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    handleLevelClick();
-                }} className="flex items-center justify-center flex-3">
+                <form onSubmit={handleLevelClick} className="flex items-center justify-center flex-3">
                     <Input placeholder="Enter Answer:" className="w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
                     <Button type="submit" className="shadow-lg bg-green-600 cursor-pointer ml-3 h-6 transition-all hover:bg-green-200 active:scale-95 rounded-lg" disabled={sendDisabled}>
                         <SendHorizonalIcon></SendHorizonalIcon>

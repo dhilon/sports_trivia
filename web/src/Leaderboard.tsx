@@ -8,9 +8,11 @@ import {
 } from "@/components/ui/card"
 import { SidebarLayout } from "./SidebarLayout"
 import useSWR from "swr";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis, Cell } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "./components/ui/chart";
 import { navigate } from "wouter/use-browser-location";
+import { currUser } from "./components/CurrUser";
+
 
 export interface Leaderboard {
     basketball: { [key: string]: number };
@@ -19,7 +21,7 @@ export interface Leaderboard {
     baseball: { [key: string]: number };
     hockey: { [key: string]: number };
     tennis: { [key: string]: number };
-    //total: { [key: string]: number };
+    total: { [key: string]: number };
 }
 
 function leaderboard() {
@@ -58,80 +60,90 @@ function LeaderboardCard(
 
     const { leaders, isLoading, isError } = leaderboard();
 
+    const { user, isLoading: isLoadingUser, isError: isErrorUser } = currUser();
+
     const chartData = []
 
     for (let i = 0; i < (Object.keys(leaders?.[sport as keyof Leaderboard] || {}).length || 0); i++) {
         chartData[i] = { name: Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i], points: leaders?.[sport as keyof Leaderboard]?.[Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i]] || 0 }
     }
     chartData.sort((a, b) => b.points - a.points);
+    for (let i = 0; i < (chartData.length || 0); i++) {
+        chartData[i] = { name: chartData[i].name, points: chartData[i].points, rank: '#' + (i + 1) }
+    }
 
-    const visibleChartData = chartData.slice(0, 5);
-
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error loading leaderboard</div>;
+    if (isLoading || isLoadingUser) return <div>Loading...</div>;
+    if (isError || isErrorUser) return <div>Error loading leaderboard</div>;
 
     return ( //TODO: need to fix the scrollbar
-        <div className="flex flex-col items-center justify-center overflow-y-auto" style={{ maxHeight: '90vh' }}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75" >
-                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
+        <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
+            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-y-scroll" >
+                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-xl bg-gray-300 z-1">
                     <CardTitle className="text-purple-500">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
                 </CardHeader>
-                <CardContent className="mt-5">
-                    <div >
-                        <ChartContainer config={chartConfig}>
-                            <BarChart
-                                width={600}
-                                height={300}
-                                accessibilityLayer
-                                data={visibleChartData}
-                                layout="vertical"
-                                margin={{
-                                    right: 100,
-                                }}
-                            >
-                                <CartesianGrid horizontal={false} />
-                                <YAxis
+                <CardContent className="mt-5" >
+
+                    <ChartContainer config={chartConfig} style={{ height: '460px' }}>
+
+                        <BarChart
+                            accessibilityLayer
+                            data={chartData}
+                            layout="vertical"
+                            margin={{
+                                right: 600,
+                            }}
+
+                        >
+                            <CartesianGrid horizontal={false} />
+                            <YAxis
+                                dataKey="name"
+                                type="category"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                                hide
+                            />
+                            <XAxis dataKey="points" type="number" hide />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="line" />}
+                            />
+                            <Bar dataKey="points" layout="vertical" radius={4}>
+                                {chartData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => navigate("/profile/" + entry.name)}
+                                        height={20}
+                                    />
+                                ))}
+                                <LabelList
                                     dataKey="name"
-                                    type="category"
-                                    tickLine={false}
-                                    tickMargin={10}
-                                    axisLine={false}
-                                    tickFormatter={(value) => value.slice(0, 3)}
-                                    hide
+                                    position="insideLeft"
+                                    offset={8}
+                                    className="fill-foreground"
+                                    fontSize={12}
+                                    style={{ pointerEvents: "none" }}
                                 />
-                                <XAxis dataKey="points" type="number" hide />
-                                <ChartTooltip
-                                    cursor={false}
-                                    content={<ChartTooltipContent indicator="line" />}
+                                <LabelList
+                                    dataKey="rank"
+                                    position="right"
+                                    offset={8}
+                                    className="fill-foreground"
+                                    fontSize={12}
+                                    style={{ pointerEvents: "none" }}
                                 />
-                                <Bar
-                                    dataKey="points"
-                                    layout="vertical"
-                                    fill="var(--color-points)"
-                                    radius={4}
-                                    onClick={(e) => navigate("/profile/" + e.payload.name)}
-                                >
-                                    <LabelList
-                                        dataKey="name"
-                                        position="insideLeft"
-                                        offset={8}
-                                        className="fill-foreground"
-                                        fontSize={12}
-                                    />
-                                    <LabelList
-                                        dataKey="points"
-                                        position="right"
-                                        offset={8}
-                                        className="fill-foreground"
-                                        fontSize={12}
-                                    />
-                                </Bar>
-                            </BarChart>
-                        </ChartContainer>
-                    </div>
+                            </Bar>
+                        </BarChart>
+
+                    </ChartContainer>
+
+
                 </CardContent>
             </Card>
-        </div>
+        </div >
 
     )
 }

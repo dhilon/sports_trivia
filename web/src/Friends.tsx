@@ -96,9 +96,9 @@ function Friends() {
 
     return (
         <div className="flex flex-col h-full max-w-[900px] mx-auto">
-            <div className="flex-1 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+            <div className="overflow-y-auto" style={{ maxHeight: '90vh' }}>
                 <Card className="h-full">
-                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-10">
+                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-xl bg-gray-300 z-1">
                         <CardTitle className="text-purple-500">Friends</CardTitle>
                         <CardDescription>Sorted by points</CardDescription>
                     </CardHeader>

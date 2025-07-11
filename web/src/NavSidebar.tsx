@@ -3,6 +3,7 @@ import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, Sid
 import { useState } from "react";
 import axios from "axios";
 import { navigate } from "wouter/use-browser-location";
+import { useLocation } from "wouter";
 import { currUser } from "./components/CurrUser";
 
 
@@ -10,6 +11,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
 
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [errMsg, setErrMsg] = useState("");
+    const [location] = useLocation();
 
     const { user, isLoading, isError, errorMessage } = currUser();
 
@@ -37,45 +39,52 @@ export function NavSidebar() { //need to change redirects to fetch currUser
         }
     }
 
+    // Helper function to check if a path is active
+    const isActive = (path: string) => {
+        if (path === "/" && location === "/") return true;
+        if (path !== "/" && location.startsWith(path)) return true;
+        return false;
+    };
+
     return (
         <Sidebar>
             <SidebarHeader>Hello, {user?.username}<SidebarTrigger /></SidebarHeader>
             <SidebarContent className='min-w-52 bg-amber-200 text-purple-500'>
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 mt-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/") ? "bg-purple-600 text-white" : ""}`}>
                             <a href="/">
                                 <House />
                                 <span>Home</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive(`/profile/${user?.username}`) ? "bg-purple-600 text-white" : ""}`}>
                             <a href={`/profile/${user?.username}`}>
                                 <CircleUserRound />
                                 <span>Profile</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive(`/gamelog/${user?.username}`) ? "bg-purple-600 text-white" : ""}`}>
                             <a href={`/gamelog/${user?.username}`}>
                                 <Inbox />
                                 <span>Gamelog</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/friends") ? "bg-purple-600 text-white" : ""}`}>
                             <a href={`/friends/`}>
                                 <UserRoundSearch />
                                 <span>Friends</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/leaderboard") ? "bg-purple-600 text-white" : ""}`}>
                             <a href={`/leaderboard/`}>
                                 <Trophy />
                                 <span>Leaderboard</span>
@@ -83,16 +92,16 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/password") ? "bg-purple-600 text-white" : ""}`}>
                             <a href="/password">
                                 <KeyRound />
                                 <span>Change Login</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild onClick={handleLogout} disabled={isLoggingOut}>
+                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                        <SidebarMenuButton asChild className="rounded-xl" onClick={handleLogout} disabled={isLoggingOut}>
                             <div>
                                 <LogOut />
                                 <span>{isLoggingOut ? "Logging out…" : "Log Out"}</span>

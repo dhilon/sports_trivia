@@ -1,11 +1,12 @@
 import MyClock from "./components/Clock";
 import { HeartPulseIcon } from "lucide-react";
 import { useState } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { Redirect, useParams } from "wouter";
 import { User } from "./types";
 import { currUser } from "./components/CurrUser";
 import { Input } from "./components/ui/input";
+import useCreateGame from "./components/CreateGame";
 
 export function PlayerHearts({ players }: { players: User[] }) {
     const radius = 50; // Distance from center
@@ -43,19 +44,24 @@ export function PlayerHearts({ players }: { players: User[] }) {
     );
 }
 
-function AroundTheHorn() {
+function AroundTheHorn() { //TODO: add a turn component to each game object
     const [isTextVisible, setIsTextVisible] = useState(false);
     const params = useParams();
     const { data: game, error, isLoading } = useSWR(`/games/` + params.id)
+    const { trigger: createGame, isMutating: isCreatingGame, error: createGameError } = useCreateGame();
 
-    if (error) return <Redirect to="/" />;
-    if (isLoading) return <div>loading...</div>
+    if (error || createGameError) return <Redirect to="/" />;
+    if (isLoading || isCreatingGame) return <div>loading...</div>
 
     const handleExpire = () => {
 
     }
 
     const handleClick = () => {
+        if (game.status === "not_started") {
+            createGame({ id: game.id, status: "in_progress", time: 0, score: 0 });
+            mutate(`/games/` + params.id);
+        }
         setIsTextVisible(!isTextVisible);
     };
 
@@ -86,7 +92,7 @@ function AroundTheHorn() {
                                 </p>
                                 <Input placeholder="Answer:" className=" text-white border-white mr-10"></Input>
                                 <div className="items-end flex justify-center w-fit ml-auto mr-10">
-                                    <MyClock onClick={handleClick} isR={false} reset={false} onExpire={handleExpire} ref={null}></MyClock>
+                                    <MyClock onClick={handleClick} isR={isTextVisible} reset={false} onExpire={handleExpire} ref={null}></MyClock>
                                 </div>
                             </div>
                         </div>

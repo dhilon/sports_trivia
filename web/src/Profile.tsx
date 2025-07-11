@@ -69,7 +69,7 @@ function Profile() {
     const { name } = useParams();
 
     const { data, isLoading, error } = useSWR(`/users/${name}`);
-    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings`);
+    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${name}`);
 
     if (!data) return null;
     if (error || rankingsError) return <div>Error: {error?.message || rankingsError?.message}</div>;
