@@ -2,12 +2,14 @@ import MyClock, { ClockHandle } from "./components/Clock";
 import { SendHorizonalIcon, StarIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { Redirect, useParams } from "wouter";
-import useSWR, { mutate } from "swr";
-import { User } from "./types";
+import useSWR from "swr";
+import { Question, User } from "./types";
 import { currUser } from "./components/CurrUser";
 import { Input } from "./components/ui/input";
 import answersMatch from "./components/strCmp";
 import useCreateGame from "./components/CreateGame";
+import { navigate } from "wouter/use-browser-location"
+import { Button } from "./components/ui/button";
 
 export function PlayerStars({ players, scores }: { players: User[], scores: { [key: string]: number } }) {
     const radius = 50; // Distance from center
@@ -55,12 +57,17 @@ function RapidFire() {
     const [fail, setFail] = useState("Waiting for players to join the game.");
     const [sendDisabled, setSendDisabled] = useState(false);
     const clockRef = useRef<ClockHandle>(null);
+
     const { trigger: createGame, isMutating: isCreatingGame, error: createGameError } = useCreateGame();
 
-
     const params = useParams();
-    const { data: game, error, isLoading } = useSWR(`/games/` + params.id)
+    const { data: game, error, isLoading, mutate } = useSWR(`/games/` + params.id)
 
+    if (game?.status === "finished") {
+        setFail("You lost the game!");
+        setSendDisabled(true);
+        clockRef.current?.toggle();
+    }
 
     if (error || createGameError) return <Redirect to="/" />;
     if (isLoading || isCreatingGame) return <div>loading...</div>
@@ -72,18 +79,19 @@ function RapidFire() {
     const handleClockClick = () => {
         if (game.status === "not_started") {
             createGame({ id: game.id, status: "in_progress", time: 0, score: 0 });
-            mutate(`/games/` + params.id);
+            mutate();
         }
         setIsTextVisible(!isTextVisible);
     };
 
-    const handleAnswerClick = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleAnswerClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[game.questions.length - 1].answer)) {
+
+        if (answersMatch(capitalizeFirstLetter(inputValue), game.questions.find((question: Question) => question.id === game.current_question)?.answer ?? "")) {
             setInputValue('');
             setFail("You got this one right!");
             createGame({ id: game.id, status: "", time: 1, score: 1 });
-            mutate(`/games/` + params.id);
+            mutate();
             // For correct answers, reset and start the clock
             clockRef.current?.reset();
         }
@@ -95,6 +103,12 @@ function RapidFire() {
     };
 
     const handleExpire = () => {
+        setSendDisabled(true);
+        if (fail != "You lost the game!") {
+            setFail("You ran out of time");
+            setSendDisabled(true);
+            clockRef.current?.toggle();
+        }
 
     }
 
@@ -111,7 +125,18 @@ function RapidFire() {
                                     style={{ backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8aq4_uQkVIKHH-jWogdXFcM1dbGn-t6HOmokgNC1S9GoCRQp6ezCxpTuLwDWPrUyJ1Zeazo5BSGIyV02QOrxhzWcl6XGeg-v_umCljs33Ux_r09Ql41b-IbU5t4_XirlfqMgfD-IHAp27LNsTsa8PUq4XgAof_VDe9eUfY1aI6jysV_K_BgCjRoscJBP28SeLchxRZV9cTOKFbNECvIZ8N4LdIsGtAYqpmGzupwAu0pcHJwwG6wKrK032XmBG8c2Q8lpA2sJlA-zm")` }}
                                 >
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <h2 className="text-purple-500 text-2xl font-bold max-w-[45ch] text-center break-words">{isTextVisible && <p>{game.questions[game.questions.length - 1].text}</p>}</h2> {/* TODO: make this call the id based on the return message */}
+                                        {game.status === "finished" ? (
+                                            <Button
+                                                onClick={() => navigate(`/games/${game.sport}/rapid_fire/${game.id}/results`)}
+                                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-2xl"
+                                            >
+                                                View Results
+                                            </Button>
+                                        ) : (
+                                            <h2 className="text-purple-500 text-2xl font-bold max-w-[45ch] text-center break-words">
+                                                {isTextVisible && <p>{game.questions.find((question: Question) => question.id === game.current_question)?.text}</p>}
+                                            </h2>
+                                        )}
                                     </div>
                                     <div className="absolute inset-0">
                                         <PlayerStars players={game.players} scores={game.scores} />

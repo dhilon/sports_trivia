@@ -138,6 +138,11 @@ export function getColumns(
                             >
                                 Review Game
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => navigate("/games/" + sport + "/" + lgameType + "/" + gameId + "/results")}
+                            >
+                                View Results
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
                             <DropdownMenuItem>Practice</DropdownMenuItem>

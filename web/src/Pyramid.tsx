@@ -106,8 +106,6 @@ function Pyramid() {
             setFail("You ran out of time");
             setShouldUpdateScore(true);
         }
-
-        // Just stop the clock without toggling
     };
 
     const handleClockClick = () => {

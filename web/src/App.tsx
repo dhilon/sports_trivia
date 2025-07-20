@@ -1,4 +1,4 @@
-import { Switch } from "wouter";
+import { Redirect, Switch } from "wouter";
 import { Router, Route } from "wouter";
 import LoginPage from '@/Login';
 import SignupPage from './Signup';
@@ -15,7 +15,6 @@ import { SWRConfig } from "swr";
 import axios from 'axios';
 import AroundTheHorn from "./AroundTheHorn";
 import LeaderboardPage from "./Leaderboard";
-import { navigate } from "wouter/use-browser-location";
 
 function App() {
 
@@ -29,10 +28,6 @@ function App() {
     return response
   };
 
-  const RedirectToHome = () => {
-    navigate("/home");
-    return null;
-  }
 
   return (
     <SWRConfig
@@ -49,7 +44,7 @@ function App() {
       <Switch>
 
         <Router base="/">
-          <Route path="/" component={RedirectToHome}></Route>
+          <Route path="/" component={() => <Redirect to="/home" />}></Route>
           <Route path="/home" component={HomePage}></Route>
           <Route path="/gamelog/:name" component={GamelogPage}></Route>
           <Route path="/login" component={LoginPage}></Route>

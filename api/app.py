@@ -18,7 +18,7 @@ import ast
 from Levenshtein import distance
 
 openaiClient = OpenAI(
-    api_key="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"
+    api_key="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"
 )
 
 
@@ -86,16 +86,26 @@ def load_user(user_id: str):
         return None
 
 
-def chat_gpt_response(league, num_tokens):
+def question_generator(league, num_tokens):
 
-    prompt = f"Give me {num_tokens} extremely difficult questions about the professional sports league for {league} in the following format: {{'question': str, 'answer': str}}, take out the first greeting sentence, don't have numbers before the question, separate each object with a new line, and make the max answer length 50 characters"
-
-    completion = openaiClient.chat.completions.create(
-        model="gpt-4o-mini",
-        store=True,
-        messages=[{"role": "user", "content": prompt}],
+    response = openaiClient.responses.create(
+        prompt={
+            "id": "pmpt_687d4be62a8c8193b142093834112f980375678bfb02a3a4",
+            "version": "3",
+        }
     )
-    return completion.choices[0].message.content
+    return response.output_text
+
+
+def answer_checker(question, answer):
+    response = openaiClient.responses.create(
+        prompt={
+            "id": "pmpt_687d4f608c8081939c84691abec56d4b07d861c4d72929a0",
+            "version": "1",
+            "variables": {"question": question, "answer": answer},
+        }
+    )
+    return response.output_text
 
 
 @app.route("/me/", methods=["GET"])
@@ -196,13 +206,14 @@ def all_games():
                 time=0,
                 status="in_progress",
                 id=recent_game().id + 1,
+                current_question=0,
             )
             if game_type == "tower_of_power":
                 num_questions = random.randint(8, 12)
             else:
                 num_questions = 1
 
-            chat_response = chat_gpt_response(sport, num_questions)
+            chat_response = question_generator(sport, num_questions)
 
             if chat_response:
                 for question in chat_response.split("\n"):
@@ -241,6 +252,8 @@ def all_games():
             rqs = random.sample(
                 sport_questions, num_questions
             )  # default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
+            game.current_question = rqs[0].id
+            game.save()
             game.questions.add(rqs)  # mixes question difficulty here
             game.players.add([current_user])
         except Exception as e:
@@ -266,6 +279,7 @@ def get_game(
             "status": game.status,
             "sport": game.sport,
             "scores": game.get_scores(),
+            "current_question": game.current_question,
         }
         if request.method == "GET":
             return gameInfo
@@ -298,10 +312,11 @@ def get_game(
                 sport_questions = [
                     x for x in Question.select().where(Question.sport == game.sport)
                 ]
-                rq = random.sample(sport_questions, 1)
+                rq = random.sample(sport_questions, 1)[0]
                 game.questions.add(rq)
+                game.current_question = rq.id
                 game.save()
-                msg = "score updated"  # TODO: return id of game
+                return {"message": "score updated"}, 200
             try:
                 game.players.add([current_user])
             except Exception as e:
@@ -314,7 +329,6 @@ def get_game(
                 "id": game.id,
                 "type": game.type,
                 "sport": game.sport,
-                "score": game.score,
             }
 
     else:

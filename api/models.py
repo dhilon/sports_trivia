@@ -88,6 +88,7 @@ class Game(
     questions = ManyToManyField(Question, backref="games")
     time = FloatField(default=0)
     player_scores = TextField(default="{}")  # Store JSON string of {player_id: score}
+    current_question = IntegerField(default=0)
 
     def get_scores(self):
         return json.loads(str(self.player_scores)) if self.player_scores else {}
