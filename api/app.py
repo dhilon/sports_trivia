@@ -16,10 +16,12 @@ from peewee import IntegrityError
 from openai import OpenAI
 import ast
 from Levenshtein import distance
+from dotenv import load_dotenv
+import os
 
-openaiClient = OpenAI(
-    api_key="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"
-)
+load_dotenv()
+
+openaiClient = OpenAI(api_key=os.getenv("API_KEY"))
 
 
 class JSONResponse(Response):
