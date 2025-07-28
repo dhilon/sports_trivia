@@ -3,7 +3,7 @@ import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, Sid
 import { useState } from "react";
 import axios from "axios";
 import { navigate } from "wouter/use-browser-location";
-import { useLocation } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { currUser } from "./components/CurrUser";
 
 
@@ -13,13 +13,13 @@ export function NavSidebar() { //need to change redirects to fetch currUser
     const [errMsg, setErrMsg] = useState("");
     const [location] = useLocation();
 
-    const { user, isLoading, isError, errorMessage } = currUser();
+    const { user, isLoading, isError } = currUser();
 
     if (isLoading) {
         return <p>Loading user…</p>;
     }
     if (isError) {
-        return <p style={{ color: "red" }}>Error: {errorMessage}</p>;
+        return <Redirect to="/login" />;
     }
 
     async function handleLogout() {

@@ -36,14 +36,14 @@ CORS(
     resources={r"/*": {"origins": "http://localhost:5173"}},
 )
 app.config.update(
-    SECRET_KEY="a-very-secret-string",
+    SECRET_KEY=os.getenv("SECRET_KEY"),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",  # Change from "None" for localhost
     SESSION_COOKIE_SECURE=False,  # Keep False for localhost
     PERMANENT_SESSION_LIFETIME=timedelta(hours=24),  # Optional
 )
 # app.response_class = JSONResponse
-app.config["SECRET_KEY"] = "a-very-secret-string"
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -93,13 +93,20 @@ def question_generator(league, num_tokens):
     response = openaiClient.responses.create(
         prompt={
             "id": "pmpt_687d4be62a8c8193b142093834112f980375678bfb02a3a4",
-            "version": "3",
+            "version": "5",
+            "variables": {"number": str(num_tokens), "league": league},
         }
     )
+
     return response.output_text
 
 
-def answer_checker(question, answer):
+@app.route("/answer_checker/", methods=["POST"])
+def answer_checker():
+    payload = request.get_json() or {}
+    question = str(payload.get("question"))
+    answer = str(payload.get("answer"))
+
     response = openaiClient.responses.create(
         prompt={
             "id": "pmpt_687d4f608c8081939c84691abec56d4b07d861c4d72929a0",
@@ -112,7 +119,10 @@ def answer_checker(question, answer):
 
 @app.route("/me/", methods=["GET"])
 def who_am_i():
-    return get_user(current_user.username), 200
+    try:
+        return get_user(current_user.username), 200
+    except Exception as e:
+        return {"error": "Not authenticated"}, 401
 
 
 @app.route("/rankings/<name>/", methods=["GET"])
@@ -215,13 +225,16 @@ def all_games():
             else:
                 num_questions = 1
 
-            chat_response = question_generator(sport, num_questions)
+            chat_response = question_generator(sport, 10)
 
             if chat_response:
                 for question in chat_response.split("\n"):
                     if question != "":
-                        question = ast.literal_eval(question)
-                        question_text = question["question"]
+                        try:
+                            question = ast.literal_eval(question)
+                            question_text = question["question"]
+                        except:
+                            continue
 
                         # Check if question is similar to existing questions
                         existing_questions = Question.select().where(
@@ -251,10 +264,11 @@ def all_games():
             sport_questions = [
                 x for x in Question.select().where(Question.sport == sport)
             ]
-            rqs = random.sample(
-                sport_questions, num_questions
-            )  # default set to pyramid amount of questions, should figure fluid amounts for rapid fire and around the horn
+            rqs = random.sample(sport_questions, num_questions)
+            rqs.sort(key=lambda x: (x.difficulty, x.id))
             game.current_question = rqs[0].id
+            if game.type == "around_the_horn":
+                game.set_score(current_user.id, 3)
             game.save()
             game.questions.add(rqs)  # mixes question difficulty here
             game.players.add([current_user])
@@ -290,9 +304,12 @@ def get_game(
             status = payload.get("status")
             time = payload.get("time")
             score = payload.get("score")
+            current_question = payload.get("current_question")
             msg = ""
-            if game.type == "tower_of_power" and game.players.count() > 0:
+            if game.type == "tower_of_power" and game.players[0].id != current_user.id:
                 return {"error": "Tower of Power is a one player game"}, 429
+            if game.status == "finished":
+                return {"error": "Game is finished"}, 429
             if time:  # TODO: fix in frontend
                 game.time = (datetime.now() - game.date).total_seconds()
                 game.save()
@@ -302,6 +319,9 @@ def get_game(
                 game.status = status
                 game.save()
                 msg = "status updated"
+            if current_question != 0:
+                game.current_question = current_question
+                game.save()
             if score:
                 game.set_score(
                     current_user.id,
@@ -321,6 +341,9 @@ def get_game(
                 return {"message": "score updated"}, 200
             try:
                 game.players.add([current_user])
+                if game.type == "around_the_horn":
+                    game.set_score(current_user.id, 3)
+                    game.save()
             except Exception as e:
                 if msg == "":
                     return {"error": "You are already in this game"}, 400

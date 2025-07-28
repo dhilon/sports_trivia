@@ -9,10 +9,10 @@ import { useParams } from "wouter"
 import useSWR from "swr"
 import { Game, Question } from "./types"
 import MyClock, { ClockHandle } from "./components/Clock"
-import answersMatch from "./components/strCmp"
 import { currUser } from "./components/CurrUser"
 import useCreateGame from "./components/CreateGame"
 import useEditUser from "./components/EditUser"
+import useAnswerChecker from "./components/AnswerChecker"
 
 
 
@@ -52,30 +52,38 @@ function Pyramid() {
 
     const { trigger: updateGame, isMutating: isMutatingGame } = useCreateGame();
 
+    const { trigger: answerChecker, isMutating: isCheckingAnswer, error: answerCheckerError } = useAnswerChecker();
 
 
-    function capitalizeFirstLetter(string: string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
 
     function updateGameStatus(status: string) {
         updateGame({
             id: parseInt(game?.id ?? '0'),
             status: status,
             time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
-            score: (60 * ((game?.questions.length ?? 0) - highlightedLevelId))
+            score: (60 * ((game?.questions.length ?? 0) - highlightedLevelId)),
+            current_question: game?.questions[count - 1].id ?? 0
         });
     }
 
     // Keep the initial setup effect
     useEffect(() => {
         setCount(game?.questions.length ?? 0);
-        setHighlightedLevelId(game?.questions.length ?? 0);
+        game?.questions.sort((a, b) =>
+            b.difficulty - a.difficulty || b.id - a.id
+        );
+
         if (game?.status === "finished") {
+            const currentQuestionIndex = (game?.questions.findIndex(q => q.id == game?.current_question) ?? -2) + 1;
+            setHighlightedLevelId(currentQuestionIndex);
             setSendDisabled(true);
             setFail("Pyramid already finished");
         }
-        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
+        else {
+            const currentQuestionIndex = 0;
+            setHighlightedLevelId(game?.questions.length ?? 0 - currentQuestionIndex);
+        }
+
     }, [game]);
 
     // Score handling effect - only for wrong answers
@@ -96,8 +104,6 @@ function Pyramid() {
             }
         }
 
-        game?.questions.sort((a, b) => b.difficulty - a.difficulty);
-
     }, [shouldUpdateScore, user, game?.sport, highlightedLevelId, createUser]);
 
     const handleExpire = () => { //just resets and keeps going
@@ -112,26 +118,27 @@ function Pyramid() {
     };
 
 
-    const handleLevelClick = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLevelClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (answersMatch(capitalizeFirstLetter(inputValue), game?.questions[count - 1].answer)) {
+
+        const check = await answerChecker({ question: game?.questions[count - 1]?.text ?? "", answer: inputValue });
+
+        if (check) {
             setHighlightedLevelId(count - 1);
             setInputValue('');
             setCount(count - 1);
-            // For correct answers, reset and start the clock
             clockRef.current?.reset();
         }
         else {
             setFail("You failed the pyramid");
             setSendDisabled(true);
             clockRef.current?.toggle();
-            // Set the flag to update score
             setShouldUpdateScore(true);
         }
     };
 
-    if (error || isError) return <div>Error: {errorMessage}</div>
-    if (isLoading || isLoadingUser || isMutating || isMutatingGame) return <div>loading...</div>
+    if (error || isError || answerCheckerError) return <div>Error: {errorMessage}</div>
+    if (isLoading || isLoadingUser || isMutating || isMutatingGame || isCheckingAnswer) return <div>loading...</div>
 
 
     const gameWithLevels = {

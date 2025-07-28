@@ -1,15 +1,16 @@
 import MyClock, { ClockHandle } from "./components/Clock";
 import { SendHorizonalIcon, StarIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Redirect, useParams } from "wouter";
 import useSWR from "swr";
 import { Question, User } from "./types";
 import { currUser } from "./components/CurrUser";
 import { Input } from "./components/ui/input";
-import answersMatch from "./components/strCmp";
 import useCreateGame from "./components/CreateGame";
-import { navigate } from "wouter/use-browser-location"
 import { Button } from "./components/ui/button";
+import useAnswerChecker from "./components/AnswerChecker";
+import useEditUser from "./components/EditUser";
+import { Link } from "wouter";
 
 export function PlayerStars({ players, scores }: { players: User[], scores: { [key: string]: number } }) {
     const radius = 50; // Distance from center
@@ -57,28 +58,59 @@ function RapidFire() {
     const [fail, setFail] = useState("Waiting for players to join the game.");
     const [sendDisabled, setSendDisabled] = useState(false);
     const clockRef = useRef<ClockHandle>(null);
+    const [gameEnd, setGameEnd] = useState(false);
+
 
     const { trigger: createGame, isMutating: isCreatingGame, error: createGameError } = useCreateGame();
 
     const params = useParams();
     const { data: game, error, isLoading, mutate } = useSWR(`/games/` + params.id)
 
-    if (game?.status === "finished") {
-        setFail("You lost the game!");
-        setSendDisabled(true);
-        clockRef.current?.toggle();
+    const { user, isLoading: isLoadingUser, isError } = currUser();
+
+    const { trigger: createUser, isMutating } = useEditUser();
+
+    const { trigger: answerChecker, isMutating: isCheckingAnswer, error: answerCheckerError } = useAnswerChecker();
+
+
+    useEffect(() => {
+        if (game?.status === "finished") {
+            setFail("You lost the game!");
+            setSendDisabled(true);
+        }
+    }, [game]);
+
+    function updateGameStatus(status: string) {
+        createGame({
+            id: parseInt(game?.id ?? '0'),
+            status: status,
+            time: (game?.time ?? 0) - (clockRef.current?.getTime() ?? 0),
+            score: game.scores[user?.id ?? 0] ?? 0,
+            current_question: game.current_question
+        });
     }
 
-    if (error || createGameError) return <Redirect to="/" />;
-    if (isLoading || isCreatingGame) return <div>loading...</div>
-
-    function capitalizeFirstLetter(string: string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
+    useEffect(() => {
+        if (gameEnd && user && game?.sport) {
+            try {
+                user.scores[game.sport] += (game.scores[user.id] ?? 0); //posting twice for some reason
+                createUser({
+                    uName: user.username,
+                    pwd: "",
+                    scores: user.scores,
+                    friends: []
+                });
+                updateGameStatus("finished");
+                setGameEnd(false);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }, [gameEnd, user, game?.sport, createUser]);
 
     const handleClockClick = () => {
         if (game.status === "not_started") {
-            createGame({ id: game.id, status: "in_progress", time: 0, score: 0 });
+            createGame({ id: game.id, status: "in_progress", time: 0, score: 0, current_question: 0 });
             mutate();
         }
         setIsTextVisible(!isTextVisible);
@@ -87,10 +119,12 @@ function RapidFire() {
     const handleAnswerClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (answersMatch(capitalizeFirstLetter(inputValue), game.questions.find((question: Question) => question.id === game.current_question)?.answer ?? "")) {
+        const check = await answerChecker({ question: game.questions.find((question: Question) => question.id === game.current_question)?.text ?? "", answer: inputValue });
+
+        if (check) {
             setInputValue('');
             setFail("You got this one right!");
-            createGame({ id: game.id, status: "", time: 1, score: 1 });
+            createGame({ id: game.id, status: "", time: 1, score: 1, current_question: 0 });
             mutate();
             // For correct answers, reset and start the clock
             clockRef.current?.reset();
@@ -99,6 +133,7 @@ function RapidFire() {
             setFail("You got this one wrong :(");
             setSendDisabled(true);
             clockRef.current?.toggle();
+            setGameEnd(true);
         }
     };
 
@@ -108,9 +143,13 @@ function RapidFire() {
             setFail("You ran out of time");
             setSendDisabled(true);
             clockRef.current?.toggle();
+            setGameEnd(true);
         }
 
     }
+
+    if (error || createGameError || answerCheckerError || isError) return <Redirect to="/" />;
+    if (isLoading || isCreatingGame || isCheckingAnswer || isLoadingUser || isMutating) return <div>loading...</div>
 
     return (
         <div className="w-full">
@@ -124,14 +163,13 @@ function RapidFire() {
                                     className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl object-cover border-10 border-gray-200 relative"
                                     style={{ backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8aq4_uQkVIKHH-jWogdXFcM1dbGn-t6HOmokgNC1S9GoCRQp6ezCxpTuLwDWPrUyJ1Zeazo5BSGIyV02QOrxhzWcl6XGeg-v_umCljs33Ux_r09Ql41b-IbU5t4_XirlfqMgfD-IHAp27LNsTsa8PUq4XgAof_VDe9eUfY1aI6jysV_K_BgCjRoscJBP28SeLchxRZV9cTOKFbNECvIZ8N4LdIsGtAYqpmGzupwAu0pcHJwwG6wKrK032XmBG8c2Q8lpA2sJlA-zm")` }}
                                 >
-                                    <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="absolute inset-0 flex items-center justify-center z-20">
                                         {game.status === "finished" ? (
-                                            <Button
-                                                onClick={() => navigate(`/games/${game.sport}/rapid_fire/${game.id}/results`)}
-                                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-2xl"
-                                            >
-                                                View Results
-                                            </Button>
+                                            <Link href={`/games/${game.sport}/rapid_fire/${game.id}/results`}>
+                                                <Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-2xl cursor-pointer shadow-lg">
+                                                    View Results
+                                                </Button>
+                                            </Link>
                                         ) : (
                                             <h2 className="text-purple-500 text-2xl font-bold max-w-[45ch] text-center break-words">
                                                 {isTextVisible && <p>{game.questions.find((question: Question) => question.id === game.current_question)?.text}</p>}
@@ -153,14 +191,14 @@ function RapidFire() {
                                 <div className="flex gap-2 font-medium leading-none">
                                     <form onSubmit={handleAnswerClick} className="flex gap-2">
                                         <Input placeholder="Answer:" className=" text-white border-white w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
-                                        <button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" disabled={sendDisabled}>
+                                        <Button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" disabled={sendDisabled}>
                                             <SendHorizonalIcon></SendHorizonalIcon>
-                                        </button>
+                                        </Button>
                                     </form>
                                 </div>
 
                                 <div className="items-end flex justify-center w-fit ml-10 mr-10">
-                                    <MyClock onClick={handleClockClick} isR={isTextVisible} reset={false} onExpire={handleExpire} ref={clockRef}></MyClock>
+                                    <MyClock onClick={handleClockClick} isR={!sendDisabled} reset={false} onExpire={handleExpire} ref={clockRef}></MyClock>
                                 </div>
                             </div>
                         </div>

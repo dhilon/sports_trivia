@@ -9,6 +9,7 @@ export type Game = {
     players: Array<User>
     questions: Array<Question>
     time: number
+    current_question: number
 
     // …any others, e.g. numPlayers, length, etc.
 }

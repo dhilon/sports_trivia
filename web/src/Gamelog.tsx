@@ -102,14 +102,16 @@ export function getColumns(
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        <div className="text-right">Date</div>
-                        <ArrowUpDown />
+                        Date
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 )
             },
-            cell: ({ row }) => {
-
-                return <div className="text-right flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#ffffff73] text-[#101418] text-sm font-medium leading-normal w-full">{row.getValue("date")}</div>
+            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+            sortingFn: (rowA, rowB, columnId) => {
+                const dateA = new Date(rowA.getValue(columnId));
+                const dateB = new Date(rowB.getValue(columnId));
+                return dateA.getTime() - dateB.getTime();
             },
         },
         {
@@ -184,9 +186,9 @@ function Gamelog() {
         data: games,
         columns,
         onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,

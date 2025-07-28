@@ -23,7 +23,7 @@ export interface MyClockProps {
 // 1) Wrap in forwardRef<ClockHandle,Props>
 const MyClock = forwardRef<ClockHandle, MyClockProps>(
     ({ onClick, isR, reset, onExpire }, ref) => {
-        const [time, setTime] = useState(10);
+        const [time, setTime] = useState(20);
         const [isRunning, setRun] = useState(isR);
 
         // Add this useEffect to sync isRunning with the isR prop
@@ -49,14 +49,14 @@ const MyClock = forwardRef<ClockHandle, MyClockProps>(
         // 2) Expose methods via useImperativeHandle
         useImperativeHandle(ref, () => ({
             click: () => buttonRef.current?.click(),
-            reset: () => setTime(10),
+            reset: () => setTime(20),
             toggle: () => setRun((r) => !r),
             getTime: () => time,
         }));
 
         const handleClick = () => {
             if (reset) {
-                setTime(10);
+                setTime(20);
                 setRun(false);
             } else {
                 setRun((r) => !r);
