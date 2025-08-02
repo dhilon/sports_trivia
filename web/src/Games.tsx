@@ -75,22 +75,24 @@ function GameCard(
 
     return (
 
-        <button className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" onClick={(e) => (handleSubmit(e))}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70" >
-                <CardHeader>
-                    <CardTitle>{name}</CardTitle>
-                    <CardDescription>"{analogy}"</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
-                </CardContent>
-                <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="flex gap-2 font-medium leading-none">
-                        {description}
-                    </div>
-                </CardFooter>
-            </Card>
-        </button>
+        <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
+            <button className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" onClick={(e) => (handleSubmit(e))}>
+                <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-70 w-70 overflow-hidden border-3 border-gray-300" >
+                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
+                        <CardTitle className="text-purple-500">{name}</CardTitle>
+                        <CardDescription>"{analogy}"</CardDescription>
+                    </CardHeader>
+                    <CardContent className="mt-5">
+                        <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
+                    </CardContent>
+                    <CardFooter className="flex-col items-start gap-2 text-sm">
+                        <div className="flex gap-2 font-medium leading-none">
+                            {description}
+                        </div>
+                    </CardFooter>
+                </Card>
+            </button>
+        </div>
 
 
     )
@@ -99,9 +101,9 @@ function GameCard(
 function Games() { //rapid fire and around the horn need to generate new games, will do later
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 mt-50">
-            <GameCard name="Tower of Power" image={tower} description="Can you take on every single level of this timed pyramid and not lose all your points?" url="/tower_of_power/" analogy="It's like scaling Mount Fuji" />
-            <GameCard name="Rapid Fire" image={fire} description="Which one of your friends can answer correctly first?" url="/rapid_fire/" analogy="Just don't be last" />
-            <GameCard name="Around the Horn" image={around} description="Answer your question whenever you can, but don't be the one to flame out. Circles are endless" url="/around_the_horn/" analogy="Duck duck and you're the goose" />
+            <GameCard name="Tower of Power" image={tower} description="Who wants to be a millionaire?" url="/tower_of_power/" analogy="It's like scaling Mount Fuji" />
+            <GameCard name="Rapid Fire" image={fire} description="First to answer wins!" url="/rapid_fire/" analogy="... requires rapid response!" />
+            <GameCard name="Around the Horn" image={around} description="Turn based" url="/around_the_horn/" analogy="Duck duck goose!" />
 
         </div>
 

@@ -1,7 +1,7 @@
 "use client"
 
-import { PlusCircleIcon, TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
+import { PlusCircleIcon } from "lucide-react"
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts"
 import { mutate } from "swr"
 
 import {
@@ -25,9 +25,6 @@ import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { currUser } from "./components/CurrUser"
 import useEditUser from "./components/EditUser"
-const chartData = [
-    {},
-]
 
 const chartConfig = {
     points: {
@@ -42,15 +39,8 @@ const chartConfig = {
 
 function Friends() {
 
-
-    const [inputValue, setInputValue] = useState('');
-    const [errMsg, setErrMsg] = useState('');
+    const chartData = []
     const { user, isLoading, isError, errorMessage } = currUser();
-
-    const { trigger: createUser, isMutating, error } = useEditUser();
-
-    if (isError || error) return <div>Error: {errorMessage}</div>;
-    if (isLoading || isMutating) return <div>loading...</div>
 
     for (let i = 0; i < (user?.friends?.length || 0); i++) {
         let sum = 0;
@@ -61,13 +51,23 @@ function Friends() {
             sum += scoreValues[c] || 0;
         }
         chartData[i] = { name: user?.friends[i]?.username || "", points: sum }
+        chartData[i + 1] = { name: user?.username || "", points: (user?.scores.basketball || 0) + (user?.scores.soccer || 0) + (user?.scores.hockey || 0) + (user?.scores.football || 0) + (user?.scores.baseball || 0) + (user?.scores.tennis || 0) }
     }
-
     chartData.sort((a, b) => {
         const pointsA = (a as { points: number }).points || 0;
         const pointsB = (b as { points: number }).points || 0;
         return pointsB - pointsA;
     });
+
+    const [inputValue, setInputValue] = useState('');
+    const [errMsg, setErrMsg] = useState('');
+
+
+    const { trigger: createUser, isMutating, error } = useEditUser();
+
+    if (isError || error) return <div>Error: {errorMessage}</div>;
+    if (isLoading || isMutating) return <div>loading...</div>
+
 
     const handleClick = async () => {
         try {
@@ -97,8 +97,8 @@ function Friends() {
     return (
         <div className="flex flex-col h-full max-w-[900px] mx-auto">
             <div className="overflow-y-auto" style={{ maxHeight: '90vh' }}>
-                <Card className="h-full">
-                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-xl bg-gray-300 z-1">
+                <Card className="h-full border-3 border-gray-300">
+                    <CardHeader className="sticky rounded-lg top-0 bg-gray-300 z-1">
                         <CardTitle className="text-purple-500">Friends</CardTitle>
                         <CardDescription>Sorted by points</CardDescription>
                     </CardHeader>
@@ -134,6 +134,14 @@ function Friends() {
                                     radius={4}
                                     onClick={(e) => navigate("/profile/" + e.payload.name)}
                                 >
+                                    {chartData.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => navigate("/profile/" + entry.name)}
+                                        />
+                                    ))}
                                     <LabelList
                                         dataKey="name"
                                         position="insideLeft"
@@ -154,7 +162,7 @@ function Friends() {
                     </CardContent>
                     <CardFooter className="flex-col items-start gap-2 text-sm">
                         <div className="flex gap-2 font-medium leading-none">
-                            Trending up by 5.2% this name <TrendingUp className="h-4 w-4" />
+                            Show yourself!
                         </div>
                         <div className="leading-none text-muted-foreground">
                             Showing total scores for all users

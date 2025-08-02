@@ -90,7 +90,7 @@ function Pyramid() {
     useEffect(() => {
         if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += (60 * ((game?.questions.length ?? 0) - highlightedLevelId)); //posting twice for some reason
+                user.scores[game.sport] += ((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
                 createUser({
                     uName: user.username,
                     pwd: "",
@@ -138,7 +138,7 @@ function Pyramid() {
     };
 
     if (error || isError || answerCheckerError) return <div>Error: {errorMessage}</div>
-    if (isLoading || isLoadingUser || isMutating || isMutatingGame || isCheckingAnswer) return <div>loading...</div>
+    if (isLoading || isLoadingUser || isMutating || isMutatingGame) return <div>loading...</div>
 
 
     const gameWithLevels = {
@@ -172,11 +172,11 @@ function Pyramid() {
                     </Button>
                 </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {60 * ((game?.questions.length ?? 0) - highlightedLevelId)} points gained
+                    {(user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId)} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
-                    {50 * (game?.questions.length ?? 0)} points wagered
+                    {(user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)} points wagered
                 </div>
 
             </div>
@@ -196,13 +196,13 @@ function Pyramid() {
                     </a>
                 </div>
                 <div className="flex items-start text-red-500">
-                    {fail}
+                    {fail || (isCheckingAnswer && "Checking answer...")}
                 </div>
                 <div className="flex items-start">
                     <MyClock
                         onClick={handleClockClick}
                         isR={!sendDisabled}
-                        reset={false}
+                        stop={true}
                         onExpire={handleExpire}
                         ref={clockRef}
                     ></MyClock>

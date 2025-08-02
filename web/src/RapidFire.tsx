@@ -109,10 +109,6 @@ function RapidFire() {
     }, [gameEnd, user, game?.sport, createUser]);
 
     const handleClockClick = () => {
-        if (game.status === "not_started") {
-            createGame({ id: game.id, status: "in_progress", time: 0, score: 0, current_question: 0 });
-            mutate();
-        }
         setIsTextVisible(!isTextVisible);
     };
 
@@ -126,14 +122,11 @@ function RapidFire() {
             setFail("You got this one right!");
             createGame({ id: game.id, status: "", time: 1, score: 1, current_question: 0 });
             mutate();
-            // For correct answers, reset and start the clock
             clockRef.current?.reset();
         }
         else {
             setFail("You got this one wrong :(");
             setSendDisabled(true);
-            clockRef.current?.toggle();
-            setGameEnd(true);
         }
     };
 
@@ -141,15 +134,16 @@ function RapidFire() {
         setSendDisabled(true);
         if (fail != "You lost the game!") {
             setFail("You ran out of time");
-            setSendDisabled(true);
-            clockRef.current?.toggle();
-            setGameEnd(true);
+            setSendDisabled(false);
+            createGame({ id: game.id, status: "", time: 1, score: 0, current_question: 0 });
+            mutate();
+            clockRef.current?.reset();
         }
 
     }
 
     if (error || createGameError || answerCheckerError || isError) return <Redirect to="/" />;
-    if (isLoading || isCreatingGame || isCheckingAnswer || isLoadingUser || isMutating) return <div>loading...</div>
+    if (isLoading || isCreatingGame || isLoadingUser || isMutating) return <div>loading...</div>
 
     return (
         <div className="w-full">
@@ -186,7 +180,7 @@ function RapidFire() {
                                 <div className={`${fail === "You got this one right!" ? 'text-green-500' : 'text-red-500'} leading-normal text-center`} style={{
                                     fontSize: "25px"
                                 }}>
-                                    {fail}
+                                    {fail || (isCheckingAnswer && "Checking answer...")}
                                 </div>
                                 <div className="flex gap-2 font-medium leading-none">
                                     <form onSubmit={handleAnswerClick} className="flex gap-2">
@@ -198,7 +192,7 @@ function RapidFire() {
                                 </div>
 
                                 <div className="items-end flex justify-center w-fit ml-10 mr-10">
-                                    <MyClock onClick={handleClockClick} isR={!sendDisabled} reset={false} onExpire={handleExpire} ref={clockRef}></MyClock>
+                                    <MyClock onClick={handleClockClick} isR={!sendDisabled} stop={true} onExpire={handleExpire} ref={clockRef}></MyClock>
                                 </div>
                             </div>
                         </div>

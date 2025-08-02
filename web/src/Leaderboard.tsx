@@ -75,14 +75,13 @@ function LeaderboardCard(
     if (isLoading || isLoadingUser) return <div>Loading...</div>;
     if (isError || isErrorUser) return <div>Error loading leaderboard</div>;
 
-    return ( //TODO: need to fix the scrollbar
+    return (
         <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-y-scroll" >
-                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-xl bg-gray-300 z-1">
+            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-y-scroll border-3 border-gray-300" >
+                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
                     <CardTitle className="text-purple-500">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
                 </CardHeader>
-                <CardContent className="mt-5" >
-
+                <CardContent className="mt-5">
                     <ChartContainer config={chartConfig} style={{ height: '460px' }}>
 
                         <BarChart
@@ -154,12 +153,10 @@ function Leaderboard() {
             <LeaderboardCard sport="basketball" />
             <LeaderboardCard sport="soccer" />
             <LeaderboardCard sport="football" />
-            <LeaderboardCard sport="baseball" />
             <LeaderboardCard sport="hockey" />
             <LeaderboardCard sport="tennis" />
+            <LeaderboardCard sport="baseball" />
             <LeaderboardCard sport="total" />
-
-
         </div>
 
     )

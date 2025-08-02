@@ -152,7 +152,7 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
     };
 
     if (error || createGameError || answerCheckerError || isError) return <Redirect to="/" />;
-    if (isLoading || isCreatingGame || isCheckingAnswer || isLoadingUser || isMutating) return <div>loading...</div>
+    if (isLoading || isCreatingGame || isLoadingUser || isMutating) return <div>loading...</div>
 
     return (
         <div className="w-full">
@@ -190,7 +190,7 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
                                 <div className={`${fail === "You got this one right!" ? 'text-green-500' : 'text-red-500'} leading-normal text-center`} style={{
                                     fontSize: "25px"
                                 }}>
-                                    {fail}
+                                    {fail || (isCheckingAnswer && "Checking answer...")}
                                 </div>
                                 <div className="flex gap-2 font-medium leading-none">
                                     <form onSubmit={handleAnswerClick} className="flex gap-2">
@@ -202,7 +202,7 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
                                 </div>
 
                                 <div className="items-end flex justify-center w-fit ml-10 mr-10">
-                                    <MyClock onClick={handleClockClick} isR={isTextVisible} reset={false} onExpire={handleExpire} ref={clockRef}></MyClock>
+                                    <MyClock onClick={handleClockClick} isR={isTextVisible} stop={true} onExpire={handleExpire} ref={clockRef}></MyClock>
                                 </div>
                             </div>
                         </div>

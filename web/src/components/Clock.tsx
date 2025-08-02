@@ -16,13 +16,13 @@ export type ClockHandle = {
 export interface MyClockProps {
     onClick: () => void;
     isR: boolean;
-    reset: boolean;
+    stop: boolean;
     onExpire: () => void;
 }
 
 // 1) Wrap in forwardRef<ClockHandle,Props>
 const MyClock = forwardRef<ClockHandle, MyClockProps>(
-    ({ onClick, isR, reset, onExpire }, ref) => {
+    ({ onClick, isR, stop, onExpire }, ref) => {
         const [time, setTime] = useState(20);
         const [isRunning, setRun] = useState(isR);
 
@@ -55,10 +55,7 @@ const MyClock = forwardRef<ClockHandle, MyClockProps>(
         }));
 
         const handleClick = () => {
-            if (reset) {
-                setTime(20);
-                setRun(false);
-            } else {
+            if (stop) {
                 setRun((r) => !r);
             }
             onClick();

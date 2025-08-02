@@ -58,51 +58,55 @@ function JoinCard() {
 
     return (
 
-        <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75" >
-            <CardHeader>
-                <CardTitle>Join Game</CardTitle>
-                <CardDescription className="text-red-600">{errMsg}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <img src={together} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    <form onSubmit={handleClick} className="flex gap-2">
-                        <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
-                        <button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg">
-                            <SendHorizonalIcon></SendHorizonalIcon>
-                        </button>
-                    </form>
-                </div>
-            </CardFooter>
-        </Card>
+        <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
+            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-hidden border-3 border-gray-300" >
+                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
+                    <CardTitle className="text-purple-500">Join Game</CardTitle>
+                </CardHeader>
+                <CardContent className="mt-10">
+                    <CardDescription className="text-red-600">{errMsg}</CardDescription>
+                    <img src={together} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 text-sm">
+                    <div className="flex gap-2 font-medium leading-none">
+                        <form onSubmit={handleClick} className="flex gap-2">
+                            <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
+                            <button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg">
+                                <SendHorizonalIcon></SendHorizonalIcon>
+                            </button>
+                        </form>
+                    </div>
+                </CardFooter>
+            </Card>
+        </div>
+
 
 
     )
 }
 
 function HomeCard(
-    { image, description, sport }: { image: string, description: string, sport: string }
+    { image, sport, question }: { image: string, sport: string, question: string }
 ) {
 
     return (
-        <Link className="shadow-lg cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" href={"/games/" + sport.toLowerCase()}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75" >
-                <CardHeader>
-                    <CardTitle>{sport}</CardTitle>
-                    <CardDescription>A sport</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
-                </CardContent>
-                <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="flex gap-2 font-medium leading-none">
-                        {description}
-                    </div>
-                </CardFooter>
-            </Card>
-        </Link>
+        <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
+            <Link className="cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95" href={"/games/" + sport.toLowerCase()}>
+                <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-hidden border-3 border-gray-300">
+                    <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
+                        <CardTitle className="text-purple-500">{sport}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="mt-10">
+                        <img src={image} alt="image" className="min-h-10 max-h-50 min-w-10 max-w-50 h-25 w-25" />
+                    </CardContent>
+                    <CardFooter className="flex-col items-start gap-2 text-sm">
+                        <div className="flex gap-2 font-medium leading-none">
+                            {question}
+                        </div>
+                    </CardFooter>
+                </Card>
+            </Link>
+        </div >
 
 
     )
@@ -111,12 +115,12 @@ function HomeCard(
 function Home() {
     return (
         <div className="flex flex-wrap justify-center gap-10 mt-10">
-            <HomeCard image={basketball} description="Is Michael Jordan the GOAT?" sport="Basketball" />
-            <HomeCard image={soccer} description="Is it actually futból?" sport="Soccer" />
-            <HomeCard image={football} description="Are the Lions ever winning the Super Bowl?" sport="Football" />
-            <HomeCard image={baseball} description="Is hitting a baseball really the hardest thing to do in pro sports?" sport="Baseball" />
-            <HomeCard image={hockey} description="Can you skate?" sport="Hockey" />
-            <HomeCard image={tennis} description="Will the Big Three ever be topped?" sport="Tennis" />
+            <HomeCard image={basketball} question="Is Michael Jordan the GOAT?" sport="Basketball" />
+            <HomeCard image={soccer} question="Is it actually futból?" sport="Soccer" />
+            <HomeCard image={football} question="Are the Lions ever winning the Super Bowl?" sport="Football" />
+            <HomeCard image={hockey} question="Can you skate?" sport="Hockey" />
+            <HomeCard image={tennis} question="Will the Big Three ever be topped?" sport="Tennis" />
+            <HomeCard image={baseball} question="Is hitting a baseball really the hardest thing to do in pro sports?" sport="Baseball" />
             <JoinCard />
 
         </div>

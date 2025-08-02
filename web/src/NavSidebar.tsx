@@ -48,11 +48,11 @@ export function NavSidebar() { //need to change redirects to fetch currUser
 
     return (
         <Sidebar>
-            <SidebarHeader>Hello, {user?.username}<SidebarTrigger /></SidebarHeader>
+            <SidebarHeader><SidebarTrigger />Hello, {user?.username}</SidebarHeader>
             <SidebarContent className='min-w-52 bg-amber-200 text-purple-500'>
                 <SidebarMenu>
                     <SidebarMenuItem className="mb-2 mt-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/") ? "bg-purple-600 text-white" : ""}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl ${isActive("/home") ? "bg-purple-600 text-white" : ""}`}>
                             <a href="/">
                                 <House />
                                 <span>Home</span>
