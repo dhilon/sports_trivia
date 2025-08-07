@@ -147,7 +147,7 @@ export function getColumns(
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
-                            <DropdownMenuItem>Practice</DropdownMenuItem>
+                            <DropdownMenuItem>Practice Questions</DropdownMenuItem>
                             <DropdownMenuLabel className="italic font-light text-green-400">{game.time} seconds</DropdownMenuLabel>
                         </DropdownMenuContent>
                     </DropdownMenu>

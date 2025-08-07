@@ -310,10 +310,15 @@ def get_game(
                 return {"error": "Tower of Power is a one player game"}, 429
             if game.status == "finished":
                 return {"error": "Game is finished"}, 429
-            if time:  # TODO: fix in frontend
+            if time:
                 game.time = (datetime.now() - game.date).total_seconds()
                 game.save()
-            if status == "finished" or status == "in_progress":
+                msg = "time updated"
+            if (
+                status == "finished"
+                or status == "in_progress"
+                or status == "processing"
+            ):
                 if status == "in_progress":
                     game.date = datetime.now()
                 game.status = status
@@ -326,9 +331,9 @@ def get_game(
                 game.set_score(
                     current_user.id,
                     (
-                        score + game.get_scores()[str(current_user.id)]
+                        int(score) + game.get_scores()[str(current_user.id)]
                         if str(current_user.id) in game.get_scores()
-                        else score
+                        else int(score)
                     ),
                 )
                 sport_questions = [

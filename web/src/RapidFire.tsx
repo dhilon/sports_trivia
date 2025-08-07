@@ -53,9 +53,8 @@ export function PlayerStars({ players, scores }: { players: User[], scores: { [k
 }
 
 function RapidFire() {
-    const [isTextVisible, setIsTextVisible] = useState(false);
     const [inputValue, setInputValue] = useState("");
-    const [fail, setFail] = useState("Waiting for players to join the game.");
+    const [fail, setFail] = useState("Are you ready to play rapid fire?");
     const [sendDisabled, setSendDisabled] = useState(false);
     const clockRef = useRef<ClockHandle>(null);
     const [gameEnd, setGameEnd] = useState(false);
@@ -64,7 +63,7 @@ function RapidFire() {
     const { trigger: createGame, isMutating: isCreatingGame, error: createGameError } = useCreateGame();
 
     const params = useParams();
-    const { data: game, error, isLoading, mutate } = useSWR(`/games/` + params.id)
+    const { data: game, error, isLoading, mutate: mutateGame } = useSWR(`/games/` + params.id)
 
     const { user, isLoading: isLoadingUser, isError } = currUser();
 
@@ -74,8 +73,16 @@ function RapidFire() {
 
 
     useEffect(() => {
+        if (game?.players.length === 1) {
+            setFail("Waiting for players to join the game.");
+            setSendDisabled(true);
+        }
+        if (game?.players.length > 1) {
+            setFail("Are you ready to play rapid fire?");
+            setSendDisabled(false);
+        }
         if (game?.status === "finished") {
-            setFail("You lost the game!");
+            setFail("The game is over!");
             setSendDisabled(true);
         }
     }, [game]);
@@ -84,23 +91,30 @@ function RapidFire() {
         createGame({
             id: parseInt(game?.id ?? '0'),
             status: status,
-            time: (game?.time ?? 0) - (clockRef.current?.getTime() ?? 0),
-            score: game.scores[user?.id ?? 0] ?? 0,
+            time: 1,
+            score: 0,
             current_question: game.current_question
         });
+        if (status === "processing") {
+            setGameEnd(true);
+            updateGameStatus("finished");
+        }
+        if (status === "finished") {
+            setFail("The game is over!");
+            setSendDisabled(true);
+        }
     }
 
     useEffect(() => {
         if (gameEnd && user && game?.sport) {
             try {
-                user.scores[game.sport] += (game.scores[user.id] ?? 0); //posting twice for some reason
+                user.scores[game.sport] += ((game.scores[user.id] ?? 0) * 20) - 50; //TODO: will this update for all players?
                 createUser({
                     uName: user.username,
                     pwd: "",
                     scores: user.scores,
                     friends: []
                 });
-                updateGameStatus("finished");
                 setGameEnd(false);
             } catch (error) {
                 console.error(error);
@@ -109,7 +123,6 @@ function RapidFire() {
     }, [gameEnd, user, game?.sport, createUser]);
 
     const handleClockClick = () => {
-        setIsTextVisible(!isTextVisible);
     };
 
     const handleAnswerClick = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -120,23 +133,27 @@ function RapidFire() {
         if (check) {
             setInputValue('');
             setFail("You got this one right!");
-            createGame({ id: game.id, status: "", time: 1, score: 1, current_question: 0 });
-            mutate();
+            await createGame({ id: game.id, status: "", time: 1, score: 1, current_question: 0 });
+            mutateGame();
             clockRef.current?.reset();
+            if (game.scores[user?.id ?? 0] >= 4) { //doesn't update after mutate immediately
+                updateGameStatus("processing");
+            }
         }
         else {
             setFail("You got this one wrong :(");
+            setInputValue('');
             setSendDisabled(true);
         }
     };
 
-    const handleExpire = () => {
+    const handleExpire = async () => {
         setSendDisabled(true);
         if (fail != "You lost the game!") {
             setFail("You ran out of time");
             setSendDisabled(false);
-            createGame({ id: game.id, status: "", time: 1, score: 0, current_question: 0 });
-            mutate();
+            await createGame({ id: game.id, status: "", time: 1, score: 0.5, current_question: 0 });
+            mutateGame();
             clockRef.current?.reset();
         }
 
@@ -166,7 +183,7 @@ function RapidFire() {
                                             </Link>
                                         ) : (
                                             <h2 className="text-purple-500 text-2xl font-bold max-w-[45ch] text-center break-words">
-                                                {isTextVisible && <p>{game.questions.find((question: Question) => question.id === game.current_question)?.text}</p>}
+                                                {<p>{game.questions.find((question: Question) => question.id === game.current_question)?.text}</p>}
                                             </h2>
                                         )}
                                     </div>
@@ -192,7 +209,7 @@ function RapidFire() {
                                 </div>
 
                                 <div className="items-end flex justify-center w-fit ml-10 mr-10">
-                                    <MyClock onClick={handleClockClick} isR={!sendDisabled} stop={true} onExpire={handleExpire} ref={clockRef}></MyClock>
+                                    <MyClock onClick={handleClockClick} isR={true} stop={true} onExpire={handleExpire} ref={clockRef}></MyClock>
                                 </div>
                             </div>
                         </div>

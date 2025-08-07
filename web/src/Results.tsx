@@ -1,11 +1,13 @@
 "use client"
 
 import { TrendingUp, TrendingDown } from "lucide-react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./components/ui/card"
 import { SidebarLayout } from "./SidebarLayout"
-import { Link } from "wouter"
+import { Link, useParams } from "wouter"
+import useSWR from "swr"
 
 type Rank = {
+    id: number,
     rank: number,
     name: string,
     amount: number,
@@ -30,7 +32,8 @@ const ResultsRank = ({ rank }: ResultsRankProps) => {
                 {rank.time} average time to answer
             </div>
             <div className="flex-initial basis-2/7 border-r">
-                {rank.points} <TrendingUp />/<TrendingDown /> x points
+                {rank.points > 0 ? <TrendingUp color="green" /> : <TrendingDown color="red" />}
+                {rank.points} points
             </div>
         </div>
     )
@@ -38,84 +41,54 @@ const ResultsRank = ({ rank }: ResultsRankProps) => {
 
 
 
-const data: Rank[] = [
-    {
-        rank: 1,
-        points: 316,
-        name: "Dhilon",
-        amount: 99,
-        time: 3.79
-    },
-    {
-        rank: 2,
-        points: 242,
-        name: "Dhilon",
-        amount: 78,
-        time: 3.79
-    },
-    {
-        rank: 3,
-        points: 173,
-        name: "Maya",
-        amount: 77,
-        time: 3.79
-    },
-    {
-        rank: 4,
-        points: 874,
-        name: "Maya",
-        amount: 54,
-        time: 3.79
-    },
-    {
-        rank: 5,
-        points: 721,
-        name: "Dhilon",
-        amount: 41,
-        time: 3.79
-    },
-    {
-        rank: 6,
-        points: 721,
-        name: "Dhilon",
-        amount: 31,
-        time: 3.79
-    },
-    {
-        rank: 7,
-        points: 721,
-        name: "Dhilon",
-        amount: 10,
-        time: 3.79
-    },
-    {
-        rank: 11,
-        points: 721,
-        name: "Dhilon",
-        amount: 0,
-        time: 3.79
-    },
-]
-
 function Results() {
 
+    const params = useParams();
+    const { data: game, error, isLoading } = useSWR(`/games/` + params.id)
+
+    const data: Rank[] = []
+    for (const player of game?.players ?? []) {
+        data.push({
+            id: player.id,
+            rank: 0,
+            points: game.scores[player.id] * 20 - 50,
+            name: player.username,
+            amount: game.scores[player.id],
+            time: game.time,
+        })
+    }
+
+    data.sort((a, b) => b.points - a.points)
+    for (let i = 0; i < data.length; i++) {
+        data[i].rank = i + 1;
+    }
+
+    let qAnswered = 0
+    for (const player of game?.players ?? []) {
+        qAnswered += game.scores[player.id]
+    }
+
+
+    if (isLoading) return <div>loading...</div>
+    if (error) return <div>error</div>
     return (
         <div className="w-full flex">
             <div className="ml-auto mr-auto lg:w-200 ">
                 <Card >
                     <CardHeader>
                         <CardTitle>Scorecard</CardTitle>
-                        <CardDescription>Date, GameType, Amount of Players</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {data.map((rank) => (<ResultsRank rank={rank} ></ResultsRank>))}
+                        {data.map((rank, index) => (
+                            <ResultsRank key={rank.id || index} rank={rank} />
+                        ))}
                     </CardContent>
                     <CardFooter className="flex-col items-start gap-2 text-sm">
                         <div className="flex gap-2 font-medium leading-none">
-                            56 total questions
+                            {game.questions.length} total questions
                         </div>
                         <div className="leading-none text-muted-foreground">
-                            45 total answered
+                            {qAnswered} total answered
                         </div>
                     </CardFooter>
                 </Card>

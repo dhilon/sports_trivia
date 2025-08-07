@@ -90,7 +90,7 @@ function Pyramid() {
     useEffect(() => {
         if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += ((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
+                user.scores[game.sport] += Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
                 createUser({
                     uName: user.username,
                     pwd: "",
@@ -108,7 +108,7 @@ function Pyramid() {
 
     const handleExpire = () => { //just resets and keeps going
         setSendDisabled(true);
-        if (fail != "Pyramid already finished") {
+        if (fail != "Pyramid already finished" && fail != "You ran out of time") {
             setFail("You ran out of time");
             setShouldUpdateScore(true);
         }
@@ -172,11 +172,11 @@ function Pyramid() {
                     </Button>
                 </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {(user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId)} points gained
+                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
-                    {(user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)} points wagered
+                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0))} points wagered
                 </div>
 
             </div>

@@ -113,10 +113,10 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
         setSendDisabled(true);
         if (fail != "You lost the game!") {
             setFail("You ran out of time");
-            createGame({ id: game.id, status: "", time: 0, score: game.scores[user?.id ?? 0] - 1, current_question: 0 });
+            createGame({ id: game.id, status: "", time: 1, score: -1, current_question: 0 });
             mutate();
             setSendDisabled(true);
-            clockRef.current?.toggle();
+            clockRef.current?.reset();
         }
 
     }
@@ -141,13 +141,15 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
             mutate();
             // For correct answers, reset and start the clock
             clockRef.current?.reset();
+            if (game.scores[user?.id ?? 0] == 5) {
+                setGameEnd(true);
+            }
         }
         else {
             setFail("You got this one wrong :(");
-            createGame({ id: game.id, status: "", time: 0, score: game.scores[user?.id ?? 0] - 1, current_question: 0 });
+            createGame({ id: game.id, status: "", time: 1, score: -1, current_question: 0 });
             mutate();
             setSendDisabled(true);
-            clockRef.current?.toggle();
         }
     };
 
@@ -195,9 +197,9 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
                                 <div className="flex gap-2 font-medium leading-none">
                                     <form onSubmit={handleAnswerClick} className="flex gap-2">
                                         <Input placeholder="Answer:" className=" text-white border-white w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)}></Input>
-                                        <button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" disabled={sendDisabled}>
+                                        <Button type="submit" className="shadow-lg cursor-pointer h-6 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 rounded-lg" disabled={sendDisabled}>
                                             <SendHorizonalIcon></SendHorizonalIcon>
-                                        </button>
+                                        </Button>
                                     </form>
                                 </div>
 
