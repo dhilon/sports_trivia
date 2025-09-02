@@ -130,7 +130,7 @@ function RapidFire() {
 
         const check = await answerChecker({ question: game.questions.find((question: Question) => question.id === game.current_question)?.text ?? "", answer: inputValue });
 
-        if (check) {
+        if (check == "True") {
             setInputValue('');
             setFail("You got this one right!");
             await createGame({ id: game.id, status: "", time: 1, score: 1, current_question: 0 });

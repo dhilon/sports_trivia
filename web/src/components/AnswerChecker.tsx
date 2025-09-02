@@ -2,7 +2,7 @@ import useSWRMutation from "swr/mutation";
 import axios from "axios";
 
 type AnswerCheckerPayload = { question: string, answer: string };
-type AnswerCheckerResponse = boolean;
+type AnswerCheckerResponse = string;
 
 export default function useAnswerChecker() {
     return useSWRMutation<

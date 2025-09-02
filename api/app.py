@@ -18,10 +18,13 @@ import ast
 from Levenshtein import distance
 from dotenv import load_dotenv
 import os
+from google import genai
+from google.genai import types
+
 
 load_dotenv()
 
-openaiClient = OpenAI(api_key=os.getenv("API_KEY"))
+openaiClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 class JSONResponse(Response):
@@ -107,14 +110,23 @@ def answer_checker():
     question = str(payload.get("question"))
     answer = str(payload.get("answer"))
 
-    response = openaiClient.responses.create(
-        prompt={
-            "id": "pmpt_687d4f608c8081939c84691abec56d4b07d861c4d72929a0",
-            "version": "1",
-            "variables": {"question": question, "answer": answer},
-        }
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents="Check if the answer is correct for the question and only respond with the exact string 'True' or 'False': "
+        + question
+        + " Answer: "
+        + answer,
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(
+                thinking_budget=0
+            ),  # Disables thinking
+            temperature=0.0,
+        ),
     )
-    return response.output_text
+
+    return response.text or ""
 
 
 @app.route("/me/", methods=["GET"])

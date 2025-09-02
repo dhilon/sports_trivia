@@ -90,7 +90,7 @@ function Pyramid() {
     useEffect(() => {
         if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
+                user.scores[game.sport] += Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.02 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
                 createUser({
                     uName: user.username,
                     pwd: "",
@@ -123,7 +123,7 @@ function Pyramid() {
 
         const check = await answerChecker({ question: game?.questions[count - 1]?.text ?? "", answer: inputValue });
 
-        if (check) {
+        if (check == "True") {
             setHighlightedLevelId(count - 1);
             setInputValue('');
             setCount(count - 1);
@@ -172,7 +172,7 @@ function Pyramid() {
                     </Button>
                 </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.015 * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
+                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.02 * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
