@@ -39,8 +39,11 @@ import { Game } from "./types"
 
 
 export function getColumns(
+    games: Game[],
     onViewOpponents: (game: Game) => void
 ): ColumnDef<Game, any>[] {
+    const wins = games?.filter((g) => g.status === "win").length ?? 0;
+    const losses = games?.filter((g) => g.status === "loss").length ?? 0;
     return [
         {
             id: "select",
@@ -49,7 +52,40 @@ export function getColumns(
         },
         {
             accessorKey: "status",
-            header: "Status",
+            header: ({ column }) => {
+                const current = (column.getFilterValue() as string) || "";
+                const label = current === "win" ? "W" : current === "loss" ? "L" : "Filter";
+                return (
+                    <div className="flex items-center gap-2">
+                        <span>Status</span>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">{label}</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="right" align="start" sideOffset={6}>
+                                <DropdownMenuItem
+                                    className={`${current === "" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue(undefined)}
+                                >
+                                    All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "win" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("win")}
+                                >
+                                    W ({wins})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "loss" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("loss")}
+                                >
+                                    L ({losses})
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
+            },
             cell: ({ row }) => {
                 // force‐cast to string
                 const str = row.getValue("status") as string;
@@ -61,14 +97,52 @@ export function getColumns(
         {
             accessorKey: "type",
             header: ({ column }) => {
+                const current = (column.getFilterValue() as string) || "";
+                const ath = games?.filter((g) => g.type === "around_the_horn").length ?? 0;
+                const rf = games?.filter((g) => g.type === "rapid_fire").length ?? 0;
+                const top = games?.filter((g) => g.type === "tower_of_power").length ?? 0;
+                const label = current === "around_the_horn" ? "Around" : current === "rapid_fire" ? "Rapid" : current === "tower_of_power" ? "Tower" : "Filter";
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Game Type
-                        <ArrowUpDown />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        >
+                            Game Type
+                            <ArrowUpDown />
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">{label}</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="right" align="start" sideOffset={6}>
+                                <DropdownMenuItem
+                                    className={`${current === "" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue(undefined)}
+                                >
+                                    All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "around_the_horn" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("around_the_horn")}
+                                >
+                                    Around ({ath})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "rapid_fire" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("rapid_fire")}
+                                >
+                                    Rapid ({rf})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "tower_of_power" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("tower_of_power")}
+                                >
+                                    Tower ({top})
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 )
             },
             cell: ({ row }) => {
@@ -82,14 +156,75 @@ export function getColumns(
         {
             accessorKey: "sport",
             header: ({ column }) => {
+                const current = (column.getFilterValue() as string) || "";
+                const basketball = games?.filter((g) => g.sport === "basketball").length ?? 0;
+                const soccer = games?.filter((g) => g.sport === "soccer").length ?? 0;
+                const baseball = games?.filter((g) => g.sport === "baseball").length ?? 0;
+                const football = games?.filter((g) => g.sport === "football").length ?? 0;
+                const tennis = games?.filter((g) => g.sport === "tennis").length ?? 0;
+                const hockey = games?.filter((g) => g.sport === "hockey").length ?? 0;
+                const label = current
+                    ? current.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+                    : "Filter";
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Sport
-                        <ArrowUpDown />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        >
+                            Sport
+                            <ArrowUpDown />
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">{label}</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="right" align="start" sideOffset={6}>
+                                <DropdownMenuItem
+                                    className={`${current === "" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue(undefined)}
+                                >
+                                    All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "basketball" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("basketball")}
+                                >
+                                    Bball ({basketball})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "soccer" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("soccer")}
+                                >
+                                    Soccer ({soccer})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "baseball" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("baseball")}
+                                >
+                                    Baseball ({baseball})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "football" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("football")}
+                                >
+                                    Football ({football})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "tennis" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("tennis")}
+                                >
+                                    Tennis ({tennis})
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className={`${current === "hockey" ? "bg-gradient-to-r from-purple-400 to-pink-400 text-white" : ""}`}
+                                    onClick={() => column.setFilterValue("hockey")}
+                                >
+                                    Hockey ({hockey})
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 )
             },
             cell: ({ row }) => <div className="capitalize">{row.getValue("sport")}</div>,
@@ -102,12 +237,12 @@ export function getColumns(
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        Date
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        <div className="text-right">Date</div>
+                        <ArrowUpDown />
                     </Button>
                 )
             },
-            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+            cell: ({ row }) => <div className="text-right flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#ffffff73] text-[#101418] text-sm font-medium leading-normal w-full">{row.getValue("date")}</div>,
             sortingFn: (rowA, rowB, columnId) => {
                 const dateA = new Date(rowA.getValue(columnId));
                 const dateB = new Date(rowB.getValue(columnId));
@@ -117,6 +252,7 @@ export function getColumns(
         {
             id: "actions",
             enableHiding: false,
+            header: "Total games: " + (games?.length ?? 0),
             cell: ({ row }) => {
                 const game = row.original
                 const gameType = row.getValue("type");
@@ -133,7 +269,7 @@ export function getColumns(
                                 <MoreHorizontal />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent side="right" align="start" sideOffset={6}>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
                                 onClick={() => navigate("/games/" + sport + "/" + lgameType + "/" + gameId)}
@@ -160,8 +296,11 @@ export function getColumns(
 function Gamelog() {
 
     const params = useParams();
+    const name = params.name;
 
-    const { data: games = [], error, isLoading } = useSWR<Game[]>("/users/" + params.name + "/games");
+    const { data: games = [], error, isLoading } = useSWR<Game[]>(
+        name ? "/users/" + name + "/games" : null
+    );
 
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -178,7 +317,7 @@ function Gamelog() {
         // do anything: navigate, open a modal, etc.
     };
 
-    const columns = getColumns((game) => handleOpps(game));
+    const columns = getColumns(games, (game) => handleOpps(game));
 
 
 
@@ -186,9 +325,9 @@ function Gamelog() {
         data: games,
         columns,
         onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
@@ -200,7 +339,12 @@ function Gamelog() {
         },
     })
 
-    if (error) return <Redirect to="/" />;
+    if (error) {
+        // If session expired, send to login; otherwise show inline error
+        const status = (error as any)?.response?.status;
+        if (status === 401) return <Redirect to="/login" />;
+        return <div className="p-4 text-red-600">Failed to load gamelog.</div>
+    }
     if (isLoading) return <div>loading...</div>
 
     return (

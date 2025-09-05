@@ -37,7 +37,7 @@ function Pyramid() {
 
 
     const params = useParams();
-    const { data: game, error, isLoading } = useSWR<Game>(`/games/${params.id}`) //still need to sort by sport
+    const { data: game, error, isLoading, mutate: mutateGame } = useSWR<Game>(`/games/${params.id}`) //still need to sort by sport
 
     const [inputValue, setInputValue] = useState('');
     const [count, setCount] = useState(0);
@@ -65,7 +65,7 @@ function Pyramid() {
             id: parseInt(game?.id ?? '0'),
             status: status,
             time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
-            score: Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0)),
+            score: Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0)),
             current_question: game?.questions[count - 1].id ?? 0
         });
         //update question difficulty
@@ -74,14 +74,15 @@ function Pyramid() {
     // Keep the initial setup effect
     useEffect(() => {
         const total = game?.questions.length ?? 0;
+        setCount(total);
         game?.questions.sort((a, b) =>
             b.difficulty - a.difficulty || b.id - a.id
         );
 
         if (game?.status === "finished") {
             const idx = game?.questions.findIndex(q => q.id === game?.current_question) ?? -1;
-            const currentIndex = idx + 1; // 1-based completed count
-            setHighlightedLevelId(total - currentIndex); // parentheses matter
+            const currentIndex = idx; // 1-based completed count
+            setHighlightedLevelId(currentIndex); // parentheses matter
             setSendDisabled(true);
             setFail("Pyramid already finished");
         } else {
@@ -100,7 +101,7 @@ function Pyramid() {
     useEffect(() => {
         if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0));
+                user.scores[game.sport] += Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0));
                 createUser({
                     uName: user.username,
                     pwd: "",
@@ -116,7 +117,7 @@ function Pyramid() {
 
     }, [shouldUpdateScore, user, game?.sport, highlightedLevelId, createUser]);
 
-    const handleExpire = () => { //just resets and keeps going
+    const handleExpire = () => {
         setSendDisabled(true);
         if (fail != "Pyramid already finished" && fail != "You ran out of time") {
             setFail("You ran out of time");
@@ -136,6 +137,12 @@ function Pyramid() {
                 throw new Error("Must be logged in to create game");
             }
             const id = (await newGame({ type: "tower_of_power", sport: game?.sport ?? "basketball" })).id;
+            mutateGame();
+            clockRef.current?.reset();
+            clockRef.current?.toggle();
+            setInputValue('');
+            setSendDisabled(false);
+            setFail("");
             navigate("/games/" + game?.sport + "/tower_of_power/" + id);
         } catch (error: any) {
             // 4) On 4xx/5xx, display message
@@ -156,7 +163,7 @@ function Pyramid() {
             clockRef.current?.reset();
         }
         else {
-            setFail("You failed the pyramid");
+            setFail("You failed the pyramid! The correct answer is " + check);
             setSendDisabled(true);
             clockRef.current?.toggle();
             setShouldUpdateScore(true);
@@ -198,7 +205,7 @@ function Pyramid() {
                     </Button>
                 </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
+                    {Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
@@ -220,7 +227,7 @@ function Pyramid() {
                     >
                         <HomeIcon />
                     </a>
-                    <button
+                    <button className="shadow-lg cursor-pointer transition-all hover:bg-gray-100  active:scale-95 rounded-lg ml-10"
                         onClick={e => handleRefreshClick(e)}
                         style={{
                             pointerEvents: !sendDisabled ? 'none' : 'auto',

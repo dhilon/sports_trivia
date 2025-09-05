@@ -22,7 +22,7 @@ function App() {
     axios.defaults.withCredentials = true;
     const instance = axios.create({
       baseURL: 'http://localhost:5000/',
-      timeout: 1000,
+      timeout: 10000,
     });
     const response = (await instance.get(url)).data
     return response

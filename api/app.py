@@ -136,7 +136,7 @@ def answer_checker():
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents="Check if the answer is correct for the question and only respond with the exact string 'True' or 'False': "
+        contents="Check if the answer is correct for the question and only respond with the exact string 'True' if correct or the actual answer if incorrect: "
         + question
         + " Answer: "
         + answer,
