@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { SidebarLayout } from "./SidebarLayout"
 import { Input } from "@/components/ui/input"
-import { HomeIcon, SendHorizonalIcon } from "lucide-react"
+import { HomeIcon, RefreshCcwIcon, SendHorizonalIcon } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { useParams } from "wouter"
 import useSWR from "swr"
@@ -13,6 +13,8 @@ import { currUser } from "./components/CurrUser"
 import useCreateGame from "./components/CreateGame"
 import useEditUser from "./components/EditUser"
 import useAnswerChecker from "./components/AnswerChecker"
+import { navigate } from "wouter/use-browser-location"
+import useNewGame from "./components/NewGame"
 
 
 
@@ -52,6 +54,8 @@ function Pyramid() {
 
     const { trigger: updateGame, isMutating: isMutatingGame } = useCreateGame();
 
+    const { trigger: newGame, isMutating: isMutatingNewGame } = useNewGame();
+
     const { trigger: answerChecker, isMutating: isCheckingAnswer, error: answerCheckerError } = useAnswerChecker();
 
 
@@ -61,28 +65,34 @@ function Pyramid() {
             id: parseInt(game?.id ?? '0'),
             status: status,
             time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
-            score: (60 * ((game?.questions.length ?? 0) - highlightedLevelId)),
+            score: Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0)),
             current_question: game?.questions[count - 1].id ?? 0
         });
+        //update question difficulty
     }
 
     // Keep the initial setup effect
     useEffect(() => {
-        setCount(game?.questions.length ?? 0);
+        const total = game?.questions.length ?? 0;
         game?.questions.sort((a, b) =>
             b.difficulty - a.difficulty || b.id - a.id
         );
 
         if (game?.status === "finished") {
-            const currentQuestionIndex = (game?.questions.findIndex(q => q.id == game?.current_question) ?? -2) + 1;
-            setHighlightedLevelId(currentQuestionIndex);
+            const idx = game?.questions.findIndex(q => q.id === game?.current_question) ?? -1;
+            const currentIndex = idx + 1; // 1-based completed count
+            setHighlightedLevelId(total - currentIndex); // parentheses matter
             setSendDisabled(true);
             setFail("Pyramid already finished");
+        } else {
+            const currentIndex = 0; // not started
+            setHighlightedLevelId(total - currentIndex); // parentheses matter
         }
-        else {
-            const currentQuestionIndex = 0;
-            setHighlightedLevelId(game?.questions.length ?? 0 - currentQuestionIndex);
-        }
+        //if (count === 0 && fail != "You conquered the pyramid!") {
+        //setFail("You conquered the pyramid!");
+        //setSendDisabled(true);
+        //setShouldUpdateScore(true);
+        //}
 
     }, [game]);
 
@@ -90,7 +100,7 @@ function Pyramid() {
     useEffect(() => {
         if (shouldUpdateScore && user && game?.sport) {
             try {
-                user.scores[game.sport] += Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.02 * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0)); //posting twice for some reason
+                user.scores[game.sport] += Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0));
                 createUser({
                     uName: user.username,
                     pwd: "",
@@ -117,6 +127,22 @@ function Pyramid() {
     const handleClockClick = () => {
     };
 
+    async function handleRefreshClick(e: React.FormEvent) {
+        e.preventDefault();
+
+        // 2) Send credentials to Flask
+        try {
+            if (!user?.username) {
+                throw new Error("Must be logged in to create game");
+            }
+            const id = (await newGame({ type: "tower_of_power", sport: game?.sport ?? "basketball" })).id;
+            navigate("/games/" + game?.sport + "/tower_of_power/" + id);
+        } catch (error: any) {
+            // 4) On 4xx/5xx, display message
+            console.log(error.response?.data?.error);
+        }
+    }
+
 
     const handleLevelClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -138,7 +164,7 @@ function Pyramid() {
     };
 
     if (error || isError || answerCheckerError) return <div>Error: {errorMessage}</div>
-    if (isLoading || isLoadingUser || isMutating || isMutatingGame) return <div>loading...</div>
+    if (isLoading || isLoadingUser || isMutating || isMutatingGame || isMutatingNewGame) return <div>loading...</div>
 
 
     const gameWithLevels = {
@@ -172,11 +198,11 @@ function Pyramid() {
                     </Button>
                 </form>
                 <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.02 * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
+                    {Math.floor(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10) * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
                 </div>
                 <div className="mb-4"></div>
                 <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
-                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.01 * (game?.questions.length ?? 0))} points wagered
+                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0))} points wagered
                 </div>
 
             </div>
@@ -194,6 +220,16 @@ function Pyramid() {
                     >
                         <HomeIcon />
                     </a>
+                    <button
+                        onClick={e => handleRefreshClick(e)}
+                        style={{
+                            pointerEvents: !sendDisabled ? 'none' : 'auto',
+                            color: !sendDisabled ? 'gray' : 'blue',
+                        }}
+                        aria-disabled={!sendDisabled}
+                    >
+                        <RefreshCcwIcon />
+                    </button>
                 </div>
                 <div className="flex items-start text-red-500">
                     {fail || (isCheckingAnswer && "Checking answer...")}

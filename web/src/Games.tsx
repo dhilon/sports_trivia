@@ -13,32 +13,12 @@ import { useParams } from "wouter"
 import tower from "tower.jpeg"
 import fire from "fire.jpeg"
 import around from "around.jpeg"
-import axios from "axios";
-import useSWRMutation from "swr/mutation";
+
 import { navigate } from "wouter/use-browser-location"
 import { currUser } from "./components/CurrUser"
+import useNewGame from "./components/NewGame"
 
-type CreateGamePayload = { type: string; sport: string };
-type CreateGameResponse = { id: number };
 
-function useCreateGame() {
-    return useSWRMutation<
-        CreateGameResponse,
-        Error,
-        "/games",
-        CreateGamePayload
-    >(
-        "/games",
-        async (_url, { arg: { type, sport } }) => {
-            const res = await axios.post<CreateGameResponse>(
-                "http://localhost:5000/games/",
-                { type: type, sport: sport },
-                { withCredentials: true }
-            );
-            return res.data;
-        }
-    );
-}
 
 type Params = { sport: string };
 
@@ -48,7 +28,7 @@ function GameCard(
 ) {
     const params = useParams();
     const { sport } = useParams<Params>();
-    const { trigger: createGame, isMutating } = useCreateGame();
+    const { trigger: createGame, isMutating } = useNewGame();
     const { user, isLoading, isError, errorMessage } = currUser();
 
     async function handleSubmit(e: React.FormEvent) {
@@ -102,8 +82,8 @@ function Games() { //rapid fire and around the horn need to generate new games, 
     return (
         <div className="flex flex-wrap flex-row w-fit ml-auto mr-auto gap-10 mt-50">
             <GameCard name="Tower of Power" image={tower} description="Who wants to be a millionaire?" url="/tower_of_power/" analogy="It's like scaling Mount Fuji" />
-            <GameCard name="Rapid Fire" image={fire} description="First to answer wins!" url="/rapid_fire/" analogy="... requires rapid response!" />
-            <GameCard name="Around the Horn" image={around} description="Turn based" url="/around_the_horn/" analogy="Duck duck goose!" />
+            <GameCard name="Rapid Fire" image={fire} description="**NOT WORKING**" url="/rapid_fire/" analogy="... requires rapid response!" />
+            <GameCard name="Around the Horn" image={around} description="**NOT WORKING**" url="/around_the_horn/" analogy="Duck duck goose!" />
 
         </div>
 

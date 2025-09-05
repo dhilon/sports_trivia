@@ -74,6 +74,7 @@ class Question(BaseModel):
     answer = CharField()
     sport = CharField()
     difficulty = IntegerField(default=50)  # Default to middle difficulty
+    num_answers = IntegerField(default=100)
 
 
 class Game(

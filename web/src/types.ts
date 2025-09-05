@@ -19,7 +19,8 @@ export type Question = {
     id: number,
     text: string,
     answer: string,
-    level?: number
+    level?: number,
+    num_answers: number
 }
 
 export type User = {

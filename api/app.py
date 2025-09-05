@@ -13,7 +13,8 @@ from flask_login import (
 from datetime import datetime, timedelta
 from init import init_db
 from peewee import IntegrityError
-from openai import OpenAI
+
+# from openai import OpenAI
 import ast
 from Levenshtein import distance
 from dotenv import load_dotenv
@@ -24,7 +25,7 @@ from google.genai import types
 
 load_dotenv()
 
-openaiClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# openaiClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 class JSONResponse(Response):
@@ -93,15 +94,36 @@ def load_user(user_id: str):
 
 def question_generator(league, num_tokens):
 
-    response = openaiClient.responses.create(
-        prompt={
-            "id": "pmpt_687d4be62a8c8193b142093834112f980375678bfb02a3a4",
-            "version": "5",
-            "variables": {"number": str(num_tokens), "league": league},
-        }
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+    contents = (
+        "Give me "
+        + str(num_tokens)
+        + " questions with an bell-curve distribution of difficult questions about the professional sports league for "
+        + league
+        + " in the following format: {'question': str, 'answer': str, 'difficulty': int}. "
+        + "-Take out the first greeting sentence"
+        + "-don't have numbers before the question"
+        + "-separate each object with a new line"
+        + "-make the max answer length 50 characters"
+        + "-describe the difficulty of the question on a scale of 1-100 with 1 being easy and 100 being hard. For example:"
+        + "'{'question': 'how many players on a basketball court at a time?', 'answer' : '5', 'difficulty': 5}"
+        + "Don't use this question"
+        + "Make sure that each answer is accurate by using web search"
     )
 
-    return response.output_text
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=contents,
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(
+                thinking_budget=0
+            ),  # Disables thinking
+            temperature=0.5,
+        ),
+    )
+
+    return response.text or ""
 
 
 @app.route("/answer_checker/", methods=["POST"])
@@ -265,12 +287,13 @@ def all_games():
                             continue  # Skip this question if it's too similar to existing ones
 
                         question_answer = question["answer"].split(",")[0]
+                        question_difficulty = question["difficulty"]
                         Question.create(
                             id=recent_question().id + 1,
                             sport=sport,
                             text=question_text,
                             answer=question_answer,
-                            difficulty=50,
+                            difficulty=question_difficulty,
                         )
 
             sport_questions = [
