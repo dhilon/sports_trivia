@@ -19,8 +19,8 @@ A full-stack sports trivia game built with a React frontend and a Flask backend.
 ## Tech Stack
 
 - **Frontend**: React, SWR (for data fetching), Tailwind CSS (for styling), Vite or similar dev server
-- **Backend**: Flask (Python), REST endpoints, possibly a simple database or storage
-- **Authentication / Users**: basic username/password (or stubbed), tracking of users, friends, scores
+- **Backend**: Flask (Python), REST endpoints, a simple postgres database with a peewee ORM and storage
+- **Authentication / Users**: basic username/password (or stubbed), tracking of users, friends, scores, games, with passwords stored in the builtin flask login auth
 - **Modes**: Pyramid, Rapid Fire, Around The Horn, etc., each with their own UI and timer logic
 
 ---
@@ -33,21 +33,21 @@ Here are some screenshots of the application and descriptions of what you see in
 
 ### Sport Cards / Home Page
 
-![Sport Cards View](/path/to/Screenshot_2025-09-14_at_4.57.52_PM.png)  
+![Sport Cards View](<img width="2048" height="1107" alt="image" src="https://github.com/user-attachments/assets/152a99fc-2a23-4093-b139-734bb65d45e8" />)  
 > **Description**: This is the home/sports card view. Each card represents a sport (e.g. Basketball, Soccer, Football, Hockey, Tennis, Baseball). On the cards are images and teaser questions. One card is “Join Game” which allows entering a code to join an existing game.
 
 ---
 
 ### Game History Table / Completed / In-Progress Games
 
-![Game History Table](/path/to/Screenshot_2025-09-14_at_4.58.26_PM.png)  
+![Game History Table](<img width="2048" height="1106" alt="image" src="https://github.com/user-attachments/assets/9cbff0ba-11c0-49e5-bd7a-fa4c37556a2a" />)  
 > **Description**: A table listing past games and live/in-progress ones. Columns include Status, Game Type, Sport, Date, and filtering/sorting capabilities. Shows total number of games at top right.
 
 ---
 
 ### Pyramid / Tower-of-Power Game Mode
 
-![Pyramid Game Mode](/path/to/Screenshot_2025-09-14_at_4.58.44_PM.png)  
+![Pyramid Game Mode](<img width="2048" height="1106" alt="image" src="https://github.com/user-attachments/assets/38d1d9ff-536a-4b2d-9d94-cd20ec76b594" />)  
 > **Description**: The “Tower of Power” or Pyramid game mode: multiple levels of questions stacking visually. Shows which levels are completed. A timer is shown for the current question, along with input field to answer. Displays points gained and wagered.
 
 ---
@@ -180,8 +180,5 @@ If you include this file in your repo (e.g. `/README.md`), it will help other co
 
 ---
 
-<img width="2048" height="1107" alt="image" src="https://github.com/user-attachments/assets/152a99fc-2a23-4093-b139-734bb65d45e8" />
-<img width="2048" height="1106" alt="image" src="https://github.com/user-attachments/assets/9cbff0ba-11c0-49e5-bd7a-fa4c37556a2a" />
-<img width="2048" height="1106" alt="image" src="https://github.com/user-attachments/assets/38d1d9ff-536a-4b2d-9d94-cd20ec76b594" />
 
 
