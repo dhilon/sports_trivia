@@ -150,6 +150,8 @@ def answer_checker():
             temperature=0.0,
         ),
     )
+    if response.text != "True":
+        print("Hi!")
 
     return response.text or ""
 
