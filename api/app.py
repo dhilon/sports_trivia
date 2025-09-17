@@ -388,6 +388,7 @@ def get_game(
                         else int(score)
                     ),
                 )
+            if status != "finished":
                 sport_questions = [
                     x for x in Question.select().where(Question.sport == game.sport)
                 ]

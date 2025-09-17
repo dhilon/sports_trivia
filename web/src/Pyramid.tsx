@@ -66,7 +66,7 @@ function Pyramid() {
             status: status,
             time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
             score: Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0)),
-            current_question: game?.questions[count - 1].id ?? 0
+            current_question: highlightedLevelId ?? 0
         });
         //update question difficulty
     }
@@ -78,8 +78,7 @@ function Pyramid() {
         game?.questions.sort((a, b) =>
             b.difficulty - a.difficulty || b.id - a.id
         );
-        const idx = game?.questions.findIndex(q => q.id === game?.current_question) ?? -1;
-        const currentIndex = idx; //TODO: this is wrong
+        const currentIndex = game?.current_question ?? -1;
 
         if (game?.status === "finished") {
             // 1-based completed count
