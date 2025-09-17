@@ -12,11 +12,10 @@ from flask_login import (
 )
 from datetime import datetime, timedelta
 from init import init_db
-from peewee import IntegrityError
+
 
 # from openai import OpenAI
 import ast
-from Levenshtein import distance
 from dotenv import load_dotenv
 import os
 from google import genai
@@ -96,6 +95,8 @@ def question_generator(league, num_tokens):
 
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
+    old_questions = Question.select().where(Question.sport == league)
+
     contents = (
         "Give me "
         + str(num_tokens)
@@ -110,6 +111,8 @@ def question_generator(league, num_tokens):
         + "'{'question': 'how many players on a basketball court at a time?', 'answer' : '5', 'difficulty': 5}"
         + "Don't use this question"
         + "Make sure that each answer is accurate by using web search"
+        + "Don't use these questions: "
+        + "\n".join([q.text for q in old_questions])
     )
 
     response = client.models.generate_content(
@@ -149,6 +152,33 @@ def answer_checker():
     )
 
     return response.text or ""
+
+
+def difficulty_calculator(rawqs):
+
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+    qs = list(map(lambda q: q.text, rawqs))
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents="Given the list of questions (all separated by a new line), give them a difficulty score from 1 to 100 that is roughly normally distributed returned in a list format with just the numbers separated by a new line: "
+        + "\n".join(qs),
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(
+                thinking_budget=0
+            ),  # Disables thinking
+            temperature=0.0,
+        ),
+    )
+
+    ratings = response.text.split("\n")
+    for i in range(len(ratings)):
+        Question.update(difficulty=int(ratings[i])).where(
+            Question.id == rawqs[i].id
+        ).execute()
+
+    return 1
 
 
 @app.route("/me/", methods=["GET"])
@@ -270,22 +300,6 @@ def all_games():
                         except:
                             continue
 
-                        # Check if question is similar to existing questions
-                        existing_questions = Question.select().where(
-                            Question.sport == sport
-                        )
-                        is_similar = False
-                        for existing_q in existing_questions:
-                            if (
-                                distance(question_text, existing_q.text)
-                                < len(question_text) * 0.2
-                            ):
-                                is_similar = True
-                                break
-
-                        if is_similar:
-                            continue  # Skip this question if it's too similar to existing ones
-
                         question_answer = question["answer"].split(",")[0]
                         question_difficulty = question["difficulty"]
                         Question.create(
@@ -300,6 +314,7 @@ def all_games():
                 x for x in Question.select().where(Question.sport == sport)
             ]
             rqs = random.sample(sport_questions, num_questions)
+            one = difficulty_calculator(rqs)
             rqs.sort(key=lambda x: (x.difficulty, x.id))
             game.current_question = rqs[0].id
             if game.type == "around_the_horn":

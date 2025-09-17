@@ -78,22 +78,23 @@ function Pyramid() {
         game?.questions.sort((a, b) =>
             b.difficulty - a.difficulty || b.id - a.id
         );
+        const idx = game?.questions.findIndex(q => q.id === game?.current_question) ?? -1;
+        const currentIndex = idx; //TODO: this is wrong
 
         if (game?.status === "finished") {
-            const idx = game?.questions.findIndex(q => q.id === game?.current_question) ?? -1;
-            const currentIndex = idx; // 1-based completed count
-            setHighlightedLevelId(currentIndex); // parentheses matter
+            // 1-based completed count
+            setHighlightedLevelId(currentIndex);
             setSendDisabled(true);
             setFail("Pyramid already finished");
         } else {
-            const currentIndex = 0; // not started
-            setHighlightedLevelId(total - currentIndex); // parentheses matter
+            const currentIndex = 0;
+            setHighlightedLevelId(total - currentIndex);
         }
-        //if (count === 0 && fail != "You conquered the pyramid!") {
-        //setFail("You conquered the pyramid!");
-        //setSendDisabled(true);
-        //setShouldUpdateScore(true);
-        //}
+        if (currentIndex === 0 && fail != "You conquered the pyramid!") {
+            setFail("You conquered the pyramid!");
+            setSendDisabled(true);
+            setShouldUpdateScore(true);
+        }
 
     }, [game]);
 
