@@ -150,6 +150,9 @@ def auth_google_callback():
             )
 
     login_user(user)
+    scores = default_scores()
+    for sport in scores:
+        Score.create(userId=user, sport=sport, score=scores[sport])
 
     return redirect("http://localhost:5173/home")
 

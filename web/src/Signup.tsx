@@ -24,7 +24,7 @@ function Signup() {
     const [pwd, setPwd] = useState("");
     const [check, setCheck] = useState("");
     const [errMsg, setErrMsg] = useState("");
-
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
 
     const { trigger: createUser, isMutating } = useCreateUser();
@@ -129,7 +129,7 @@ function Signup() {
                             </Button>
 
                             {/* Optional OAuth */}
-                            <Button variant="outline" className="w-full" onClick={() => navigate("/login/google")}>
+                            <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>
                                 Sign up with Google
                             </Button>
                         </div>
