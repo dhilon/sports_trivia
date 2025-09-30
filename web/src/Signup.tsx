@@ -129,7 +129,7 @@ function Signup() {
                             </Button>
 
                             {/* Optional OAuth */}
-                            <Button variant="outline" className="w-full">
+                            <Button variant="outline" className="w-full" onClick={() => navigate("/login/google")}>
                                 Sign up with Google
                             </Button>
                         </div>

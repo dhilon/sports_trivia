@@ -24,6 +24,8 @@ function Login({ //need to add a login check for if the user is already logged i
     const [errMsg, setErrMsg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+
 
     const { trigger: loginUser, isMutating } = useLoginUser();
 
@@ -98,7 +100,7 @@ function Login({ //need to add a login check for if the user is already logged i
                             <Button disabled={isLoading} type="submit" className="w-full" >
                                 {isLoading || isMutating ? "Processing…" : "Log In"}
                             </Button>
-                            <Button variant="outline" className="w-full" >
+                            <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>
                                 Login with Google
                             </Button>
                         </div>

@@ -8,7 +8,8 @@ if db.is_closed():
 # Add the new column
 try:
     # Add player_scores column to Game table
-    db.execute_sql("ALTER TABLE question ADD COLUMN num_answers INTEGER DEFAULT 100;")
+    db.execute_sql('ALTER TABLE "user" ADD COLUMN google_sub varchar(255);')
+    db.execute_sql('ALTER TABLE "user" ADD COLUMN email varchar(255);')
     print("Successfully added current_question column to game table!")
 except Exception as e:
     print(f"Error adding column: {e}")

@@ -1,5 +1,6 @@
 import random
-from flask import Flask, request, Response, abort, jsonify, session
+from sqlite3 import IntegrityError
+from flask import Flask, request, Response, abort, jsonify, session, url_for, redirect
 import datetime
 from flask_cors import CORS
 from models import db, User, Question, Game, Score, Friends, default_scores
@@ -12,6 +13,7 @@ from flask_login import (
 )
 from datetime import datetime, timedelta
 from init import init_db
+from authlib.integrations.flask_client import OAuth
 
 
 # from openai import OpenAI
@@ -39,6 +41,8 @@ CORS(
     resources={r"/*": {"origins": "http://localhost:5173"}},
 )
 app.config.update(
+    GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID"),
+    GOOGLE_CLIENT_SECRET=os.getenv("GOOGLE_CLIENT_SECRET"),
     SECRET_KEY=os.getenv("SECRET_KEY"),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",  # Change from "None" for localhost
@@ -49,6 +53,16 @@ app.config.update(
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
+VITE_API_BASE = "http://localhost:5000"
+oauth = OAuth(app)
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    api_base_url="https://openidconnect.googleapis.com/v1/",
+    client_kwargs={"scope": "openid email profile"},
+)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5000)
@@ -89,6 +103,55 @@ def load_user(user_id: str):
     except Exception as e:
         app.logger.error("user_loader exception: %s", e)
         return None
+
+
+@app.get("/login/google")
+def login_google():
+    redirect_uri = "http://localhost:5000/auth/google/callback"
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@app.get("/auth/google/callback")
+def auth_google_callback():
+    try:
+        token = oauth.google.authorize_access_token()
+    except Exception as e:
+        app.logger.exception("Token exchange failed")
+        return (f"OAuth token exchange failed: {e}", 400)
+
+    # Option A: parse ID token claims without an extra request
+    try:
+        claims = oauth.google.parse_id_token(token)
+    except Exception:
+        claims = None
+
+    # Option B (fallback): call the userinfo endpoint
+    try:
+        userinfo = claims or oauth.google.get("userinfo").json()
+    except Exception as e:
+        app.logger.exception("Fetching userinfo failed")
+        return (f"Fetching userinfo failed: {e}", 400)
+
+    sub = userinfo["sub"]
+    email = userinfo["email"]
+
+    user = User.get_or_none(User.google_sub == sub)
+    if not user:
+        user = User.get_or_none(User.email == email)
+        if user:
+            user.google_sub = sub
+            user.username = userinfo.get("name")
+            user.save()
+        else:
+            user = User.create(
+                google_sub=sub,
+                email=email,
+                username=userinfo.get("name"),
+            )
+
+    login_user(user)
+
+    return redirect("http://localhost:5173/home")
 
 
 def question_generator(league, num_tokens):
@@ -248,10 +311,10 @@ def all_users():
             if User.get_or_none(username=username):
                 return {"error": "username already exists"}, 400
             user = User.create(
+                id=recent_user().id + 1,
                 username=username,
                 password=password,
                 created_at=datetime.now(),
-                id=recent_user().id + 1,
             )
             scores = default_scores()
             for sport in scores:
@@ -573,7 +636,6 @@ def login():
         return {"error": "incorrect password"}, 401
 
     login_user(user)
-    session["me"] = "me"
     return {"id": user.id, "username": user.username}, 200
 
 
