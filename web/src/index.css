@@ -105,13 +105,12 @@
 }
 
 .gradient-background {
-  background-image: linear-gradient(to right, #ff7e5f, #feb47b);
-  height: 100%;
+  /* Soft pastel background similar to mockup */
+  background-image:
+    radial-gradient(1200px 800px at 20% 10%, rgba(255, 255, 255, 0.95) 0%, rgba(250, 246, 255, 0.85) 40%, rgba(248, 241, 235, 0.8) 100%),
+    linear-gradient(180deg, #fbf7ff 0%, #f7f2ee 100%);
+  min-height: 100vh;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
   margin: 0;
   padding: 0;
 }

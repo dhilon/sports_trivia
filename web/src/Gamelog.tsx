@@ -348,80 +348,89 @@ function Gamelog() {
     if (isLoading) return <div>loading...</div>
 
     return (
-        <div className="flex justify-center">
-            <div className="w-full max-w-[1300px] rounded-lg">
-                <div className="border-2 border-gray-200 overflow-y-auto" style={{ maxHeight: '90vh' }}>
-                    <Table>
-                        <TableHeader className="sticky top-0 bg-gray-300 z-1">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </TableHead>
-                                        )
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
+        <div className="w-full">
+            {/* Header Bar */}
+            <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
+                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Game Log</h1>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="mx-auto max-w-7xl p-8">
+                <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                    <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                        <Table>
+                            <TableHeader className="sticky top-0 bg-gray-100/90 backdrop-blur z-2 border-b border-gray-200">
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => {
+                                            return (
+                                                <TableHead key={header.id} className="text-gray-800 font-semibold">
+                                                    {header.isPlaceholder
+                                                        ? null
+                                                        : flexRender(
+                                                            header.column.columnDef.header,
+                                                            header.getContext()
+                                                        )}
+                                                </TableHead>
+                                            )
+                                        })}
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-24 text-center"
-                                    >
-                                        No results.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows?.length ? (
+                                    table.getRowModel().rows.map((row) => (
+                                        <TableRow
+                                            key={row.id}
+                                            data-state={row.getIsSelected() && "selected"}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={columns.length}
+                                            className="h-24 text-center"
+                                        >
+                                            No results.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </div>
 
 
 
             {modalGame && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg">
-                        <h2 className="text-xl font-bold">
+                <div className="fixed inset-0 z-2 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 max-w-md">
+                        <h2 className="text-xl font-bold text-gray-900">
                             Opponents for Game #{modalGame.id}
                         </h2>
-                        <ul className="mt-4 list-disc list-inside">
+                        <ul className="mt-4 space-y-2">
                             {modalGame.players.map((o) => {
-
                                 return (
-                                    <li key={o.username}>
+                                    <li key={o.username} className="px-3 py-2 bg-gray-50 rounded-lg text-gray-700">
                                         {o.username}
                                     </li>
                                 );
                             })}
                         </ul>
                         <button
-                            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded"
+                            className="mt-6 w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                             onClick={() => setModalGame(null)}
                         >
                             Close

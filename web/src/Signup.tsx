@@ -35,10 +35,19 @@ function Signup() {
         event.preventDefault();
         setErrMsg("");
 
-        // 1) client-side form validity
-        const form = formRef.current;
-        if (form && !form.checkValidity()) {
-            form.reportValidity();
+        // 1) client-side validation
+        if (!uName || !pwd || !check) {
+            setErrMsg("Please fill in all fields");
+            return;
+        }
+
+        if (uName.length < 3) {
+            setErrMsg("Username must be at least 3 characters");
+            return;
+        }
+
+        if (pwd.length < 6) {
+            setErrMsg("Password must be at least 6 characters");
             return;
         }
 
@@ -48,7 +57,7 @@ function Signup() {
             return;
         }
 
-        // 4) create the new user
+        // 3) create the new user
         try {
             await createUser({ uName: uName, pwd })
         } catch (e: any) {
@@ -91,8 +100,6 @@ function Signup() {
                                     id="username"
                                     value={uName}
                                     onChange={(e) => setUName(e.target.value)}
-                                    required
-                                    minLength={3}
                                 />
                             </div>
 
@@ -104,8 +111,6 @@ function Signup() {
                                     type="password"
                                     value={pwd}
                                     onChange={(e) => setPwd(e.target.value)}
-                                    required
-                                    minLength={6}
                                 />
 
                                 <Label htmlFor="confirm">Confirm Password</Label>
@@ -114,8 +119,6 @@ function Signup() {
                                     type="password"
                                     value={check}
                                     onChange={(e) => setCheck(e.target.value)}
-                                    required
-                                    minLength={6}
                                 />
                             </div>
 

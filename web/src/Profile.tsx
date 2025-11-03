@@ -93,68 +93,75 @@ function Profile() {
     chartData[5].ranking = '#' + (rankings.football.position ?? 0)
 
     return (
-        <div className="flex flex-col h-full max-w-[900px] mx-auto" style={{ maxHeight: '90vh' }}>
-            <Card className="h-full border-3 border-gray-300" >
-                <CardHeader className="sticky rounded-lg top-0 bg-gray-300 z-1">
-                    <CardTitle className="text-purple-500">{data.username}'s Profile</CardTitle>
-                    <CardDescription>Created at {data.created_at}</CardDescription>
-                </CardHeader>
-                <CardContent className="items-center justify-center mt-10">
-                    <ChartContainer config={chartConfig}>
-                        <BarChart accessibilityLayer data={chartData} margin={{
-                            top: 20,
-                        }}>
-                            <CartesianGrid vertical={false} />
-                            <XAxis
-                                dataKey="browser"
-                                tickLine={false}
-                                tickMargin={10}
-                                axisLine={false}
-                                tickFormatter={(value) =>
-                                    chartConfig[value as keyof typeof chartConfig]?.label
-                                }
-                            />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                            />
-                            <Bar
-                                dataKey="points"
-                                strokeWidth={2}
-                                radius={8}
-                                activeIndex={2}
-                                activeBar={({ ...props }) => {
-                                    return (
-                                        <Rectangle
-                                            {...props}
-                                            fillOpacity={0.8}
-                                            stroke={props.payload.fill}
-                                            strokeDasharray={4}
-                                            strokeDashoffset={4}
-                                        />
-                                    )
-                                }}
-                            >
-                                <LabelList
-                                    dataKey="ranking"
-                                    position="top"
-                                    offset={12}
-                                    className="fill-foreground"
-                                    fontSize={12}
+        <div className="w-full">
+            {/* Header Bar */}
+            <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
+                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">{data.username}'s Profile</h1>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="mx-auto max-w-4xl p-8">
+                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[700px]">
+                    <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-4">
+                        <CardTitle className="text-lg font-semibold text-gray-800">{data.username}'s Statistics</CardTitle>
+                        <CardDescription className="text-sm text-gray-600">Created at {data.created_at}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="items-center justify-center mt-8 max-h-[550px] overflow-y-auto">
+                        <ChartContainer config={chartConfig}>
+                            <BarChart accessibilityLayer data={chartData} margin={{
+                                top: 20,
+                            }}>
+                                <CartesianGrid vertical={false} />
+                                <XAxis
+                                    dataKey="browser"
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                    tickFormatter={(value) =>
+                                        chartConfig[value as keyof typeof chartConfig]?.label
+                                    }
                                 />
-                            </Bar>
-                        </BarChart>
-                    </ChartContainer>
-                </CardContent>
-                <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="flex gap-2 font-medium leading-none">
-                        Good job!
-                    </div>
-                    <div className="leading-none text-muted-foreground">
-                        Showing total points for the last 6 months
-                    </div>
-                </CardFooter>
-            </Card>
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                />
+                                <Bar
+                                    dataKey="points"
+                                    strokeWidth={2}
+                                    radius={8}
+                                    activeIndex={2}
+                                    activeBar={({ ...props }) => {
+                                        return (
+                                            <Rectangle
+                                                {...props}
+                                                fillOpacity={0.8}
+                                                stroke={props.payload.fill}
+                                                strokeDasharray={4}
+                                                strokeDashoffset={4}
+                                            />
+                                        )
+                                    }}
+                                >
+                                    <LabelList
+                                        dataKey="ranking"
+                                        position="top"
+                                        offset={12}
+                                        className="fill-foreground"
+                                        fontSize={12}
+                                    />
+                                </Bar>
+                            </BarChart>
+                        </ChartContainer>
+                    </CardContent>
+                    <CardFooter className="flex-col items-start gap-2 text-sm border-t bg-gray-50/50 rounded-b-xl py-4">
+                        <div className="leading-none text-muted-foreground text-xs">
+                            Showing total points for the last 6 months
+                        </div>
+                    </CardFooter>
+                </Card>
+            </div>
         </div>
 
     )

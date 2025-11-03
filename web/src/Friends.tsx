@@ -102,14 +102,22 @@ function Friends() {
     }
 
     return (
-        <div className="flex flex-col h-full max-w-[850px] mx-auto">
-            <div className="overflow-y-auto" style={{ maxHeight: '90vh' }}>
-                <Card className="h-full border-3 border-gray-300">
-                    <CardHeader className="sticky rounded-lg top-0 bg-gray-300 z-1">
-                        <CardTitle className="text-purple-500">Friends</CardTitle>
-                        <CardDescription>Sorted by points</CardDescription>
+        <div className="w-full">
+            {/* Header Bar */}
+            <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
+                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Friends</h1>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="mx-auto max-w-3xl p-8">
+                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[650px]">
+                    <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-3">
+                        <CardTitle className="text-base font-semibold text-gray-800">Friends Leaderboard</CardTitle>
+                        <CardDescription className="text-xs text-gray-600">Sorted by points</CardDescription>
                     </CardHeader>
-                    <CardContent className="overflow-y-auto items-center justify-center mt-5">
+                    <CardContent className="overflow-y-auto items-center justify-center mt-3 max-h-[400px]">
                         <ChartContainer config={chartConfig}>
                             <BarChart
                                 accessibilityLayer
@@ -167,42 +175,41 @@ function Friends() {
                             </BarChart>
                         </ChartContainer>
                     </CardContent>
-                    <CardFooter className="flex-col items-start gap-2 text-sm">
+                    <CardFooter className="flex-col items-start gap-3 text-xs border-t bg-gray-50/50 rounded-b-xl py-3">
                         <div className="flex gap-2 font-medium leading-none">
-                            <Button onClick={(e) => youClicked()} className={`${showYou ? 'bg-green-500' : 'bg-red-500'}`}>
+                            <Button onClick={() => youClicked()} className={`rounded-lg text-xs h-8 ${showYou ? 'bg-green-500 hover:bg-green-600' : 'bg-purple-500 hover:bg-purple-600'}`}>
                                 Show yourself! {showYou ? 'Yes' : 'No'}
                             </Button>
-
                         </div>
-                        <div className="leading-none text-muted-foreground">
+                        <div className="leading-none text-muted-foreground text-xs">
                             Showing total scores for all users
                         </div>
+                        <div className="mt-2 flex w-full items-center space-x-3">
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                handleClick();
+                            }} className="flex w-full items-center space-x-2">
+                                <Input
+                                    placeholder="Add Friend..."
+                                    className="flex-1 h-8 text-xs"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                />
+                                <Button
+                                    type="submit"
+                                    className="bg-purple-600 hover:bg-purple-700 active:scale-95 h-8 w-8 rounded-full p-0"
+                                >
+                                    <PlusCircleIcon className="h-4 w-4" />
+                                </Button>
+                            </form>
+                        </div>
+                        {errMsg && (
+                            <div className={`text-xs ${errMsg === "Friend added" ? 'text-green-600' : 'text-red-600'}`}>
+                                {errMsg}
+                            </div>
+                        )}
                     </CardFooter>
                 </Card>
-            </div>
-            <div className="mt-5 flex items-center justify-center space-x-3">
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    handleClick();
-                }} className="flex items-center space-x-3">
-                    <Input
-                        placeholder="Add Friend:"
-                        className="w-100"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                    />
-                    <Button
-                        type="submit"
-                        className="shadow-lg bg-green-600 cursor-pointer transition-all hover:bg-green-200 active:scale-95 w-10 h-10 rounded-full grid place-items-center"
-                    >
-                        <PlusCircleIcon />
-                    </Button>
-                </form>
-            </div>
-            <div className="flex flex-col items-center justify-center mx-auto space-y-2">
-                <div className={`${errMsg === "Friend added" ? 'text-green-500' : 'text-red-500'}`}>
-                    {errMsg}
-                </div>
             </div>
         </div>
     )

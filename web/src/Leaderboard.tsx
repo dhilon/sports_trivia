@@ -76,10 +76,10 @@ function LeaderboardCard(
     if (isError || isErrorUser) return <div>Error loading leaderboard</div>;
 
     return (
-        <div className="flex flex-col" style={{ maxHeight: '90vh' }}>
-            <Card className="min-h-50 max-h-125 min-w-50 max-w-125 h-75 w-75 overflow-y-scroll border-3 border-gray-300" >
-                <CardHeader className="sticky border-2 border-gray-200 top-0 rounded-lg bg-gray-300 z-1">
-                    <CardTitle className="text-purple-500">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
+        <div className="flex flex-col">
+            <Card className="w-[280px] h-[540px] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <CardHeader className="sticky top-0 z-2 rounded-t-xl border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
+                    <CardTitle className="text-base font-semibold text-gray-800">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
                 </CardHeader>
                 <CardContent className="mt-5">
                     <ChartContainer config={chartConfig} style={{ height: '460px' }}>
@@ -149,14 +149,24 @@ function LeaderboardCard(
 
 function Leaderboard() {
     return (
-        <div className="flex flex-wrap justify-center gap-10 mt-10">
-            <LeaderboardCard sport="basketball" />
-            <LeaderboardCard sport="soccer" />
-            <LeaderboardCard sport="football" />
-            <LeaderboardCard sport="hockey" />
-            <LeaderboardCard sport="tennis" />
-            <LeaderboardCard sport="baseball" />
-            <LeaderboardCard sport="total" />
+        <div className="w-full">
+            {/* Header Bar */}
+            <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
+                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Leaderboard</h1>
+                </div>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-16 gap-y-12 p-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <LeaderboardCard sport="basketball" />
+                <LeaderboardCard sport="soccer" />
+                <LeaderboardCard sport="football" />
+                <LeaderboardCard sport="hockey" />
+                <LeaderboardCard sport="tennis" />
+                <LeaderboardCard sport="baseball" />
+                <LeaderboardCard sport="total" />
+            </div>
         </div>
 
     )

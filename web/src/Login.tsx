@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import useLoginUser from "./components/LoginUser"
 
 
@@ -23,7 +23,6 @@ function Login({ //need to add a login check for if the user is already logged i
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const formRef = useRef<HTMLFormElement>(null);
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
 
@@ -36,9 +35,8 @@ function Login({ //need to add a login check for if the user is already logged i
         setIsLoading(true);
 
         // 1) Client-side validation
-        const form = formRef.current;
-        if (form && !form.checkValidity()) {
-            form.reportValidity();
+        if (!uName || !pwd) {
+            setErrMsg("Please enter both username and password");
             setIsLoading(false);
             return;
         }
@@ -85,7 +83,6 @@ function Login({ //need to add a login check for if the user is already logged i
                                 <Input
                                     id="username"
                                     value={uName} onChange={(e) => setUName(e.target.value)}
-                                    required
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -95,7 +92,7 @@ function Login({ //need to add a login check for if the user is already logged i
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <Input id="password" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} required />
+                                <Input id="password" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} />
                             </div>
                             <Button disabled={isLoading} type="submit" className="w-full" >
                                 {isLoading || isMutating ? "Processing…" : "Log In"}
