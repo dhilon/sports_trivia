@@ -80,7 +80,7 @@ Here are some screenshots of the application and descriptions of what you see in
 4. Run the Flask app:
 
     ```bash
-    python app.py
+    flask run
     ```
 
    By default it should start on **http://localhost:5000** (unless you configured otherwise).
