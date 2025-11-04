@@ -64,11 +64,10 @@ function Pyramid() {
         updateGame({
             id: parseInt(game?.id ?? '0'),
             status: status,
-            time: (game?.time ?? 0) + 10 - (clockRef.current?.getTime() ?? 0),
+            time: 1,
             score: Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId) - (user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0)),
             current_question: highlightedLevelId ?? 0
         });
-        //update question difficulty
     }
 
     // Keep the initial setup effect

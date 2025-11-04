@@ -89,6 +89,12 @@ function Password({
                             <Button variant="outline" className="w-full">
                                 Use Google
                             </Button>
+                            <div className="mt-4 text-center text-sm">
+                                Click here to go home{" "}
+                                <a className="underline underline-offset-4" onClick={() => navigate("/home")}>
+                                    Cancel
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </CardContent>

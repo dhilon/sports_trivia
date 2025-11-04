@@ -130,7 +130,7 @@ function LeaderboardCard(
                                     dataKey="rank"
                                     position="right"
                                     offset={8}
-                                    className="fill-foreground"
+                                    className="fill-gray-500"
                                     fontSize={12}
                                     style={{ pointerEvents: "none" }}
                                 />

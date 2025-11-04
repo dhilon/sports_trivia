@@ -9,6 +9,7 @@ from peewee import (
     FloatField,
     ManyToManyField,
     TextField,
+    BooleanField,
 )
 from playhouse.postgres_ext import PostgresqlExtDatabase
 from flask_login import UserMixin
@@ -77,6 +78,7 @@ class Question(BaseModel):
     sport = CharField()
     difficulty = IntegerField(default=50)  # Default to middle difficulty
     num_answers = IntegerField(default=100)
+    dead = BooleanField(default=False)
 
 
 class Game(

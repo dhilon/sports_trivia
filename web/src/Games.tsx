@@ -58,7 +58,7 @@ function GameCard(
         <div className="flex flex-col">
             <button className="cursor-pointer transition-all active:scale-95" onClick={(e) => (handleSubmit(e))}>
                 <Card className="w-[280px] h-[240px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                    <CardHeader className="sticky top-0 z-10 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
+                    <CardHeader className="sticky top-0 z-2 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
                         <CardTitle className="text-base font-semibold text-gray-800">{name}</CardTitle>
                         <CardDescription className="text-xs italic text-gray-600">"{analogy}"</CardDescription>
                     </CardHeader>

@@ -22,7 +22,7 @@ import useSWR from "swr"
 
 
 const chartData = [
-    { browser: "basketball", ranking: "#1", points: 0, fill: "var(--color-basketball)" }, //need to still fix ranking but points is good
+    { browser: "basketball", ranking: "#1", points: 0, fill: "var(--color-basketball)" },
     { browser: "soccer", ranking: "#2", points: 0, fill: "var(--color-soccer)" },
     { browser: "football", ranking: "#6", points: 0, fill: "var(--color-football)" },
     { browser: "hockey", ranking: "#3", points: 0, fill: "var(--color-hockey)" },
@@ -148,7 +148,7 @@ function Profile() {
                                         dataKey="ranking"
                                         position="top"
                                         offset={12}
-                                        className="fill-foreground"
+                                        className="fill-gray-500"
                                         fontSize={12}
                                     />
                                 </Bar>

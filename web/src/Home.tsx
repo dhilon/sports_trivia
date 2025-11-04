@@ -45,22 +45,20 @@ function JoinCard() {
             if (!user?.username || isError) {
                 throw new Error("Must be logged in to join game");
             }
+            if (isNaN(parseInt(inputValue))) {
+                setErrMsg("Invalid game code");
+                return;
+            }
             const { id, type, sport } = await createGame({ id: parseInt(inputValue), status: "", time: 0, score: 0, current_question: 0 });
             navigate("/games/" + sport + "/" + type + "/" + id);
         } catch (error: any) {
-            // 4) On 4xx/5xx, display message
             setErrMsg(error.response.data.error + errorMessage)
         }
-
     };
-
-
-
-
     return (
 
         <div className="flex flex-col">
-            <Card className="w-[280px] h-[220px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <Card className="w-[280px] h-[235px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <CardHeader className="sticky top-0 z-10 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
                     <CardTitle className="text-base font-semibold text-gray-800">Join Game</CardTitle>
                 </CardHeader>
@@ -71,11 +69,15 @@ function JoinCard() {
                 <CardFooter className="flex-col items-start gap-2 text-xs pb-4">
                     <div className="flex gap-2 font-medium leading-none w-full">
                         <form onSubmit={handleClick} className="flex gap-2 w-full">
-                            <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)} className="h-8 text-xs" />
+                            <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)} className="h-8 text-xs" required />
                             <button type="submit" className="h-8 rounded-lg bg-white px-2 shadow transition-all hover:bg-gray-100 active:scale-95 dark:bg-gray-900 dark:hover:bg-gray-800">
                                 <SendHorizonalIcon className="h-4 w-4" />
                             </button>
                         </form>
+
+                    </div>
+                    <div className="text-xs text-red-600">
+                        {errMsg}
                     </div>
                 </CardFooter>
             </Card>
@@ -121,7 +123,7 @@ function Home() {
                 <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
                     <div className="flex items-center gap-3">
                         <img src={favicon} alt="favicon" className="h-10 w-10 rounded-lg" />
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">SportsQuiz</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">SportsTrivia</h1>
                     </div>
                 </div>
             </div>

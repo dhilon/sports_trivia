@@ -11,9 +11,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { navigate } from "wouter/use-browser-location";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import useCreateUser from "./components/CreateUser";
 import useLoginUser from "./components/LoginUser";
+import { currUser } from "./components/CurrUser";
 
 
 function Signup() {
@@ -26,10 +27,26 @@ function Signup() {
     const [errMsg, setErrMsg] = useState("");
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
-
+    // All hooks must be called before any conditional returns
+    const { user, isLoading: isLoadingUser, isError: isErrorUser, errorMessage: errorMessageUser } = currUser();
     const { trigger: createUser, isMutating } = useCreateUser();
-
     const { trigger: loginUser, isMutating: isMutatingLogin } = useLoginUser();
+
+    // Redirect logged-in users away from signup page
+    useEffect(() => {
+        if (user && !isLoadingUser) {
+            navigate("/home");
+        }
+    }, [user, isLoadingUser]);
+
+    if (isLoadingUser) {
+        return <p>Loading user…</p>;
+    }
+
+    // If user is logged in, don't render the form (redirect will happen via useEffect)
+    if (user) {
+        return null;
+    }
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -135,6 +152,12 @@ function Signup() {
                             <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>
                                 Sign up with Google
                             </Button>
+                            <div className="text-center text-sm">
+                                Already have an account?{" "}
+                                <a className="underline underline-offset-4" onClick={() => navigate("/login")}>
+                                    Login
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </CardContent>

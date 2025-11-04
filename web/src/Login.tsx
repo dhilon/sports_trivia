@@ -10,11 +10,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { navigate } from "wouter/use-browser-location"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import useLoginUser from "./components/LoginUser"
+import { currUser } from "./components/CurrUser"
 
 
-function Login({ //need to add a login check for if the user is already logged in, and if so, redirect to the home page
+function Login({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -25,8 +26,25 @@ function Login({ //need to add a login check for if the user is already logged i
     const [isLoading, setIsLoading] = useState(false);
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
-
+    // All hooks must be called before any conditional returns
+    const { user, isLoading: isLoadingUser, isError: isErrorUser, errorMessage: errorMessageUser, refresh: refreshUser } = currUser();
     const { trigger: loginUser, isMutating } = useLoginUser();
+
+    // Redirect logged-in users away from login page
+    useEffect(() => {
+        if (user && !isLoadingUser) {
+            navigate("/home");
+        }
+    }, [user, isLoadingUser]);
+
+    if (isLoadingUser) {
+        return <p>Loading user…</p>;
+    }
+
+    // If user is logged in, don't render the form (redirect will happen via useEffect)
+    if (user) {
+        return null;
+    }
 
 
     async function handleSubmit(e: React.FormEvent) {

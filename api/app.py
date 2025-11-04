@@ -216,8 +216,6 @@ def answer_checker():
             temperature=0.0,
         ),
     )
-    if response.text != "True":
-        print("Hi!")
 
     return response.text or ""
 
@@ -379,7 +377,10 @@ def all_games():
                         )
 
             sport_questions = [
-                x for x in Question.select().where(Question.sport == sport)
+                x
+                for x in Question.select().where(
+                    (Question.sport == sport) & (Question.dead == False)
+                )
             ]
             rqs = random.sample(sport_questions, num_questions)
             one = difficulty_calculator(rqs)

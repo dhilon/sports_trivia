@@ -13,7 +13,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
     const [errMsg, setErrMsg] = useState("");
     const [location] = useLocation();
 
-    const { user, isLoading, isError } = currUser();
+    const { user, isLoading, isError, clearUser } = currUser();
 
     if (isLoading) {
         return <p>Loading user…</p>;
@@ -30,6 +30,8 @@ export function NavSidebar() { //need to change redirects to fetch currUser
             await axios.get("http://localhost:5000/logout/", {
                 withCredentials: true,
             });
+            // Clear the user cache so the app knows we're logged out
+            clearUser();
             // Successfully logged out on the server; redirect to /login
             navigate("/login");
         } catch (error: any) {
