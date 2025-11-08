@@ -100,6 +100,7 @@ function Login({
                                 <Label htmlFor="username">Username</Label>
                                 <Input
                                     id="username"
+                                    className="text-gray-800"
                                     value={uName} onChange={(e) => setUName(e.target.value)}
                                 />
                             </div>
@@ -110,9 +111,9 @@ function Login({
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <Input id="password" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} />
+                                <Input id="password" type="password" className="text-gray-800" value={pwd} onChange={(e) => setPwd(e.target.value)} />
                             </div>
-                            <Button disabled={isLoading} type="submit" className="w-full" >
+                            <Button disabled={isLoading} type="submit" className="w-full bg-gray-500 text-white hover:bg-gray-200 hover:text-gray-800" >
                                 {isLoading || isMutating ? "Processing…" : "Log In"}
                             </Button>
                             <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>

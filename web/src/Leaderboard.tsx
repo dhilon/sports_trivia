@@ -54,6 +54,29 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
+// Custom label component to truncate long names
+const CustomLabel = (props: any) => {
+    const { x, y, width, height, value } = props;
+    const maxLength = Math.floor(width / 7); // Approximate character width
+    const displayValue = value.length > maxLength && maxLength > 3
+        ? value.slice(0, maxLength - 3) + '...'
+        : value;
+
+    return (
+        <text
+            x={x + 8}
+            y={y + height / 2}
+            dominantBaseline="middle"
+            fill="currentColor"
+            fontSize={12}
+            textAnchor="start"
+            style={{ pointerEvents: "none" }}
+        >
+            {displayValue}
+        </text>
+    );
+};
+
 function LeaderboardCard(
     { sport }: { sport: string }
 ) {
@@ -68,29 +91,34 @@ function LeaderboardCard(
         chartData[i] = { name: Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i], points: leaders?.[sport as keyof Leaderboard]?.[Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i]] || 0 }
     }
     chartData.sort((a, b) => b.points - a.points);
-    for (let i = 0; i < (chartData.length || 0); i++) {
-        chartData[i] = { name: chartData[i].name, points: chartData[i].points, rank: '#' + (i + 1) }
-    }
+
+    // Limit to top 10 scores and add rankings
+    const top10Data = chartData.slice(0, 10).map((item, index) => ({
+        name: item.name,
+        points: item.points,
+        rank: '#' + (index + 1)
+    }));
 
     if (isLoading || isLoadingUser) return <div>Loading...</div>;
     if (isError || isErrorUser) return <div>Error loading leaderboard</div>;
 
     return (
         <div className="flex flex-col">
-            <Card className="w-[280px] h-[540px] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+            <Card className="w-[280px] h-[500px] rounded-xl border border-gray-200 bg-white shadow-sm">
                 <CardHeader className="sticky top-0 z-2 rounded-t-xl border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
                     <CardTitle className="text-base font-semibold text-gray-800">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
                 </CardHeader>
                 <CardContent className="mt-5">
-                    <ChartContainer config={chartConfig} style={{ height: '460px' }}>
+                    <ChartContainer config={chartConfig} style={{ height: '420px' }}>
 
                         <BarChart
                             accessibilityLayer
-                            data={chartData}
+                            data={top10Data}
                             layout="vertical"
                             margin={{
-                                right: 600,
+                                right: 530,
                             }}
+                            barCategoryGap="1%"
 
                         >
                             <CartesianGrid horizontal={false} />
@@ -109,7 +137,7 @@ function LeaderboardCard(
                                 content={<ChartTooltipContent indicator="line" />}
                             />
                             <Bar dataKey="points" layout="vertical" radius={4}>
-                                {chartData.map((entry, index) => (
+                                {top10Data.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
                                         fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
@@ -121,10 +149,8 @@ function LeaderboardCard(
                                 <LabelList
                                     dataKey="name"
                                     position="insideLeft"
-                                    offset={8}
+                                    content={CustomLabel}
                                     className="fill-foreground"
-                                    fontSize={12}
-                                    style={{ pointerEvents: "none" }}
                                 />
                                 <LabelList
                                     dataKey="rank"

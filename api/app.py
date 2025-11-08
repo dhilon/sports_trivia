@@ -201,11 +201,14 @@ def answer_checker():
     question = str(payload.get("question"))
     answer = str(payload.get("answer"))
 
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    return check_answer(question, answer) or ""
 
+
+def check_answer(question, answer):
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents="Check if the answer is correct for the question and only respond with the exact string 'True' if correct or the actual answer if incorrect: "
+        contents="Given the question and answer, tell me whether the answer is correct or incorrect and only respond with the exact string 'True' if correct or the exact string 'False' if incorrect: "
         + question
         + " Answer: "
         + answer,
@@ -216,7 +219,6 @@ def answer_checker():
             temperature=0.0,
         ),
     )
-
     return response.text or ""
 
 
@@ -581,6 +583,8 @@ def get_user(name=None):
                 for f in Friends.select().where(Friends.user == user)
             ],
             "created_at": user.created_at,
+            "google_sub": user.google_sub,
+            "email": user.email,
         }
     else:
         return abort(404, description=f"User {name or 'None'} not found")

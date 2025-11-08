@@ -191,7 +191,7 @@ function Friends() {
                             }} className="flex w-full items-center space-x-2">
                                 <Input
                                     placeholder="Add Friend..."
-                                    className="flex-1 h-8 text-xs"
+                                    className="flex-1 h-8 text-xs text-gray-800"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                 />

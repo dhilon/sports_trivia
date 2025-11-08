@@ -7,6 +7,8 @@ export interface User {
     scores: { [key: string]: number };
     friends: User[];
     created_at: string;
+    google_sub?: string;
+    email?: string;
 }
 
 export function currUser() {

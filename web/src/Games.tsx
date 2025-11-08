@@ -24,7 +24,7 @@ type Params = { sport: string };
 
 
 function GameCard(
-    { name, image, description, url, analogy }: { name: string, image: string, description: string, url: string, analogy: string }
+    { name, image, description, url, analogy, disabled = false }: { name: string, image: string, description: string, url: string, analogy: string, disabled?: boolean }
 ) {
     const params = useParams();
     const { sport } = useParams<Params>();
@@ -33,6 +33,8 @@ function GameCard(
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
+        if (disabled) return;
 
         // 2) Send credentials to Flask
         try {
@@ -56,7 +58,11 @@ function GameCard(
     return (
 
         <div className="flex flex-col">
-            <button className="cursor-pointer transition-all active:scale-95" onClick={(e) => (handleSubmit(e))}>
+            <button
+                className={`transition-all ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer active:scale-95'}`}
+                onClick={(e) => (handleSubmit(e))}
+                disabled={disabled}
+            >
                 <Card className="w-[280px] h-[240px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                     <CardHeader className="sticky top-0 z-2 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
                         <CardTitle className="text-base font-semibold text-gray-800">{name}</CardTitle>
@@ -94,8 +100,8 @@ function Games() { //rapid fire and around the horn need to generate new games, 
             {/* Cards Grid */}
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-16 gap-y-12 p-8 sm:grid-cols-2 lg:grid-cols-3">
                 <GameCard name="Tower of Power" image={tower} description="Who wants to be a millionaire?" url="/tower_of_power/" analogy="It's like scaling Mount Fuji" />
-                <GameCard name="Rapid Fire" image={fire} description="**NOT WORKING**" url="/rapid_fire/" analogy="... requires rapid response!" />
-                <GameCard name="Around the Horn" image={around} description="**NOT WORKING**" url="/around_the_horn/" analogy="Duck duck goose!" />
+                <GameCard name="Rapid Fire" image={fire} description="Coming soon..." url="/rapid_fire/" analogy="... requires rapid response!" disabled={true} />
+                <GameCard name="Around the Horn" image={around} description="Coming soon..." url="/around_the_horn/" analogy="Duck duck goose!" disabled={true} />
             </div>
         </div>
 

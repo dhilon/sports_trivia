@@ -86,13 +86,10 @@ function Password({
                             <Button type="submit" className="w-full" disabled={isMutating}>
                                 {isMutating ? 'Changing' : 'Continue'}
                             </Button>
-                            <Button variant="outline" className="w-full">
-                                Use Google
-                            </Button>
                             <div className="mt-4 text-center text-sm">
-                                Click here to go home{" "}
+
                                 <a className="underline underline-offset-4" onClick={() => navigate("/home")}>
-                                    Cancel
+                                    Click here to go home{" "}
                                 </a>
                             </div>
                         </div>

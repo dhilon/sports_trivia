@@ -12,7 +12,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Filter } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +36,7 @@ import { navigate } from "wouter/use-browser-location"
 import { Redirect, useParams } from "wouter"
 import useSWR from "swr"
 import { Game } from "./types"
+import { formatRelativeDate } from "./lib/dateUtils"
 
 
 export function getColumns(
@@ -54,13 +55,14 @@ export function getColumns(
             accessorKey: "status",
             header: ({ column }) => {
                 const current = (column.getFilterValue() as string) || "";
-                const label = current === "win" ? "W" : current === "loss" ? "L" : "Filter";
                 return (
                     <div className="flex items-center gap-2">
                         <span>Status</span>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">{label}</Button>
+                                <Button variant="ghost" size="sm">
+                                    {current === "win" ? "W" : current === "loss" ? "L" : <Filter className="h-4 w-4" />}
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent side="right" align="start" sideOffset={6}>
                                 <DropdownMenuItem
@@ -101,9 +103,8 @@ export function getColumns(
                 const ath = games?.filter((g) => g.type === "around_the_horn").length ?? 0;
                 const rf = games?.filter((g) => g.type === "rapid_fire").length ?? 0;
                 const top = games?.filter((g) => g.type === "tower_of_power").length ?? 0;
-                const label = current === "around_the_horn" ? "Around" : current === "rapid_fire" ? "Rapid" : current === "tower_of_power" ? "Tower" : "Filter";
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-start gap-2 pl-4">
                         <Button
                             variant="ghost"
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -113,7 +114,9 @@ export function getColumns(
                         </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">{label}</Button>
+                                <Button variant="ghost" size="sm">
+                                    {current === "around_the_horn" ? "Around" : current === "rapid_fire" ? "Rapid" : current === "tower_of_power" ? "Tower" : <Filter className="h-4 w-4" />}
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent side="right" align="start" sideOffset={6}>
                                 <DropdownMenuItem
@@ -150,7 +153,7 @@ export function getColumns(
                 const str = row.getValue("type") as string;
                 // replace all underscores with spaces
                 const spaced = str.replace(/_/g, " ");
-                return <div className="capitalize flex items-center justify-center">{spaced}</div>;
+                return <div className="capitalize flex items-center justify-start pl-4">{spaced}</div>;
             },
         },
         {
@@ -163,11 +166,8 @@ export function getColumns(
                 const football = games?.filter((g) => g.sport === "football").length ?? 0;
                 const tennis = games?.filter((g) => g.sport === "tennis").length ?? 0;
                 const hockey = games?.filter((g) => g.sport === "hockey").length ?? 0;
-                const label = current
-                    ? current.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-                    : "Filter";
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-start gap-2 pl-4">
                         <Button
                             variant="ghost"
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -177,7 +177,9 @@ export function getColumns(
                         </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">{label}</Button>
+                                <Button variant="ghost" size="sm">
+                                    {current ? current.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : <Filter className="h-4 w-4" />}
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent side="right" align="start" sideOffset={6}>
                                 <DropdownMenuItem
@@ -227,22 +229,24 @@ export function getColumns(
                     </div>
                 )
             },
-            cell: ({ row }) => <div className="capitalize">{row.getValue("sport")}</div>,
+            cell: ({ row }) => <div className="capitalize flex items-center justify-start pl-4">{row.getValue("sport")}</div>,
         },
         {
             accessorKey: "date",
             header: ({ column }) => {
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        <div className="text-right">Date</div>
-                        <ArrowUpDown />
-                    </Button>
+                    <div className="flex items-center justify-start pl-8">
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        >
+                            Date
+                            <ArrowUpDown />
+                        </Button>
+                    </div>
                 )
             },
-            cell: ({ row }) => <div className="text-right flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#ffffff73] text-[#101418] text-sm font-medium leading-normal w-full">{row.getValue("date")}</div>,
+            cell: ({ row }) => <div className="flex cursor-pointer items-center justify-start pl-8 overflow-hidden rounded-full h-8 px-4 bg-[#ffffff73] text-[#101418] text-sm font-medium leading-normal w-full">{formatRelativeDate(row.getValue("date"))}</div>,
             sortingFn: (rowA, rowB, columnId) => {
                 const dateA = new Date(rowA.getValue(columnId));
                 const dateB = new Date(rowB.getValue(columnId));
@@ -283,7 +287,7 @@ export function getColumns(
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
-                            <DropdownMenuItem>Practice Questions</DropdownMenuItem>
+                            <DropdownMenuItem>Replay Questions</DropdownMenuItem>
                             <DropdownMenuLabel className="italic font-light text-green-400">{game.time} seconds</DropdownMenuLabel>
                         </DropdownMenuContent>
                     </DropdownMenu>

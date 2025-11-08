@@ -51,13 +51,13 @@ export function NavSidebar() { //need to change redirects to fetch currUser
     return (
         <Sidebar>
             <SidebarHeader className="border-b border-gray-200/60 bg-white/80 backdrop-blur">
-                <SidebarTrigger />
+                <SidebarTrigger className="text-gray-800" />
                 <span className="text-sm font-medium text-gray-700">Hello, {user?.username}</span>
             </SidebarHeader>
             <SidebarContent className='min-w-52 bg-white/70 backdrop-blur-md text-gray-700 border-r border-gray-200/60'>
                 <SidebarMenu>
                     <SidebarMenuItem className="mb-2 mt-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/home") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/home") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                             <a href="/">
                                 <House />
                                 <span>Home</span>
@@ -65,7 +65,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/profile/${user?.username}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/profile/${user?.username}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                             <a href={`/profile/${user?.username}`}>
                                 <CircleUserRound />
                                 <span>Profile</span>
@@ -73,7 +73,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/gamelog/${user?.username}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/gamelog/${user?.username}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                             <a href={`/gamelog/${user?.username}`}>
                                 <Inbox />
                                 <span>Gamelog</span>
@@ -81,7 +81,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/friends") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/friends") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                             <a href={`/friends/`}>
                                 <UserRoundSearch />
                                 <span>Friends</span>
@@ -89,7 +89,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/leaderboard") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/leaderboard") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                             <a href={`/leaderboard/`}>
                                 <Trophy />
                                 <span>Leaderboard</span>
@@ -97,16 +97,19 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
+                    {/* Only show Change Login for non-Google users */}
+                    {(!user?.google_sub || user?.google_sub === "") && (
+                        <SidebarMenuItem className="mb-2 ml-2 mr-2">
+                            <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/password") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
+                                <a href="/password">
+                                    <KeyRound />
+                                    <span>Change Login</span>
+                                </a>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/password") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100"}`}>
-                            <a href="/password">
-                                <KeyRound />
-                                <span>Change Login</span>
-                            </a>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className="rounded-xl hover:bg-gray-100 transition-all" onClick={handleLogout} disabled={isLoggingOut}>
+                        <SidebarMenuButton asChild className="rounded-xl hover:bg-gray-100 hover:text-gray-800 transition-all" onClick={handleLogout} disabled={isLoggingOut}>
                             <div>
                                 <LogOut />
                                 <span>{isLoggingOut ? "Logging out…" : "Log Out"}</span>

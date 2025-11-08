@@ -19,6 +19,7 @@ import {
 import { SidebarLayout } from "./SidebarLayout"
 import { useParams } from "wouter"
 import useSWR from "swr"
+import { formatRelativeDate } from "./lib/dateUtils"
 
 
 const chartData = [
@@ -92,6 +93,14 @@ function Profile() {
     chartData[4].ranking = '#' + (rankings.tennis.position ?? 0)
     chartData[5].ranking = '#' + (rankings.football.position ?? 0)
 
+    // Calculate total points from all sports
+    const totalPoints = (data.scores.basketball ?? 0) +
+        (data.scores.soccer ?? 0) +
+        (data.scores.hockey ?? 0) +
+        (data.scores.baseball ?? 0) +
+        (data.scores.tennis ?? 0) +
+        (data.scores.football ?? 0);
+
     return (
         <div className="w-full">
             {/* Header Bar */}
@@ -106,7 +115,7 @@ function Profile() {
                 <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[700px]">
                     <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-4">
                         <CardTitle className="text-lg font-semibold text-gray-800">{data.username}'s Statistics</CardTitle>
-                        <CardDescription className="text-sm text-gray-600">Created at {data.created_at}</CardDescription>
+                        <CardDescription className="text-sm text-gray-600">Member since {formatRelativeDate(data.created_at)}</CardDescription>
                     </CardHeader>
                     <CardContent className="items-center justify-center mt-8 max-h-[550px] overflow-y-auto">
                         <ChartContainer config={chartConfig}>
@@ -157,7 +166,7 @@ function Profile() {
                     </CardContent>
                     <CardFooter className="flex-col items-start gap-2 text-sm border-t bg-gray-50/50 rounded-b-xl py-4">
                         <div className="leading-none text-muted-foreground text-xs">
-                            Showing total points for the last 6 months
+                            Total points for the last 6 months: {totalPoints}
                         </div>
                     </CardFooter>
                 </Card>

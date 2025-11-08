@@ -22,11 +22,11 @@ const PyramidLevel = ({ question, isGreen }: { question: Question, isGreen: bool
     const width = 60 / (question?.level ?? 0 + 1) + 33; //percent based rows
 
     return (
-        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-cyan-200'}`} style={{ width: `${width}%` }}>
-            <div className="flex-initial ml-2 basis-1/5 text-purple-400 font-bold">
+        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-white'}`} style={{ width: `${width}%` }}>
+            <div className="flex-initial ml-2 basis-1/5 text-gray-400 font-bold">
                 Level {question?.level ?? 0}
             </div>
-            <div className="flex-auto flex items-center justify-center basis-3/5 text-xs text-purple-400">
+            <div className={`flex-auto flex items-center justify-center basis-3/5 text-xs ${isGreen ? 'text-white' : 'text-gray-400'}`}>
                 <b>{question.text}</b>
             </div>
         </div>
@@ -185,7 +185,7 @@ function Pyramid() {
 
     return (
         <div>
-            <div className="flex items-center justify-center text-2xl text-blue-500">Tower of Power</div>
+            <div className="flex items-center justify-center text-2xl text-purple-600">Tower of Power</div>
             <div className="flex flex-col items-center mt-5">
                 {gameWithLevels?.questions.map((question, index) => (<PyramidLevel key={index}
                     question={question}
