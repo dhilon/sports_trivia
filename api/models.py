@@ -39,8 +39,8 @@ class BaseModel(Model):
 
 class User(BaseModel, UserMixin):
     id = AutoField(primary_key=True)
-    google_sub = CharField(unique=True, default="")
-    email = CharField(unique=True, default="")
+    google_sub = CharField(null=True, default=None)
+    email = CharField(null=True, default=None)
     username = CharField(unique=True)
     password_hash = CharField(default=" ")
     created_at = DateTimeField(default=datetime.now())

@@ -92,12 +92,39 @@ function LeaderboardCard(
     }
     chartData.sort((a, b) => b.points - a.points);
 
-    // Limit to top 10 scores and add rankings
-    const top10Data = chartData.slice(0, 10).map((item, index) => ({
-        name: item.name,
-        points: item.points,
-        rank: '#' + (index + 1)
-    }));
+    // Limit to top 10 scores and add rankings with tie detection
+    const top10 = chartData.slice(0, 10);
+    const top10Data = top10.map((item, index) => {
+        let rank = index + 1;
+        let rankText = '';
+
+        // Check if current score ties with previous score
+        if (index > 0 && item.points === top10[index - 1].points) {
+            // Find the rank of the first person with this score
+            let tiedRank = rank;
+            for (let i = index - 1; i >= 0; i--) {
+                if (top10[i].points === item.points) {
+                    tiedRank = i + 1;
+                } else {
+                    break;
+                }
+            }
+            rankText = 'T-' + tiedRank;
+        } else {
+            // Check if next person has same score (we're the first in a tie)
+            if (index < top10.length - 1 && item.points === top10[index + 1].points) {
+                rankText = 'T-' + rank;
+            } else {
+                rankText = '#' + rank;
+            }
+        }
+
+        return {
+            name: item.name,
+            points: item.points,
+            rank: rankText
+        };
+    });
 
     if (isLoading || isLoadingUser) return <div>Loading...</div>;
     if (isError || isErrorUser) return <div>Error loading leaderboard</div>;

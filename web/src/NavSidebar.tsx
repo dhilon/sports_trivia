@@ -98,7 +98,7 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                     </SidebarMenuItem>
 
                     {/* Only show Change Login for non-Google users */}
-                    {(!user?.google_sub || user?.google_sub === "") && (
+                    {!user?.google_sub && (
                         <SidebarMenuItem className="mb-2 ml-2 mr-2">
                             <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive("/password") ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
                                 <a href="/password">

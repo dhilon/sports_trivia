@@ -1272,9 +1272,13 @@ def init_db():
     for count in users:
         try:
             usr, created = User.get_or_create(
-                id=count["id"],
                 username=count["username"],
-                defaults={"created_at": count["created_at"]},
+                defaults={
+                    "id": count["id"],
+                    "created_at": count["created_at"],
+                    "google_sub": None,  # Null for regular users
+                    "email": None,  # Null for regular users
+                },
             )
             if created:
                 usr.password = count[
@@ -1289,8 +1293,9 @@ def init_db():
                 Friends.get_or_create(user=usr, friend=friend)
                 Friends.get_or_create(user=friend, friend=usr)
 
-        except IntegrityError:
+        except IntegrityError as e:
             # A row with that PK already exists—skip it
+            print(f"IntegrityError for user {count['username']}: {e}")
             continue
 
     for count in questions:

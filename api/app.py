@@ -144,6 +144,8 @@ def auth_google_callback():
             user.save()
         else:
             user = User.create(
+                id=recent_user().id + 1,
+                created_at=datetime.now(),
                 google_sub=sub,
                 email=email,
                 username=userinfo.get("name"),
