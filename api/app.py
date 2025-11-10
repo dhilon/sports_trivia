@@ -152,9 +152,13 @@ def auth_google_callback():
             )
 
     login_user(user)
-    scores = default_scores()
-    for sport in scores:
-        Score.create(userId=user, sport=sport, score=scores[sport])
+
+    # Only create scores if they don't exist (for new users)
+    existing_scores = Score.select().where(Score.userId == user)
+    if not existing_scores.exists():
+        scores = default_scores()
+        for sport in scores:
+            Score.create(userId=user, sport=sport, score=scores[sport])
 
     return redirect("http://localhost:5173/home")
 
@@ -179,6 +183,7 @@ def question_generator(league, num_tokens):
         + "'{'question': 'how many players on a basketball court at a time?', 'answer' : '5', 'difficulty': 5}"
         + "Don't use this question"
         + "Make sure that each answer is accurate by using web search"
+        + "Use recent web-search evidence for current season records and events (2024-25; 2025) before generating the questions and answers."
         + "Don't use these questions: "
         + "\n".join([q.text for q in old_questions])
     )
@@ -190,7 +195,9 @@ def question_generator(league, num_tokens):
             thinking_config=types.ThinkingConfig(
                 thinking_budget=0
             ),  # Disables thinking
-            temperature=0.5,
+            temperature=0.3,
+            top_p=0.9,
+            tools=[types.Tool(google_search=types.GoogleSearch())],
         ),
     )
 

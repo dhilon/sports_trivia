@@ -72,26 +72,77 @@ function Profile() {
     const { data, isLoading, error } = useSWR(`/users/${name}`);
     const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${name}`);
 
+    // Fetch leaderboard data for all sports to detect ties
+    const { data: leaderboardData, isLoading: leaderboardLoading, error: leaderboardError } = useSWR('/leaderboard');
+
     if (!data) return null;
-    if (error || rankingsError) return <div>Error: {error?.message || rankingsError?.message}</div>;
-    if (isLoading || rankingsLoading) return <div>loading...</div>
+    if (error || rankingsError || leaderboardError) return <div>Error: {error?.message || rankingsError?.message || leaderboardError?.message}</div>;
+    if (isLoading || rankingsLoading || leaderboardLoading) return <div>loading...</div>
 
     chartData[0].points = data.scores.basketball ?? 0 //get onclick to view overall leaderboards for each sport
     chartData[1].points = data.scores.soccer ?? 0
-    chartData[2].points = data.scores.hockey ?? 0
-    chartData[3].points = data.scores.baseball ?? 0
+    chartData[2].points = data.scores.football ?? 0  // football is at index 2
+    chartData[3].points = data.scores.hockey ?? 0    // hockey is at index 3
     chartData[4].points = data.scores.tennis ?? 0
-    chartData[5].points = data.scores.football ?? 0
+    chartData[5].points = data.scores.baseball ?? 0  // baseball is at index 5
 
 
 
 
-    chartData[0].ranking = '#' + (rankings.basketball.position ?? 0)
-    chartData[1].ranking = '#' + (rankings.soccer.position ?? 0)
-    chartData[2].ranking = '#' + (rankings.hockey.position ?? 0)
-    chartData[3].ranking = '#' + (rankings.baseball.position ?? 0)
-    chartData[4].ranking = '#' + (rankings.tennis.position ?? 0)
-    chartData[5].ranking = '#' + (rankings.football.position ?? 0)
+    // Helper function to detect ties and format rank (same logic as Leaderboard)
+    const formatRank = (sportName: string) => {
+        const userScore = rankings[sportName]?.score ?? 0;
+        const sportLeaderboard = leaderboardData?.[sportName];
+
+        if (!sportLeaderboard) {
+            return '#0';
+        }
+
+        // Convert leaderboard object to sorted array of {name, score}
+        const leaderboardArray = Object.entries(sportLeaderboard).map(([name, score]) => ({
+            name,
+            score: score as number
+        })).sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.name.localeCompare(b.name);
+        });
+
+        // Find user's position
+        const userIndex = leaderboardArray.findIndex(entry => entry.name === name);
+        if (userIndex === -1) {
+            return '#0';
+        }
+
+        const rank = userIndex + 1;
+
+        // Check if current score ties with previous score
+        if (userIndex > 0 && leaderboardArray[userIndex].score === leaderboardArray[userIndex - 1].score) {
+            // Find the rank of the first person with this score
+            let tiedRank = rank;
+            for (let i = userIndex - 1; i >= 0; i--) {
+                if (leaderboardArray[i].score === userScore) {
+                    tiedRank = i + 1;
+                } else {
+                    break;
+                }
+            }
+            return 'T-' + tiedRank;
+        }
+
+        // Check if next person has same score (we're the first in a tie)
+        if (userIndex < leaderboardArray.length - 1 && leaderboardArray[userIndex].score === leaderboardArray[userIndex + 1].score) {
+            return 'T-' + rank;
+        }
+
+        return '#' + rank;
+    };
+
+    chartData[0].ranking = formatRank('basketball');
+    chartData[1].ranking = formatRank('soccer');
+    chartData[2].ranking = formatRank('football');  // football is at index 2
+    chartData[3].ranking = formatRank('hockey');    // hockey is at index 3
+    chartData[4].ranking = formatRank('tennis');
+    chartData[5].ranking = formatRank('baseball');  // baseball is at index 5
 
     // Calculate total points from all sports
     const totalPoints = (data.scores.basketball ?? 0) +

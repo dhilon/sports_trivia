@@ -287,7 +287,6 @@ export function getColumns(
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onViewOpponents(game)}>View opponents</DropdownMenuItem>
-                            <DropdownMenuItem>Replay Questions</DropdownMenuItem>
                             <DropdownMenuLabel className="italic font-light text-green-400">{game.time} seconds</DropdownMenuLabel>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -428,7 +427,7 @@ function Gamelog() {
                             {modalGame.players.map((o) => {
                                 return (
                                     <li key={o.username} className="px-3 py-2 bg-gray-50 rounded-lg text-gray-700">
-                                        {o.username}
+                                        <a href={"/profile/" + o.username}>{o.username}</a>
                                     </li>
                                 );
                             })}
