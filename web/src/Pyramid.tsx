@@ -18,16 +18,23 @@ import useNewGame from "./components/NewGame"
 
 
 
-const PyramidLevel = ({ question, isGreen }: { question: Question, isGreen: boolean }) => {
-    const width = 60 / (question?.level ?? 0 + 1) + 33; //percent based rows
+const PyramidLevel = ({ question, isGreen, totalQuestions }: { question: Question, isGreen: boolean, totalQuestions: number }) => {
+    const width = 70 / (question?.level ?? 0 + 1) + 50; //percent based rows - wider
+
+    // Adjust height and spacing based on number of questions
+    const isManyQuestions = totalQuestions > 10;
+    const rowHeight = isManyQuestions ? '35px' : '45px';
+    const rowMargin = isManyQuestions ? 'mb-1' : 'mb-1.5';
+    const fontSize = isManyQuestions ? 'text-[10px]' : 'text-xs';
+    const padding = isManyQuestions ? 'px-2 ml-2' : 'px-3 ml-3';
 
     return (
-        <div className={`flex border-1 items-center overflow-hidden basis-10 p-4 cursor-pointer ${isGreen ? 'bg-green-500' : 'bg-white'}`} style={{ width: `${width}%` }}>
-            <div className="flex-initial ml-2 basis-1/5 text-gray-400 font-bold">
+        <div className={`flex items-center overflow-hidden border border-gray-200 rounded-lg shadow-sm ${rowMargin} transition-all duration-200 ${isGreen ? 'bg-green-500 border-green-600' : 'bg-white hover:bg-gray-50'}`} style={{ width: `${width}%`, minHeight: rowHeight }}>
+            <div className={`flex-initial ${padding} basis-1/5 font-semibold ${fontSize} ${isGreen ? 'text-white' : 'text-gray-500'}`}>
                 Level {question?.level ?? 0}
             </div>
-            <div className={`flex-auto flex items-center justify-center basis-3/5 text-xs ${isGreen ? 'text-white' : 'text-gray-400'}`}>
-                <b>{question.text}</b>
+            <div className={`flex-auto flex items-center justify-center basis-3/5 ${fontSize} ${padding} ${isGreen ? 'text-white font-semibold' : 'text-gray-700'}`}>
+                {question.text}
             </div>
         </div>
     )
@@ -183,64 +190,86 @@ function Pyramid() {
     }
 
 
+    const totalQuestions = game?.questions.length ?? 0;
+    const isManyQuestions = totalQuestions > 10;
+    const containerPadding = isManyQuestions ? 'py-2' : 'py-4';
+    const titleMargin = isManyQuestions ? 'mb-2' : 'mb-4';
+    const pyramidMargin = isManyQuestions ? 'mb-2' : 'mb-4';
+    const pyramidGap = isManyQuestions ? 'gap-0.5' : 'gap-1';
+
     return (
-        <div>
-            <div className="flex items-center justify-center text-2xl text-purple-600">Tower of Power</div>
-            <div className="flex flex-col items-center mt-5">
+        <div className={`max-w-6xl mx-auto px-2 sm:px-4 ${containerPadding}`}>
+            <div className={`flex items-center justify-center ${titleMargin}`}>
+                <h1 className="text-xl sm:text-2xl font-bold text-purple-600">Tower of Power</h1>
+            </div>
+            <div className={`flex flex-col items-center ${pyramidGap} ${pyramidMargin}`}>
                 {gameWithLevels?.questions.map((question, index) => (<PyramidLevel key={index}
                     question={question}
                     isGreen={question.level <= (game?.questions.length ?? 0) - highlightedLevelId}
+                    totalQuestions={totalQuestions}
                 ></PyramidLevel>))}
             </div>
 
-            <div className="flex items-center space-x-2 py-4">
-                <div className="flex-1 text-sm ml-10 text-pink-700">
+            <div className={`flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 ${isManyQuestions ? 'py-3 px-3 sm:px-4' : 'py-4 px-4 sm:px-6'} bg-gray-50 rounded-lg border border-gray-200 ${isManyQuestions ? 'mb-2' : 'mb-3'}`}>
+                <div className="flex-1 text-xs sm:text-sm font-medium text-gray-700 text-center sm:text-left">
                     {(game?.questions.length ?? 0) - highlightedLevelId} level(s) completed.
                 </div>
-                <form onSubmit={handleLevelClick} className="flex items-center justify-center flex-3">
-                    <Input placeholder="Enter Answer:" className="w-100" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-                    <Button type="submit" className="shadow-lg bg-green-600 cursor-pointer ml-3 h-6 transition-all hover:bg-green-200 active:scale-95 rounded-lg" disabled={sendDisabled}>
-                        <SendHorizonalIcon></SendHorizonalIcon>
+                <form onSubmit={handleLevelClick} className="flex items-center justify-center gap-2 flex-1">
+                    <Input placeholder="Enter Answer:" className="w-full max-w-md text-sm" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                    <Button
+                        type="submit"
+                        className="bg-green-600 hover:bg-green-700 text-white shadow-md transition-all hover:shadow-lg active:scale-95 rounded-lg px-3 sm:px-4 py-2 h-9"
+                        disabled={sendDisabled}
+                    >
+                        <SendHorizonalIcon className="h-4 w-4" />
                     </Button>
                 </form>
-                <div className="items-end ml-auto mr-10 flex gap-2 font-medium leading-none">
-                    {Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
+                <div className="flex-1 flex flex-col items-center sm:items-end gap-1 text-xs sm:text-sm">
+                    <div className="font-semibold text-green-600">
+                        +{Math.floor(Math.min(Math.max(10000 / (user?.scores[game?.sport ?? ""] ?? 0), 10), 50) * ((game?.questions.length ?? 0) - highlightedLevelId))} points gained
+                    </div>
+                    <div className="text-gray-500">
+                        -{Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0))} points wagered
+                    </div>
                 </div>
-                <div className="mb-4"></div>
-                <div className="items-end ml-auto mr-10 leading-none text-muted-foreground">
-                    {Math.floor((user?.scores[game?.sport ?? ""] ?? 0) * 0.05 * (game?.questions.length ?? 0))} points wagered
-                </div>
-
             </div>
 
 
-            <div className="flex items-start justify-between px-10 mt-2">
-                <div className="flex items-start">
-                    <a
-                        href={!sendDisabled ? undefined : "/"}
-                        style={{
-                            pointerEvents: !sendDisabled ? 'none' : 'auto',
-                            color: !sendDisabled ? 'gray' : 'blue',
-                        }}
-                        aria-disabled={!sendDisabled}
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 ${isManyQuestions ? 'px-3 sm:px-4 mt-1' : 'px-4 sm:px-6 mt-2'}`}>
+                <div className="flex items-center gap-3">
+                    {sendDisabled ? (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-gray-300 bg-white text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900 active:scale-95"
+                            onClick={() => navigate("/")}
+                        >
+                            <HomeIcon className="h-5 w-5" />
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-gray-300 bg-white text-gray-400 opacity-50 cursor-not-allowed"
+                            disabled={true}
+                        >
+                            <HomeIcon className="h-5 w-5" />
+                        </Button>
+                    )}
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className={`border-gray-300 bg-white text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900 active:scale-95 ${!sendDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={!sendDisabled}
+                        onClick={handleRefreshClick}
                     >
-                        <HomeIcon />
-                    </a>
-                    <button className="shadow-lg cursor-pointer transition-all hover:bg-gray-100  active:scale-95 rounded-lg ml-10"
-                        onClick={e => handleRefreshClick(e)}
-                        style={{
-                            pointerEvents: !sendDisabled ? 'none' : 'auto',
-                            color: !sendDisabled ? 'gray' : 'blue',
-                        }}
-                        aria-disabled={!sendDisabled}
-                    >
-                        <RefreshCcwIcon />
-                    </button>
+                        <RefreshCcwIcon className="h-5 w-5" />
+                    </Button>
                 </div>
-                <div className="flex items-start text-red-500">
+                <div className="flex items-center text-red-500 font-medium min-h-[24px]">
                     {fail || (isCheckingAnswer && "Checking answer...")}
                 </div>
-                <div className="flex items-start">
+                <div className="flex items-center">
                     <MyClock
                         onClick={handleClockClick}
                         isR={!sendDisabled}

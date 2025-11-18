@@ -354,15 +354,15 @@ function Gamelog() {
         <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
-                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Game Log</h1>
+                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6">
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900">Game Log</h1>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="mx-auto max-w-7xl p-8">
+            <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-8">
                 <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                    <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                    <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                         <Table>
                             <TableHeader className="sticky top-0 bg-gray-100/90 backdrop-blur z-2 border-b border-gray-200">
                                 {table.getHeaderGroups().map((headerGroup) => (

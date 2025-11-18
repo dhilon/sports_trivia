@@ -195,7 +195,7 @@ def question_generator(league, num_tokens):
             thinking_config=types.ThinkingConfig(
                 thinking_budget=0
             ),  # Disables thinking
-            temperature=0.3,
+            temperature=0,
             top_p=0.9,
             tools=[types.Tool(google_search=types.GoogleSearch())],
         ),

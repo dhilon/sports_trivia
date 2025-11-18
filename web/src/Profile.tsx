@@ -156,19 +156,19 @@ function Profile() {
         <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
-                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">{data.username}'s Profile</h1>
+                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6">
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900 truncate">{data.username}'s Profile</h1>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="mx-auto max-w-4xl p-8">
-                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[700px]">
-                    <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-4">
-                        <CardTitle className="text-lg font-semibold text-gray-800">{data.username}'s Statistics</CardTitle>
-                        <CardDescription className="text-sm text-gray-600">Member since {formatRelativeDate(data.created_at)}</CardDescription>
+            <div className="mx-auto max-w-4xl p-3 sm:p-6 lg:p-8">
+                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[90vh] sm:max-h-[700px]">
+                    <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-3 sm:py-4">
+                        <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 truncate">{data.username}'s Statistics</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm text-gray-600">Member since {formatRelativeDate(data.created_at)}</CardDescription>
                     </CardHeader>
-                    <CardContent className="items-center justify-center mt-8 max-h-[550px] overflow-y-auto">
+                    <CardContent className="items-center justify-center mt-3 sm:mt-8 max-h-[60vh] sm:max-h-[550px] overflow-y-auto px-2 sm:px-4">
                         <ChartContainer config={chartConfig}>
                             <BarChart accessibilityLayer data={chartData} margin={{
                                 top: 20,

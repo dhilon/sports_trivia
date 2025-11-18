@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
     Card,
     CardContent,
@@ -80,6 +81,13 @@ const CustomLabel = (props: any) => {
 function LeaderboardCard(
     { sport }: { sport: string }
 ) {
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const { leaders, isLoading, isError } = leaderboard();
 
@@ -130,22 +138,25 @@ function LeaderboardCard(
     if (isError || isErrorUser) return <div>Error loading leaderboard</div>;
 
     return (
-        <div className="flex flex-col">
-            <Card className="w-[280px] h-[500px] rounded-xl border border-gray-200 bg-white shadow-sm">
-                <CardHeader className="sticky top-0 z-2 rounded-t-xl border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
-                    <CardTitle className="text-base font-semibold text-gray-800">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
+        <div className="flex flex-col w-full overflow-hidden">
+            <Card className="w-full h-auto min-h-[300px] sm:min-h-[400px] md:min-h-[500px] rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                <CardHeader className="sticky top-0 z-2 rounded-t-xl border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-2 sm:py-3">
+                    <CardTitle className="text-sm sm:text-base font-semibold text-gray-800">{sport.charAt(0).toUpperCase() + sport.slice(1)}</CardTitle>
                 </CardHeader>
-                <CardContent className="mt-5">
-                    <ChartContainer config={chartConfig} style={{ height: '420px' }}>
-
+                <CardContent className="mt-3 sm:mt-5 px-1 sm:px-5 overflow-hidden">
+                    <ChartContainer config={chartConfig} className="h-[250px] sm:h-[320px] md:h-[420px] w-full overflow-hidden">
                         <BarChart
                             accessibilityLayer
                             data={top10Data}
                             layout="vertical"
                             margin={{
-                                right: 530,
+                                top: 10,
+                                right: windowWidth < 640 ? 2 : windowWidth < 1024 ? 15 : 30,
+                                left: windowWidth < 640 ? 2 : 10,
+                                bottom: 10,
                             }}
-                            barCategoryGap="1%"
+                            barCategoryGap={windowWidth < 640 ? "3%" : "1%"}
+                            maxBarSize={windowWidth < 640 ? 30 : undefined}
 
                         >
                             <CartesianGrid horizontal={false} />
@@ -158,7 +169,12 @@ function LeaderboardCard(
                                 tickFormatter={(value) => value.slice(0, 3)}
                                 hide
                             />
-                            <XAxis dataKey="points" type="number" hide />
+                            <XAxis
+                                dataKey="points"
+                                type="number"
+                                hide
+                                domain={[0, 'dataMax']}
+                            />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent indicator="line" />}
@@ -179,14 +195,16 @@ function LeaderboardCard(
                                     content={CustomLabel}
                                     className="fill-foreground"
                                 />
-                                <LabelList
-                                    dataKey="rank"
-                                    position="right"
-                                    offset={8}
-                                    className="fill-gray-500"
-                                    fontSize={12}
-                                    style={{ pointerEvents: "none" }}
-                                />
+                                {windowWidth >= 640 && (
+                                    <LabelList
+                                        dataKey="rank"
+                                        position="right"
+                                        offset={8}
+                                        className="fill-gray-500"
+                                        fontSize={12}
+                                        style={{ pointerEvents: "none" }}
+                                    />
+                                )}
                             </Bar>
                         </BarChart>
 
@@ -205,13 +223,13 @@ function Leaderboard() {
         <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
-                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Leaderboard</h1>
+                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6">
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">Leaderboard</h1>
                 </div>
             </div>
 
             {/* Cards Grid */}
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-16 gap-y-12 p-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4 sm:p-6 lg:p-8">
                 <LeaderboardCard sport="basketball" />
                 <LeaderboardCard sport="soccer" />
                 <LeaderboardCard sport="football" />

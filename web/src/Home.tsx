@@ -57,8 +57,8 @@ function JoinCard() {
     };
     return (
 
-        <div className="flex flex-col">
-            <Card className="w-[280px] h-[235px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex flex-col w-full">
+            <Card className="w-full h-auto min-h-[200px] sm:min-h-[235px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <CardHeader className="sticky top-0 z-10 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
                     <CardTitle className="text-base font-semibold text-gray-800">Join Game</CardTitle>
                 </CardHeader>
@@ -93,16 +93,16 @@ function HomeCard(
 ) {
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
             <Link className="cursor-pointer transition-all active:scale-95" href={"/games/" + sport.toLowerCase()}>
-                <Card className="w-[280px] h-[220px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <Card className="w-full h-auto min-h-[200px] sm:min-h-[220px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                     <CardHeader className="sticky top-0 z-1 rounded-none border-b bg-gray-100/90 backdrop-blur supports-[backdrop-filter]:bg-gray-100/80 py-3">
-                        <CardTitle className="text-base font-semibold text-gray-800">{sport}</CardTitle>
+                        <CardTitle className="text-sm sm:text-base font-semibold text-gray-800">{sport}</CardTitle>
                     </CardHeader>
                     <CardContent className="mt-4 flex items-center justify-center">
-                        <img src={image} alt="image" className="h-20 w-20 rounded-md object-cover shadow" />
+                        <img src={image} alt="image" className="h-16 w-16 sm:h-20 sm:w-20 rounded-md object-cover shadow" />
                     </CardContent>
-                    <CardFooter className="flex-col items-start gap-1 text-xs text-muted-foreground pb-4">
+                    <CardFooter className="flex-col items-start gap-1 text-xs text-muted-foreground pb-4 px-4">
                         <div className="flex gap-2 font-medium leading-snug">
                             {question}
                         </div>
@@ -120,16 +120,16 @@ function Home() {
         <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
-                <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
-                    <div className="flex items-center gap-3">
-                        <img src={favicon} alt="favicon" className="h-10 w-10 rounded-lg" />
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">SportsTrivia</h1>
+                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <img src={favicon} alt="favicon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg" />
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">SportsTrivia</h1>
                     </div>
                 </div>
             </div>
 
             {/* Cards Grid */}
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-16 gap-y-12 p-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4 sm:p-6 lg:p-8">
                 <HomeCard image={basketball} question="Is Michael Jordan the GOAT?" sport="Basketball" />
                 <HomeCard image={soccer} question="Is it actually futból?" sport="Soccer" />
                 <HomeCard image={football} question="Are the Lions ever winning the Super Bowl?" sport="Football" />
