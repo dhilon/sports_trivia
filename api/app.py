@@ -17,7 +17,6 @@ from authlib.integrations.flask_client import OAuth
 
 
 # from openai import OpenAI
-import ast
 from dotenv import load_dotenv
 import os
 from google import genai
@@ -163,72 +162,90 @@ def auth_google_callback():
     return redirect("http://localhost:5173/home")
 
 
-def question_generator(league, num_tokens):
-
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-    old_questions = Question.select().where(Question.sport == league)
-
-    contents = (
-        "Give me "
-        + str(num_tokens)
-        + " questions with an bell-curve distribution of difficult questions about the professional sports league for "
-        + league
-        + " in the following format: {'question': str, 'answer': str, 'difficulty': int}. "
-        + "-Take out the first greeting sentence"
-        + "-don't have numbers before the question"
-        + "-separate each object with a new line"
-        + "-make the max answer length 50 characters"
-        + "-describe the difficulty of the question on a scale of 1-100 with 1 being easy and 100 being hard. For example:"
-        + "'{'question': 'how many players on a basketball court at a time?', 'answer' : '5', 'difficulty': 5}"
-        + "Don't use this question"
-        + "Make sure that each answer is accurate by using web search"
-        + "Use recent web-search evidence for current season records and events (2024-25; 2025) before generating the questions and answers."
-        + "Don't use these questions: "
-        + "\n".join([q.text for q in old_questions])
-    )
-
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=contents,
-        config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(
-                thinking_budget=0
-            ),  # Disables thinking
-            temperature=0,
-            top_p=0.9,
-            tools=[types.Tool(google_search=types.GoogleSearch())],
-        ),
-    )
-
-    return response.text or ""
-
-
 @app.route("/answer_checker/", methods=["POST"])
 def answer_checker():
     payload = request.get_json() or {}
     question = str(payload.get("question"))
     answer = str(payload.get("answer"))
+    response = str(payload.get("response"))
 
-    return check_answer(question, answer) or ""
+    return check_answer(question, answer, response) or ""
 
 
-def check_answer(question, answer):
+def check_answer(question, answer, response):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    response = client.models.generate_content(
+
+    prompt = f"""
+You are a sports trivia answer grader.
+
+Your job is to compare a user's answer (CANDIDATE_ANSWER) to the correct answer 
+(GROUND_TRUTH_ANSWER) in the context of the trivia QUESTION.
+
+Matching Rules:
+1. Names:
+   - Accept last name only if unambiguous (e.g., "Jordan" → "Michael Jordan").
+   - Accept reversed name order.
+   - Reject if last name could refer to multiple major athletes unless question clarifies.
+
+2. Team Names:
+   - Accept nicknames ("Lakers"), city-only ("Los Angeles"), or full name.
+   - Accept common abbreviations ("GSW", "NYK", "DAL").
+   - Reject abbreviations that are ambiguous across leagues.
+
+3. Numbers:
+   - Accept equivalent number formats ("3" = "three").
+   - Accept equivalent well-known rounded stats when obvious.
+
+4. Typos:
+   - Ignore small typos when the intended entity is clear.
+
+5. Accuracy:
+   - The candidate must refer to the **same real-world entity** as the ground truth.
+
+You MUST return a JSON object with the following shape:
+
+{{
+  "is_match": boolean,
+  "similarity_score": float,      // range 0.0 - 1.0
+  "reasoning": "short explanation of why they match or not"
+}}
+
+Do NOT include any text outside the JSON.
+
+QUESTION: {question}
+GROUND_TRUTH_ANSWER: {answer}
+CANDIDATE_ANSWER: {response}
+
+Return only the JSON.
+"""
+
+    model_response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents="Given the question and answer, tell me whether the answer is correct or incorrect and only respond with the exact string 'True' if correct or the exact string 'False' if incorrect: "
-        + question
-        + " Answer: "
-        + answer,
+        contents=prompt,
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(
-                thinking_budget=0
-            ),  # Disables thinking
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
             temperature=0.0,
         ),
     )
-    return response.text or ""
+
+    response_text = model_response.text or ""
+
+    # Extract JSON from markdown code blocks if present
+    if "```json" in response_text:
+        # Extract content between ```json and ```
+        parts = response_text.split("```json")
+        if len(parts) > 1:
+            response_text = parts[1].split("```")[0].strip()
+    elif "```" in response_text:
+        # Extract content between ``` and ```
+        parts = response_text.split("```")
+        if len(parts) > 1:
+            response_text = parts[1].strip()
+
+    # Clean up any leading/trailing whitespace
+    response_text = response_text.strip()
+
+    return response_text
 
 
 def difficulty_calculator(rawqs):
@@ -365,27 +382,6 @@ def all_games():
                 num_questions = random.randint(8, 12)
             else:
                 num_questions = 1
-
-            chat_response = question_generator(sport, 10)
-
-            if chat_response:
-                for question in chat_response.split("\n"):
-                    if question != "":
-                        try:
-                            question = ast.literal_eval(question)
-                            question_text = question["question"]
-                        except:
-                            continue
-
-                        question_answer = question["answer"].split(",")[0]
-                        question_difficulty = question["difficulty"]
-                        Question.create(
-                            id=recent_question().id + 1,
-                            sport=sport,
-                            text=question_text,
-                            answer=question_answer,
-                            difficulty=question_difficulty,
-                        )
 
             sport_questions = [
                 x

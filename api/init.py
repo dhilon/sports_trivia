@@ -1,6 +1,8 @@
 from datetime import datetime
 from models import db, User, Question, Game, Score, Friends
 from peewee import IntegrityError
+from seed_questions import seed_questions, delete_questions_not_in_games
+
 
 users = [
     {
@@ -1344,3 +1346,8 @@ def init_db():
                 Score.get_or_create(
                     userId=user_obj, sport=sport, defaults={"score": score_value}
                 )
+    for sport in sports:
+        if sport != "hockey" and sport != "football":
+            print(f"Seeding questions for {sport}")
+            seed_questions(sport)
+            print(f"Questions seeded for {sport}")

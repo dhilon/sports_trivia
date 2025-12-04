@@ -132,9 +132,12 @@ function AroundTheHorn() { //TODO: add a turn component to each game object
     const handleAnswerClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const check = await answerChecker({ question: game.questions.find((question: Question) => question.id === game.current_question)?.text ?? "", answer: inputValue });
+        const result = await answerChecker({ question: game.questions.find((question: Question) => question.id === game.current_question)?.text ?? "", answer: game.questions.find((question: Question) => question.id === game.current_question)?.answer ?? "", response: inputValue });
 
-        if (check == "True") {
+        console.log(result.similarity_score);
+        console.log(result.reasoning);
+
+        if (result.is_match) {
             setInputValue('');
             setFail("You got this one right!");
             createGame({ id: game.id, status: "", time: 1, score: 0, current_question: 0 });

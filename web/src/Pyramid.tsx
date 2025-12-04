@@ -160,16 +160,19 @@ function Pyramid() {
     const handleLevelClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const check = await answerChecker({ question: game?.questions[count - 1]?.text ?? "", answer: inputValue });
+        const result = await answerChecker({ question: game?.questions[count - 1]?.text ?? "", answer: game?.questions[count - 1]?.answer ?? "", response: inputValue });
 
-        if (check == "True") {
+        console.log(result.similarity_score);
+        console.log(result.reasoning);
+
+        if (result.is_match) {
             setHighlightedLevelId(count - 1);
             setInputValue('');
             setCount(count - 1);
             clockRef.current?.reset();
         }
         else {
-            setFail("You failed the pyramid! The correct answer is " + check);
+            setFail("You failed the pyramid! " + result.reasoning);
             setSendDisabled(true);
             clockRef.current?.toggle();
             setShouldUpdateScore(true);
