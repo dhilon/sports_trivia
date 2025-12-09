@@ -148,6 +148,7 @@ def auth_google_callback():
                 google_sub=sub,
                 email=email,
                 username=userinfo.get("name"),
+                profile_picture=userinfo.get("picture"),
             )
 
     login_user(user)
@@ -566,6 +567,8 @@ def user_detail(name):
                     (Score.userId == user) & (Score.sport == sport)
                 ).execute()
                 Score.create(userId=user, sport=sport, score=score)
+    if "profile_picture" in data:
+        user.profile_picture = data["profile_picture"]
 
     # 5) Save back to the database
     user.save()
@@ -590,6 +593,7 @@ def get_user(name=None):
             "created_at": user.created_at,
             "google_sub": user.google_sub,
             "email": user.email,
+            "profile_picture": user.profile_picture,
         }
     else:
         return abort(404, description=f"User {name or 'None'} not found")
@@ -604,6 +608,7 @@ def get_friend(name=None):  # avoid recursion
             "scores": {score.sport: score.score for score in user.scores},
             "friends": [],  # friends of friends will not be accessible
             "created_at": user.created_at,
+            "profile_picture": user.profile_picture,
         }
     else:
         return abort(404, description=f"User {name or 'None'} not found")

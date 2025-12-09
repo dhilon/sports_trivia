@@ -44,6 +44,7 @@ class User(BaseModel, UserMixin):
     username = CharField(unique=True)
     password_hash = CharField(default=" ")
     created_at = DateTimeField(default=datetime.now())
+    profile_picture = CharField(null=True, default=None)
 
     @property
     def password(self):

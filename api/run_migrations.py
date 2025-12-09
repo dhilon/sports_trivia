@@ -8,10 +8,10 @@ if db.is_closed():
 # Add the new column
 try:
     # Add player_scores column to Game table
-    db.execute_sql('ALTER TABLE "game" DROP COLUMN dead;')
-    print("Successfully deleted dead column from game table!")
+    db.execute_sql('ALTER TABLE "user" ADD COLUMN profile_picture TEXT;')
+    print("Successfully added profile picture column to user table!")
 except Exception as e:
-    print(f"Error deleting column: {e}")
+    print(f"Error adding profile picture column to user table: {e}")
     # Column might already exist
 
 db.close()
