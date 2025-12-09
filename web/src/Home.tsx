@@ -70,7 +70,7 @@ function JoinCard() {
                     <div className="flex gap-2 font-medium leading-none w-full">
                         <form onSubmit={handleClick} className="flex gap-2 w-full">
                             <Input placeholder="Code:" value={inputValue} onChange={(e) => setInputValue(e.target.value)} className="h-8 text-xs text-gray-800" required />
-                            <button type="submit" className="h-8 rounded-lg bg-white px-2 shadow transition-all hover:bg-gray-100 active:scale-95 dark:bg-gray-900 dark:hover:bg-gray-800">
+                            <button type="submit" disabled className="h-8 rounded-lg bg-white px-2 shadow transition-all hover:bg-gray-100 active:scale-95 dark:bg-gray-900 dark:hover:bg-gray-800">
                                 <SendHorizonalIcon className="h-4 w-4" />
                             </button>
                         </form>

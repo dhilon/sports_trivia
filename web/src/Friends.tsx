@@ -51,10 +51,18 @@ function Friends() {
             const scoreValues = Object.values(scores);
             sum += scoreValues[c] || 0;
         }
-        chartData[i] = { name: user?.friends[i]?.username || "", points: sum }
-        if (showYou) {
-            chartData[i + 1] = { name: user?.username || "", points: (user?.scores.basketball || 0) + (user?.scores.soccer || 0) + (user?.scores.hockey || 0) + (user?.scores.football || 0) + (user?.scores.baseball || 0) + (user?.scores.tennis || 0) }
+        chartData[i] = {
+            name: user?.friends[i]?.username || "",
+            points: sum,
+            profile_picture: user?.friends[i]?.profile_picture || "/images/logo.png",
         }
+    }
+    if (showYou) {
+        chartData.push({
+            name: user?.username || "",
+            points: (user?.scores.basketball || 0) + (user?.scores.soccer || 0) + (user?.scores.hockey || 0) + (user?.scores.football || 0) + (user?.scores.baseball || 0) + (user?.scores.tennis || 0),
+            profile_picture: user?.profile_picture || "/images/logo.png",
+        })
     }
     chartData.sort((a, b) => {
         const pointsA = (a as { points: number }).points || 0;
@@ -65,20 +73,42 @@ function Friends() {
     const [inputValue, setInputValue] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
+    const { trigger: createUser, isMutating } = useEditUser();
 
-    const { trigger: createUser, isMutating, error } = useEditUser();
+    const ProfilePicLabel = (props: any) => {
+        const { x, y, height, width, value } = props;
+        const size = 18;
+        const padding = 8;
+        const cx = x + (width ?? 0) + padding;
+        const cy = y + height / 2 - size / 2;
+        const href = value || "/images/logo.png";
+        return (
+            <image
+                href={href}
+                x={cx}
+                y={cy}
+                width={size}
+                height={size}
+                preserveAspectRatio="xMidYMid slice"
+                clipPath="circle(50% at 50% 50%)"
+            />
+        );
+    };
 
-    if (isError || error) return <div>Error: {errorMessage}</div>;
+    if (isError) return <div>Error: {errorMessage}</div>;
     if (isLoading || isMutating) return <div>loading...</div>
 
 
-    const handleClick = async () => {
+    const handleClick = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (isLoading || isMutating) return <div>Loading...</div>;
         try {
             await createUser({
                 uName: user?.username || "",
                 pwd: "",
                 scores: user?.scores || {},
-                friends: [inputValue]
+                friends: [inputValue],
+                profile_picture: user?.profile_picture || ""
             });
             setErrMsg("Friend added");
             setInputValue(''); // Clear input after successful add
@@ -147,6 +177,7 @@ function Friends() {
                                     layout="vertical"
                                     fill="var(--color-points)"
                                     radius={4}
+                                    opacity={0.91}
                                     onClick={(e) => navigate("/profile/" + e.payload.name)}
                                 >
                                     {chartData.map((entry, index) => (
@@ -171,6 +202,11 @@ function Friends() {
                                         className="fill-foreground"
                                         fontSize={12}
                                     />
+                                    <LabelList
+                                        dataKey="profile_picture"
+                                        position="right"
+                                        content={ProfilePicLabel}
+                                    />
                                 </Bar>
                             </BarChart>
                         </ChartContainer>
@@ -185,10 +221,7 @@ function Friends() {
                             Showing total scores for all users
                         </div>
                         <div className="mt-2 flex w-full items-center space-x-3">
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                handleClick();
-                            }} className="flex w-full items-center space-x-2">
+                            <form onSubmit={handleClick} className="flex w-full items-center space-x-2">
                                 <Input
                                     placeholder="Add Friend..."
                                     className="flex-1 h-8 text-xs text-gray-800"

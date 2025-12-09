@@ -20,6 +20,8 @@ import { SidebarLayout } from "./SidebarLayout"
 import { useParams } from "wouter"
 import useSWR from "swr"
 import { formatRelativeDate } from "./lib/dateUtils"
+import { ChangeEvent, useRef } from "react"
+import useEditUser from "./components/EditUser"
 
 
 const chartData = [
@@ -66,11 +68,24 @@ const chartConfig = {
 
 } satisfies ChartConfig
 
+// Generate a consistent color from a string (for initials)
+const getColorFromString = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
+};
+
 function Profile() {
     const { name } = useParams();
 
-    const { data, isLoading, error } = useSWR(`/users/${name}`);
+    const { data, isLoading, error, mutate } = useSWR(`/users/${name}`);
     const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${name}`);
+
+    const { trigger: editUser, isMutating, error: editUserError } = useEditUser();
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     // Fetch leaderboard data for all sports to detect ties
     const { data: leaderboardData, isLoading: leaderboardLoading, error: leaderboardError } = useSWR('/leaderboard');
@@ -152,23 +167,91 @@ function Profile() {
         (data.scores.tennis ?? 0) +
         (data.scores.football ?? 0);
 
+    const handleProfilePicChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const readAsDataUrl = (file: File) =>
+            new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+        try {
+            const dataUrl = await readAsDataUrl(file);
+
+            // Optimistic update with data URL so it survives reload after persisting
+            mutate({ ...data, profile_picture: dataUrl }, false);
+
+            await editUser({
+                uName: data.username || "",
+                pwd: data.password || "",
+                scores: data.scores || {},
+                friends: data.friends || [],
+                profile_picture: dataUrl,
+            });
+
+            // Revalidate to pick up server response
+            mutate();
+        } catch (err) {
+            // On failure, fall back to previous picture in cache
+            mutate();
+            console.error("Failed to update profile picture", err);
+        }
+    }
+
+    if (isMutating || editUserError) return <div>Error: {editUserError?.message}</div>;
+    if (isLoading || rankingsLoading || leaderboardLoading || isMutating) return <div>loading...</div>
+
     return (
         <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-2 w-full border-b border-gray-200/60 bg-white/70 backdrop-blur-md shadow-sm">
-                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6">
+                <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center px-4 sm:px-6 gap-3">
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+                        aria-label="Change profile picture"
+                    >
+                        {data.profile_picture && (data.profile_picture.startsWith('http') || data.profile_picture.startsWith('data:') || data.profile_picture.startsWith('/')) ? (
+                            <img
+                                src={data.profile_picture}
+                                alt={data.username}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <div
+                                className="h-full w-full rounded-full flex items-center justify-center text-white font-bold text-sm"
+                                style={{ backgroundColor: getColorFromString(data.username || '') }}
+                            >
+                                {(data.username || '?').charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        id="profile_picture"
+                        name="profile_picture"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePicChange}
+                        className="hidden"
+                    />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900 truncate">{data.username}'s Profile</h1>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="mx-auto max-w-4xl p-3 sm:p-6 lg:p-8">
-                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[90vh] sm:max-h-[700px]">
+            <div className="mx-auto max-w-4xl p-3">
+                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl max-h-[650px]">
                     <CardHeader className="border-b bg-gray-100/90 backdrop-blur rounded-t-xl py-3 sm:py-4">
                         <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 truncate">{data.username}'s Statistics</CardTitle>
                         <CardDescription className="text-xs sm:text-sm text-gray-600">Member since {formatRelativeDate(data.created_at)}</CardDescription>
                     </CardHeader>
-                    <CardContent className="items-center justify-center mt-3 sm:mt-8 max-h-[60vh] sm:max-h-[550px] overflow-y-auto px-2 sm:px-4">
+                    <CardContent className="items-center justify-center mt-3 sm:mt-8 max-h-[480px] overflow-y-auto px-2 sm:px-4">
                         <ChartContainer config={chartConfig}>
                             <BarChart accessibilityLayer data={chartData} margin={{
                                 top: 20,

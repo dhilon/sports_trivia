@@ -55,33 +55,79 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-// Custom label component to truncate long names
-const CustomLabel = (props: any) => {
-    const { x, y, width, height, value } = props;
-    const maxLength = Math.floor(width / 7); // Approximate character width
-    const displayValue = value.length > maxLength && maxLength > 3
-        ? value.slice(0, maxLength - 3) + '...'
-        : value;
 
-    return (
-        <text
-            x={x + 8}
-            y={y + height / 2}
-            dominantBaseline="middle"
-            fill="currentColor"
-            fontSize={12}
-            textAnchor="start"
-            style={{ pointerEvents: "none" }}
-        >
-            {displayValue}
-        </text>
-    );
+// Generate a consistent color from a string (for initials)
+const getColorFromString = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
+};
+
+// Render profile picture to the right of the bar using SVG <image> or initial letter
+const ProfilePicLabel = (props: any) => {
+    const { x, y, height, width, value, payload } = props;
+    const size = 22;
+    const padding = 25;
+    // Position at the right edge of the bar plus a small padding
+    const cx = x + (width ?? 0) - padding;
+    const cy = y + height / 2 - size / 2;
+
+    // Check if value is a URL (image) or just a letter (initial)
+    const isImageUrl = value && (value.startsWith('http') || value.startsWith('data:') || value.startsWith('/'));
+
+    if (isImageUrl) {
+        return (
+            <image
+                href={value || "/images/logo.png"}
+                x={cx}
+                y={cy}
+                width={size}
+                height={size}
+                preserveAspectRatio="xMidYMid slice"
+                clipPath="circle(50% at 50% 50%)"
+            />
+        );
+    } else {
+        // Render initial letter in a colored circle
+        const letter = value?.charAt(0).toUpperCase() || '?';
+        const color = getColorFromString(payload?.name || value || '');
+        const centerX = cx + size / 2;
+        const centerY = cy + size / 2;
+        const radius = size / 2;
+
+        return (
+            <g>
+                <circle
+                    cx={centerX}
+                    cy={centerY}
+                    r={radius}
+                    fill={color}
+                />
+                <text
+                    x={centerX}
+                    y={centerY}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={12}
+                    fontWeight="bold"
+                    style={{ pointerEvents: "none" }}
+                >
+                    {letter}
+                </text>
+            </g>
+        );
+    }
 };
 
 function LeaderboardCard(
     { sport }: { sport: string }
 ) {
     const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+    const [profilePictures, setProfilePictures] = useState<Record<string, string | undefined>>({});
 
     useEffect(() => {
         const handleResize = () => setWindowWidth(window.innerWidth);
@@ -95,9 +141,42 @@ function LeaderboardCard(
 
     const chartData = []
 
-    for (let i = 0; i < (Object.keys(leaders?.[sport as keyof Leaderboard] || {}).length || 0); i++) {
-        chartData[i] = { name: Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i], points: leaders?.[sport as keyof Leaderboard]?.[Object.keys(leaders?.[sport as keyof Leaderboard] || {})[i]] || 0 }
+    const sportLeaders = leaders?.[sport as keyof Leaderboard] || {};
+    const usernames = Object.keys(sportLeaders);
+
+    for (let i = 0; i < usernames.length; i++) {
+        const username = usernames[i];
+        const points = sportLeaders[username] || 0;
+        chartData[i] = { name: username, points };
     }
+
+    // Fetch profile pictures for the top 10 users of this sport
+    useEffect(() => {
+        const fetchPictures = async () => {
+            if (!leaders) return;
+            const topUsernames = usernames.slice(0, 10);
+            const results = await Promise.all(
+                topUsernames.map(async (username) => {
+                    try {
+                        const res = await fetch(`http://localhost:5000/users/${username}`);
+                        if (!res.ok) return [username, undefined] as const;
+                        const json = await res.json();
+                        return [username, json.profile_picture as string | undefined] as const;
+                    } catch {
+                        return [username, undefined] as const;
+                    }
+                })
+            );
+
+            const nextMap: Record<string, string | undefined> = {};
+            results.forEach(([username, pic]) => {
+                nextMap[username] = pic;
+            });
+            setProfilePictures(nextMap);
+        };
+
+        fetchPictures();
+    }, [leaders, sport]);
     chartData.sort((a, b) => b.points - a.points);
 
     // Limit to top 10 scores and add rankings with tie detection
@@ -129,6 +208,7 @@ function LeaderboardCard(
 
         return {
             name: item.name,
+            profile_picture: profilePictures[item.name] ?? item.name.charAt(0).toUpperCase(),
             points: item.points,
             rank: rankText
         };
@@ -152,7 +232,7 @@ function LeaderboardCard(
                             margin={{
                                 top: 10,
                                 right: windowWidth < 640 ? 2 : windowWidth < 1024 ? 15 : 30,
-                                left: windowWidth < 640 ? 2 : 10,
+                                left: windowWidth < 640 ? 2 : windowWidth < 1024 ? 10 : 40,
                                 bottom: 10,
                             }}
                             barCategoryGap={windowWidth < 640 ? "3%" : "1%"}
@@ -179,32 +259,32 @@ function LeaderboardCard(
                                 cursor={false}
                                 content={<ChartTooltipContent indicator="line" />}
                             />
-                            <Bar dataKey="points" layout="vertical" radius={4}>
+                            <Bar dataKey="points" layout="vertical" radius={4} opacity={0.91}>
                                 {top10Data.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
                                         fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
                                         style={{ cursor: "pointer" }}
                                         onClick={() => navigate("/profile/" + entry.name)}
-                                        height={20}
+                                        height={35}
                                     />
                                 ))}
-                                <LabelList
-                                    dataKey="name"
-                                    position="insideLeft"
-                                    content={CustomLabel}
-                                    className="fill-foreground"
-                                />
                                 {windowWidth >= 640 && (
                                     <LabelList
                                         dataKey="rank"
-                                        position="right"
-                                        offset={8}
+                                        position="left"
+                                        offset={6}
                                         className="fill-gray-500"
                                         fontSize={12}
                                         style={{ pointerEvents: "none" }}
                                     />
+
                                 )}
+                                <LabelList
+                                    dataKey="profile_picture"
+                                    position="right"
+                                    content={ProfilePicLabel}
+                                />
                             </Bar>
                         </BarChart>
 
