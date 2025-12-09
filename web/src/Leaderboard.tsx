@@ -146,24 +146,43 @@ function LeaderboardCard(
 
     for (let i = 0; i < usernames.length; i++) {
         const username = usernames[i];
-        const points = sportLeaders[username] || 0;
-        chartData[i] = { name: username, points };
+        const value = sportLeaders[username];
+        // Handle both number (other sports) and object (total) formats
+        const points = typeof value === 'number' ? value : (typeof value === 'object' && value !== null && 'score' in value ? (value as { score: number }).score : 0);
+        const id = typeof value === 'object' && value !== null && 'id' in value ? (value as { id: number }).id : 0;
+        chartData[i] = { name: username, id: id, points };
     }
+
+    chartData.sort((a, b) => b.points - a.points);
 
     // Fetch profile pictures for the top 10 users of this sport
     useEffect(() => {
         const fetchPictures = async () => {
             if (!leaders) return;
-            const topUsernames = usernames.slice(0, 10);
+            const currentSportLeaders = leaders[sport as keyof Leaderboard] || {};
+            const currentUsernames = Object.keys(currentSportLeaders);
+
+            // Build chart data and sort
+            const currentChartData = currentUsernames.map((username) => {
+                const value = currentSportLeaders[username];
+                const points = typeof value === 'number' ? value : (typeof value === 'object' && value !== null && 'score' in value ? (value as { score: number }).score : 0);
+                const id = typeof value === 'object' && value !== null && 'id' in value ? (value as { id: number }).id : 0;
+                return { name: username, id: id, points };
+            }).sort((a, b) => b.points - a.points).slice(0, 10);
+
             const results = await Promise.all(
-                topUsernames.map(async (username) => {
+                currentChartData.map(async (entry) => {
+                    // Skip fetching if id is 0 or invalid
+                    if (!entry.id || entry.id === 0) {
+                        return [entry.name, undefined] as const;
+                    }
                     try {
-                        const res = await fetch(`http://localhost:5000/users/${username}`);
-                        if (!res.ok) return [username, undefined] as const;
+                        const res = await fetch(`http://localhost:5000/users/${entry.id}`);
+                        if (!res.ok) return [entry.name, undefined] as const;
                         const json = await res.json();
-                        return [username, json.profile_picture as string | undefined] as const;
+                        return [entry.name, json.profile_picture as string | undefined] as const;
                     } catch {
-                        return [username, undefined] as const;
+                        return [entry.name, undefined] as const;
                     }
                 })
             );
@@ -177,7 +196,6 @@ function LeaderboardCard(
 
         fetchPictures();
     }, [leaders, sport]);
-    chartData.sort((a, b) => b.points - a.points);
 
     // Limit to top 10 scores and add rankings with tie detection
     const top10 = chartData.slice(0, 10);
@@ -208,6 +226,7 @@ function LeaderboardCard(
 
         return {
             name: item.name,
+            id: item.id,
             profile_picture: profilePictures[item.name] ?? item.name.charAt(0).toUpperCase(),
             points: item.points,
             rank: rankText
@@ -265,7 +284,7 @@ function LeaderboardCard(
                                         key={`cell-${index}`}
                                         fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
                                         style={{ cursor: "pointer" }}
-                                        onClick={() => navigate("/profile/" + entry.name)}
+                                        onClick={() => navigate("/profile/" + entry.id)}
                                         height={35}
                                     />
                                 ))}

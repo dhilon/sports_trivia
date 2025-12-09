@@ -9,6 +9,7 @@ export interface User {
     created_at: string;
     google_sub?: string;
     email?: string;
+    profile_picture?: string;
 }
 
 export function currUser() {
@@ -22,9 +23,9 @@ export function currUser() {
     );
 
     return {
-        user: data || null,               // null until fetched or 401
-        isLoading: isValidating,          // true while SWR hasn't resolved
-        isError: !!error,                 // true if SWR got a non-2xx
+        user: data,
+        isLoading: isValidating,
+        isError: !!error,
         errorMessage: error?.response?.data?.error || "",
         refresh: () => mutate(),          // manually re-fetch
         clearUser: () => mutate(undefined, false),  // clear cache without revalidating

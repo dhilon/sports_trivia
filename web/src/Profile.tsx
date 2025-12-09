@@ -17,11 +17,13 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { SidebarLayout } from "./SidebarLayout"
-import { useParams } from "wouter"
-import useSWR from "swr"
+import useSWR, { mutate } from "swr"
 import { formatRelativeDate } from "./lib/dateUtils"
-import { ChangeEvent, useRef } from "react"
+import { ChangeEvent, useRef, useState, useEffect } from "react"
 import useEditUser from "./components/EditUser"
+import { Input } from "./components/ui/input"
+import { Button } from "./components/ui/button"
+import { currUser } from "./components/CurrUser"
 
 
 const chartData = [
@@ -78,17 +80,94 @@ const getColorFromString = (str: string): string => {
     return `hsl(${hue}, 70%, 50%)`;
 };
 
-function Profile() {
-    const { name } = useParams();
+function ChangeUsernameDialog({ onClose, onErrorMessage }: { onClose: () => void, onErrorMessage: (error: string) => void }) {
+    const [newUsername, setNewUsername] = useState('');
+    const { trigger: editUser, isMutating } = useEditUser();
+    const { user, refresh } = currUser();
 
-    const { data, isLoading, error, mutate } = useSWR(`/users/${name}`);
-    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${name}`);
+    const handleChangeUsername = async () => {
+        if (!newUsername) {
+            return;
+        }
+        try {
+            await editUser({
+                id: user?.id || 0,
+                username: newUsername,
+                pwd: "1",
+                scores: {},
+                friends: [],
+                profile_picture: "",
+            });
+            // Only update cache after successful server response
+            mutate(`/users/${user?.id}`);
+            refresh();
+            onErrorMessage("Username changed successfully");
+            onClose();
+        } catch (err: any) {
+            onErrorMessage(err.response?.data?.error || "Failed to change username");
+            onClose();
+        }
+    }
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
+            <Card className="w-full max-w-md rounded-xl bg-gray-100 border border-gray-300 shadow-lg mt-[120px]">
+                <CardHeader className="rounded-t-xl bg-gray-100 border-b border-gray-200">
+                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900">Change Username</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                    <Input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        disabled={isMutating}
+                        placeholder="Enter new username"
+                        className="w-full"
+                    />
+                    <div className="flex gap-3 justify-end">
+                        <Button
+                            onClick={onClose}
+                            disabled={isMutating}
+                            variant="outline"
+                            className="px-6 rounded-lg"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleChangeUsername}
+                            disabled={isMutating}
+                            className="px-6 rounded-lg bg-purple-600 hover:bg-purple-700 text-white shadow-sm"
+                        >
+                            {isMutating ? "Changing..." : "Change"}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
+function Profile() {
+    const { user } = currUser();
+
+    const { data, isLoading, error, mutate } = useSWR(`/users/${user?.id}`);
+    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${user?.id}`);
 
     const { trigger: editUser, isMutating, error: editUserError } = useEditUser();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+    const [showChangeUsername, setShowChangeUsername] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     // Fetch leaderboard data for all sports to detect ties
     const { data: leaderboardData, isLoading: leaderboardLoading, error: leaderboardError } = useSWR('/leaderboard');
+
+    // Clear success messages after 3 seconds
+    useEffect(() => {
+        if (errorMessage === 'Username changed successfully' || errorMessage === 'Profile picture updated successfully') {
+            const timer = setTimeout(() => {
+                setErrorMessage('');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [errorMessage]);
 
     if (!data) return null;
     if (error || rankingsError || leaderboardError) return <div>Error: {error?.message || rankingsError?.message || leaderboardError?.message}</div>;
@@ -106,7 +185,7 @@ function Profile() {
 
     // Helper function to detect ties and format rank (same logic as Leaderboard)
     const formatRank = (sportName: string) => {
-        const userScore = rankings[sportName]?.score ?? 0;
+        const userScore = rankings?.[sportName]?.score ?? 0;
         const sportLeaderboard = leaderboardData?.[sportName];
 
         if (!sportLeaderboard) {
@@ -123,7 +202,7 @@ function Profile() {
         });
 
         // Find user's position
-        const userIndex = leaderboardArray.findIndex(entry => entry.name === name);
+        const userIndex = leaderboardArray.findIndex(entry => entry.name === user?.username);
         if (userIndex === -1) {
             return '#0';
         }
@@ -183,24 +262,28 @@ function Profile() {
             const dataUrl = await readAsDataUrl(file);
 
             // Optimistic update with data URL so it survives reload after persisting
-            mutate({ ...data, profile_picture: dataUrl }, false);
+            mutate({ ...data, rankings: rankings, profile_picture: dataUrl }, false);
 
             await editUser({
-                uName: data.username || "",
-                pwd: data.password || "",
-                scores: data.scores || {},
-                friends: data.friends || [],
+                id: data.id || 0,
+                username: "",
+                pwd: "",
+                scores: {},
+                friends: [],
                 profile_picture: dataUrl,
             });
 
             // Revalidate to pick up server response
             mutate();
-        } catch (err) {
+            setErrorMessage("Profile picture updated successfully");
+        } catch (err: any) {
             // On failure, fall back to previous picture in cache
             mutate();
-            console.error("Failed to update profile picture", err);
+            setErrorMessage("Failed to update profile picture");
         }
     }
+
+
 
     if (isMutating || editUserError) return <div>Error: {editUserError?.message}</div>;
     if (isLoading || rankingsLoading || leaderboardLoading || isMutating) return <div>loading...</div>
@@ -240,7 +323,20 @@ function Profile() {
                         onChange={handleProfilePicChange}
                         className="hidden"
                     />
-                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900 truncate">{data.username}'s Profile</h1>
+                    <h1 onClick={() => {
+                        setErrorMessage('');
+                        setShowChangeUsername(true);
+                    }} className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-gray-900 truncate">{data.username}'s Profile</h1>
+                    {showChangeUsername && (
+                        <ChangeUsernameDialog
+                            onClose={() => {
+                                setShowChangeUsername(false);
+                            }}
+                            onErrorMessage={setErrorMessage}
+                        />
+                    )}
+                    {errorMessage !== '' && errorMessage !== 'Username changed successfully' && errorMessage !== 'Profile picture updated successfully' && <p className="text-red-500 mt-2 ml-2">{errorMessage}</p>}
+                    {(errorMessage === 'Username changed successfully' || errorMessage === 'Profile picture updated successfully') && <p className="text-green-500 mt-2 ml-2">{errorMessage}</p>}
                 </div>
             </div>
 

@@ -279,17 +279,17 @@ def difficulty_calculator(rawqs):
 @app.route("/me/", methods=["GET"])
 def who_am_i():
     try:
-        return get_user(current_user.username), 200
+        return get_user(current_user.id), 200
     except Exception as e:
         return {"error": "Not authenticated"}, 401
 
 
-@app.route("/rankings/<name>/", methods=["GET"])
-def get_user_rankings(name):
+@app.route("/rankings/<int:id>/", methods=["GET"])
+def get_user_rankings(id):
     if not current_user.is_authenticated:
         return {"error": "Not authenticated"}, 401
 
-    user = User.get_or_none(User.username == name)
+    user = User.get_or_none(User.id == id)
     if not user:
         return {"error": "User not found"}, 404
 
@@ -302,7 +302,7 @@ def get_user_rankings(name):
             Score.select(Score, User)
             .join(User)
             .where(Score.sport == sport)
-            .order_by(User.username.asc())
+            .order_by(User.id.asc())
             .order_by(Score.score.desc())
         )
 
@@ -311,7 +311,7 @@ def get_user_rankings(name):
 
         # Find user's score and position
         user_score = next(
-            (score for score in scores_list if score.userId == user), None
+            (score for score in scores_list if score.userId.id == user.id), None
         )
         if user_score:
             position = scores_list.index(user_score) + 1  # 1-based ranking
@@ -495,7 +495,12 @@ def get_game(
 
 def get_leaderboard_for_sport(sport):
     scores = Score.select().where(Score.sport == sport).order_by(Score.score.desc())
-    return {x.userId.username: x.score for x in scores}
+    return {
+        x.userId.username: {
+            "id": x.userId.id,
+            "score": x.score
+        } for x in scores
+    }
 
 
 @app.route("/leaderboard/", methods=["GET"])
@@ -508,7 +513,10 @@ def get_leaderboard():
     tennis_leaderboard = get_leaderboard_for_sport("tennis")
     users = User.select()
     total_leaderboard = {
-        user.username: sum(score.score for score in user.scores) for user in users
+        user.username: {
+            "id": user.id,
+            "score": sum(score.score for score in user.scores)
+        } for user in users
     }
 
     return {
@@ -522,17 +530,17 @@ def get_leaderboard():
     }, 200
 
 
-@app.route("/users/<name>/", methods=["GET", "POST"])
-def user_detail(name):
+@app.route("/users/<int:id>/", methods=["GET", "POST"])
+def user_detail(id):
 
     if request.method == "GET":
-        return get_user(name)
+        return get_user(id)
 
     if db.is_closed():
         db.connect()
 
     # 2) Look up the user (404 if not found)
-    user = User.get_or_none(User.username == name)
+    user = User.get_or_none(User.id == id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -540,6 +548,11 @@ def user_detail(name):
     data = request.get_json() or {}
 
     # 4) Mutate the instance
+    if "username" in data and data["username"] != "":
+        if User.get_or_none(User.username == data["username"]):
+            return {"error": "Username already exists"}, 400
+        user.username = data["username"]
+        user.save()
     if "password" in data and data["password"] != "":
         user.password = data["password"]
         user.save()
@@ -567,7 +580,7 @@ def user_detail(name):
                     (Score.userId == user) & (Score.sport == sport)
                 ).execute()
                 Score.create(userId=user, sport=sport, score=score)
-    if "profile_picture" in data:
+    if "profile_picture" in data and data["profile_picture"] != "":
         user.profile_picture = data["profile_picture"]
 
     # 5) Save back to the database
@@ -579,15 +592,15 @@ def user_detail(name):
     }
 
 
-def get_user(name=None):
-    user = User.get(username=name)
+def get_user(id=None):
+    user = User.get(id=id)
     if user:
         return {
             "id": user.id,
             "username": user.username,
             "scores": {score.sport: score.score for score in user.scores},
             "friends": [
-                get_friend(f.friend.username)
+                get_friend(f.friend.id)
                 for f in Friends.select().where(Friends.user == user)
             ],
             "created_at": user.created_at,
@@ -596,11 +609,11 @@ def get_user(name=None):
             "profile_picture": user.profile_picture,
         }
     else:
-        return abort(404, description=f"User {name or 'None'} not found")
+        return abort(404, description=f"User {id or 'None'} not found")
 
 
-def get_friend(name=None):  # avoid recursion
-    user = User.get(username=name)  # include POST as well for adding friends
+def get_friend(id=None):  # avoid recursion
+    user = User.get(id=id)  # include POST as well for adding friends
     if user:
         return {
             "id": user.id,
@@ -611,16 +624,16 @@ def get_friend(name=None):  # avoid recursion
             "profile_picture": user.profile_picture,
         }
     else:
-        return abort(404, description=f"User {name or 'None'} not found")
+        return abort(404, description=f"User {id or 'None'} not found")
 
 
-@app.route("/users/<name>/games")
-def get_user_games(name=None):
-    user = User.get(username=name)
+@app.route("/users/<int:id>/games")
+def get_user_games(id=None):
+    user = User.get(id=id)
     if user:
         return [get_game(x.id) for x in user.games]
     else:
-        return abort(404, description=f"User {name or 'None'} not found")
+        return abort(404, description=f"User {id or 'None'} not found")
 
 
 @app.route("/questions/<int:questionId>")

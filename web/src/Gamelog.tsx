@@ -299,10 +299,10 @@ export function getColumns(
 function Gamelog() {
 
     const params = useParams();
-    const name = params.name;
+    const id = params.id;
 
     const { data: games = [], error, isLoading } = useSWR<Game[]>(
-        name ? "/users/" + name + "/games" : null
+        id ? "/users/" + id + "/games" : null
     );
 
     const [sorting, setSorting] = React.useState<SortingState>([])
@@ -427,7 +427,7 @@ function Gamelog() {
                             {modalGame.players.map((o) => {
                                 return (
                                     <li key={o.username} className="px-3 py-2 bg-gray-50 rounded-lg text-gray-700">
-                                        <a href={"/profile/" + o.username}>{o.username}</a>
+                                        <a href={"/profile/" + o.id}>{o.username}</a>
                                     </li>
                                 );
                             })}

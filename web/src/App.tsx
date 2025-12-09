@@ -51,7 +51,7 @@ function App() {
           <Route path="/leaderboard" component={LeaderboardPage}></Route>
           <Route path="/signup" component={SignupPage}></Route>
           <Route path="/password" component={PasswordPage}></Route>
-          <Route path="/profile/:name" component={ProfilePage}></Route>
+          <Route path="/profile/:id" component={ProfilePage}></Route>
           <Route path="/friends/" component={FriendsPage}></Route>
           <Route path="/games/:sport" component={GamesPage}></Route>
           <Route path="/games/:sport/tower_of_power/:id" component={PyramidPage}></Route>

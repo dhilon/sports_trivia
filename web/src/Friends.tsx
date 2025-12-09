@@ -52,6 +52,7 @@ function Friends() {
             sum += scoreValues[c] || 0;
         }
         chartData[i] = {
+            id: user?.friends[i]?.id || 0,
             name: user?.friends[i]?.username || "",
             points: sum,
             profile_picture: user?.friends[i]?.profile_picture || "/images/logo.png",
@@ -59,6 +60,7 @@ function Friends() {
     }
     if (showYou) {
         chartData.push({
+            id: user?.id || 0,
             name: user?.username || "",
             points: (user?.scores.basketball || 0) + (user?.scores.soccer || 0) + (user?.scores.hockey || 0) + (user?.scores.football || 0) + (user?.scores.baseball || 0) + (user?.scores.tennis || 0),
             profile_picture: user?.profile_picture || "/images/logo.png",
@@ -104,7 +106,8 @@ function Friends() {
         if (isLoading || isMutating) return <div>Loading...</div>;
         try {
             await createUser({
-                uName: user?.username || "",
+                id: user?.id || 0,
+                username: user?.username || "",
                 pwd: "",
                 scores: user?.scores || {},
                 friends: [inputValue],
@@ -178,14 +181,14 @@ function Friends() {
                                     fill="var(--color-points)"
                                     radius={4}
                                     opacity={0.91}
-                                    onClick={(e) => navigate("/profile/" + e.payload.name)}
+                                    onClick={(e) => navigate("/profile/" + e.payload.id)}
                                 >
                                     {chartData.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
                                             fill={entry.name === user?.username ? "#32CD32" : "var(--color-points)"}
                                             style={{ cursor: "pointer" }}
-                                            onClick={() => navigate("/profile/" + entry.name)}
+                                            onClick={() => navigate("/profile/" + entry.id)}
                                         />
                                     ))}
                                     <LabelList

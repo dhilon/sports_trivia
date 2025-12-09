@@ -22,7 +22,7 @@ const ResultsRank = ({ rank }: ResultsRankProps) => {
             <div className="flex-initial w-20 text-sm font-semibold text-gray-700">
                 #{rank.rank}
             </div>
-            <Link className="flex-initial w-32 text-sm font-medium text-purple-600 hover:text-purple-700 hover:underline" href={("/profile/" + rank.name)}>
+            <Link className="flex-initial w-32 text-sm font-medium text-purple-600 hover:text-purple-700 hover:underline" href={("/profile/" + rank.id)}>
                 {rank.name}
             </Link>
             <div className="flex-auto text-sm text-gray-600 px-4">
