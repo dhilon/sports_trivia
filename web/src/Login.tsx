@@ -116,17 +116,24 @@ function Login({
                             <Button disabled={isLoading} type="submit" className="w-full bg-gray-500 text-white hover:bg-gray-200 hover:text-gray-800" >
                                 {isLoading || isMutating ? "Processing…" : "Log In"}
                             </Button>
-                            <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>
-                                Login with Google
-                            </Button>
+
                         </div>
+
+                    </form>
+
+                    <div className="mt-4 text-center text-sm">
+                        <Button variant="outline" className="w-full" onClick={() => window.location.assign(`${API_BASE}/login/google`)}>
+                            Login with Google
+                        </Button>
+
                         <div className="mt-4 text-center text-sm">
                             Don&apos;t have an account?{" "}
                             <a className="underline underline-offset-4" onClick={() => navigate("/signup")}>
                                 Sign up
                             </a>
                         </div>
-                    </form>
+
+                    </div>
                 </CardContent>
             </Card>
         </div>

@@ -1,6 +1,5 @@
 import random
-from sqlite3 import IntegrityError
-from flask import Flask, request, Response, abort, jsonify, session, url_for, redirect
+from flask import Flask, request, Response, abort, jsonify, redirect
 import datetime
 from flask_cors import CORS
 from models import db, User, Question, Game, Score, Friends, default_scores
@@ -415,7 +414,7 @@ def get_game(
         gameInfo = {
             "id": game.id,
             "type": game.type,
-            "players": [get_user(x.username) for x in game.players],
+            "players": [get_user(x.id) for x in game.players],
             "time": game.time,
             "questions": [get_question(x.id) for x in game.questions],
             "date": game.date,
@@ -593,7 +592,13 @@ def user_detail(id):
 
 
 def get_user(id=None):
-    user = User.get(id=id)
+    if id is None:
+        return None
+    # Handle both integer ID and string username
+    if isinstance(id, str):
+        user = User.get_or_none(User.username == id)
+    else:
+        user = User.get_or_none(User.id == id)
     if user:
         return {
             "id": user.id,

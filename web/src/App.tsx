@@ -46,7 +46,7 @@ function App() {
         <Router base="/">
           <Route path="/" component={() => <Redirect to="/home" />}></Route>
           <Route path="/home" component={HomePage}></Route>
-          <Route path="/gamelog/:name" component={GamelogPage}></Route>
+          <Route path="/gamelog/:id" component={GamelogPage}></Route>
           <Route path="/login" component={LoginPage}></Route>
           <Route path="/leaderboard" component={LeaderboardPage}></Route>
           <Route path="/signup" component={SignupPage}></Route>

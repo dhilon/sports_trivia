@@ -73,8 +73,8 @@ export function NavSidebar() { //need to change redirects to fetch currUser
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem className="mb-2 ml-2 mr-2">
-                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/gamelog/${user?.username}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
-                            <a href={`/gamelog/${user?.username}`}>
+                        <SidebarMenuButton asChild className={`rounded-xl transition-all ${isActive(`/gamelog/${user?.id}`) ? "bg-purple-600 text-white shadow-sm" : "hover:bg-gray-100 hover:text-gray-800"}`}>
+                            <a href={`/gamelog/${user?.id}`}>
                                 <Inbox />
                                 <span>Gamelog</span>
                             </a>

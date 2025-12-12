@@ -99,7 +99,9 @@ function ChangeUsernameDialog({ onClose, onErrorMessage }: { onClose: () => void
                 profile_picture: "",
             });
             // Only update cache after successful server response
-            mutate(`/users/${user?.id}`);
+            if (user?.id) {
+                mutate(`/users/${user.id}`);
+            }
             refresh();
             onErrorMessage("Username changed successfully");
             onClose();
@@ -149,8 +151,8 @@ function ChangeUsernameDialog({ onClose, onErrorMessage }: { onClose: () => void
 function Profile() {
     const { user } = currUser();
 
-    const { data, isLoading, error, mutate } = useSWR(`/users/${user?.id}`);
-    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(`/rankings/${user?.id}`);
+    const { data, isLoading, error, mutate } = useSWR(user?.id ? `/users/${user.id}` : null);
+    const { data: rankings, isLoading: rankingsLoading, error: rankingsError } = useSWR(user?.id ? `/rankings/${user.id}` : null);
 
     const { trigger: editUser, isMutating, error: editUserError } = useEditUser();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -193,10 +195,11 @@ function Profile() {
         }
 
         // Convert leaderboard object to sorted array of {name, score}
-        const leaderboardArray = Object.entries(sportLeaderboard).map(([name, score]) => ({
-            name,
-            score: score as number
-        })).sort((a, b) => {
+        // Handle both number (legacy) and object (new format with {id, score}) formats
+        const leaderboardArray = Object.entries(sportLeaderboard).map(([name, value]) => {
+            const score = typeof value === 'number' ? value : (typeof value === 'object' && value !== null && 'score' in value ? (value as { score: number }).score : 0);
+            return { name, score };
+        }).sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return a.name.localeCompare(b.name);
         });

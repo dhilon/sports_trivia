@@ -1349,5 +1349,5 @@ def init_db():
     for sport in sports:
         if sport != "hockey" and sport != "football":
             print(f"Seeding questions for {sport}")
-            #seed_questions(sport)
+            seed_questions(sport)
             print(f"Questions seeded for {sport}")
